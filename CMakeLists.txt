@@ -39,7 +39,6 @@ ELSE (APPLE)
         find_package(GLEW REQUIRED)
     ELSE(UNIX)
         find_package(glew REQUIRED)
-        SET(EXTRA_LIBS ${EXTRA_LIBS} pdh.lib)
     ENDIF(UNIX)
     include_directories(${GLEW_INCLUDE_DIR})
     SET(EXTRA_LIBS ${EXTRA_LIBS} ${OPENGL_LIBRARY} ${GLEW_LIBRARY})
@@ -54,22 +53,18 @@ include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 find_package(SDL2_MIXER REQUIRED)
 include_directories(${SDL2_MIXER_INCLUDE_DIRS})
 
-#SRE
-find_package(SRE REQUIRED)
-include_directories(${SRE_INCLUDE_DIR})
-
 include_directories(include)
 
 SET(EXTRA_LIBS ${EXTRA_LIBS} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${SDL2_IMAGE_LIBRARY})
 
 IF(WIN32)
     if(DEBUG_MODE)
-        SET(EXTRA_LIBS ${EXTRA_LIBS} ${SRE_DEBUG_LIBRARY})
+        SET(EXTRA_LIBS ${EXTRA_LIBS}) #DEBUG LIBS?
     else()
-        SET(EXTRA_LIBS ${EXTRA_LIBS} ${SRE_RELEASE_LIBRARY})
+        SET(EXTRA_LIBS ${EXTRA_LIBS}) #RELEASE LIBS?
     endif()
 ELSE(WIN32)
-    SET(EXTRA_LIBS ${EXTRA_LIBS} ${SRE_LIBRARY})
+    SET(EXTRA_LIBS ${EXTRA_LIBS})
 ENDIF(WIN32)
 
 file(GLOB_RECURSE GAME_FILES
