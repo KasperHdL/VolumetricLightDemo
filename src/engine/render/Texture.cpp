@@ -1,6 +1,6 @@
-#include "SRE/Texture.hpp"
+#include "Texture.hpp"
 
-#include "SRE/impl/GL.hpp"
+#include "impl/GL.hpp"
 #include <stdio.h>
 #include <SDL_surface.h>
 
@@ -9,8 +9,8 @@
 #include <vector>
 #include <fstream>
 #include <memory>
-#include <SRE/RenderStats.h>
-#include <SRE/SimpleRenderEngine.hpp>
+#include "RenderStats.h"
+#include "SimpleRenderEngine.hpp"
 
 namespace {
 	static std::vector<char> readAllBytes(char const* filename)
@@ -31,7 +31,7 @@ namespace {
 	}
 }
 
-namespace SRE {
+namespace Renderer {
 	Texture* whiteTexture = nullptr;
 	Texture* sphereTexture = nullptr;
 

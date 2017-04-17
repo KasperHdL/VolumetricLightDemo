@@ -2,11 +2,11 @@
 
 #include "glm/glm.hpp"
 #include <vector>
-#include "SRE/MeshTopology.hpp"
+#include "MeshTopology.hpp"
 
-#include "SRE/impl/Export.hpp"
+#include "impl/Export.hpp"
 
-namespace SRE {
+namespace Renderer {
     /**
      * Represents a Mesh object.
      * When constructing a mesh object, its data is uploaded to the CPU and is no longer available on the CPU.

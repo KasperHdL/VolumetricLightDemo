@@ -2,9 +2,9 @@
 // Created by morten on 31/07/16.
 //
 
-#include "SRE/Shader.hpp"
+#include "Shader.hpp"
 
-#include "SRE/impl/GL.hpp"
+#include "impl/GL.hpp"
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -13,10 +13,10 @@
 #include <vector>
 #include <map>
 #include <sstream>
-#include <SRE/SimpleRenderEngine.hpp>
-#include "SRE/Texture.hpp"
+#include "SimpleRenderEngine.hpp"
+#include "Texture.hpp"
 
-namespace SRE {
+namespace Renderer {
 
     Shader *standard = nullptr;
     Shader *unlit = nullptr;

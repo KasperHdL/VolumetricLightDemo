@@ -8,9 +8,9 @@
 
 #include "glm/glm.hpp"
 
-#include "SRE/impl/Export.hpp"
+#include "impl/Export.hpp"
 
-namespace SRE {
+namespace Renderer {
     // The purpose of this class is to draw debug information into the scene.
     // The Debug class is using the current camera
     class DllExport Debug {

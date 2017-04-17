@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include "SRE/impl/Export.hpp"
+#include "impl/Export.hpp"
 
-namespace SRE {
+namespace Renderer {
     /**
      * Defines the types of Light. Note ambient light is simply represented using a vec3 in the SimpleRenderEngine class.
      */

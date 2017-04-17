@@ -2,15 +2,15 @@
 // Created by morten on 01/08/16.
 //
 
-#include "SRE/Camera.hpp"
+#include "Camera.hpp"
 
-#include "SRE/impl/GL.hpp"
+#include "impl/GL.hpp"
 
-#include "SRE/SimpleRenderEngine.hpp"
+#include "SimpleRenderEngine.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 
-namespace SRE{
+namespace Renderer{
     Camera::Camera()
     : viewTransform{1.0f},projectionTransform {1.0f}, viewportX{0}, viewportY{0}
     {

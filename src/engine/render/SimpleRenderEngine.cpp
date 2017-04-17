@@ -11,17 +11,17 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
 
-#include "SRE/SimpleRenderEngine.hpp"
+#include "SimpleRenderEngine.hpp"
 #include <cassert>
-#include "SRE/Shader.hpp"
-#include "SRE/Mesh.hpp"
+#include "Shader.hpp"
+#include "Mesh.hpp"
 
-#include "SRE/impl/GL.hpp"
+#include "impl/GL.hpp"
 #include <iostream>
 #include <algorithm>
 #include <string>
 
-namespace SRE {
+namespace Renderer {
     SimpleRenderEngine* SimpleRenderEngine::instance = nullptr;
 
     SimpleRenderEngine::SimpleRenderEngine(SDL_Window * window)

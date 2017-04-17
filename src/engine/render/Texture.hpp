@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "SRE/impl/Export.hpp"
+#include "impl/Export.hpp"
 
-namespace SRE{
+namespace Renderer{
 
     /**
      * Represent a texture (uploaded to the GPU).

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SRE/impl/Export.hpp"
+#include "impl/Export.hpp"
 
-namespace SRE {
+namespace Renderer {
     /**
      * Enum which defines blending types. Currently support types of blending is:
      *  - BlendType::Disabled - No blending

@@ -2,16 +2,16 @@
 // Created by morten on 31/07/16.
 //
 
-#include "SRE/Mesh.hpp"
+#include "Mesh.hpp"
 
-#include "SRE/impl/GL.hpp"
+#include "impl/GL.hpp"
 #include <glm/gtc/constants.hpp>
 #include <iostream>
-#include <SRE/SimpleRenderEngine.hpp>
+#include "SimpleRenderEngine.hpp"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-namespace SRE {
+namespace Renderer {
     Mesh::Mesh(const std::vector<glm::vec3> &vertexPositions, const std::vector<glm::vec3> &normals,
                const std::vector<glm::vec4> &uvs, const std::vector<glm::vec4> &colors, std::vector<float> particleSize, const std::vector<uint16_t> &indices, MeshTopology meshTopology)
 
