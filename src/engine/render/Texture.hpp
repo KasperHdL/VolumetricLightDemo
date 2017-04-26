@@ -5,8 +5,6 @@
 
 #include "impl/Export.hpp"
 
-namespace Renderer{
-
     /**
      * Represent a texture (uploaded to the GPU).
      * In general the width and the height of the texture should be power-of-two (e.g. 256 or 512)
@@ -78,4 +76,3 @@ private:
     unsigned int textureId;
     friend class Shader;
 };
-}

@@ -7,16 +7,16 @@
 // https://github.com/ocornut/imgui
 
 #include "imgui.h"
-#include "SRE/imgui_sre.hpp"
+#include "imgui_re.hpp"
 #include <string>
 #include <iostream>
-#include "SRE/Shader.hpp"
+#include "../Shader.hpp"
 
 // SDL,GL3W
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-#include "SRE/impl/GL.hpp"
+#include "../impl/GL.hpp"
 
 // Data
 static double       g_Time = 0.0f;
@@ -159,7 +159,7 @@ static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
     SDL_SetClipboardText(text);
 }
 
-bool ImGui_SRE_ProcessEvent(SDL_Event *event)
+bool ImGui_RE_ProcessEvent(SDL_Event *event)
 {
     ImGuiIO& io = ImGui::GetIO();
     switch (event->type)
@@ -228,7 +228,7 @@ void ImGui_ImplSdlGL3_CreateFontsTexture()
 
 
 
-bool ImGui_SRE_CreateDeviceObjects()
+bool ImGui_RE_CreateDeviceObjects()
 {
     // Backup GL state
     GLint last_texture, last_array_buffer, last_vertex_array;
@@ -269,8 +269,8 @@ bool ImGui_SRE_CreateDeviceObjects()
 #ifdef EMSCRIPTEN
     std::string vs = vertex_shader;
     std::string fs = fragment_shader;
-    SRE::Shader::translateToGLSLES(vs, true);
-    SRE::Shader::translateToGLSLES(fs, false);
+    Shader::translateToGLSLES(vs, true);
+    Shader::translateToGLSLES(fs, false);
     auto vsp = vs.c_str();
     auto fsp = fs.c_str();
     glShaderSource(g_VertHandle, 1, &vsp, 0);
@@ -317,7 +317,7 @@ bool ImGui_SRE_CreateDeviceObjects()
     return true;
 }
 
-void    ImGui_SRE_InvalidateDeviceObjects()
+void    ImGui_RE_InvalidateDeviceObjects()
 {
 #ifndef EMSCRIPTEN
     if (g_VaoHandle) glDeleteVertexArrays(1, &g_VaoHandle);
@@ -345,7 +345,7 @@ void    ImGui_SRE_InvalidateDeviceObjects()
     }
 }
 
-bool    ImGui_SRE_Init(SDL_Window *window)
+bool    ImGui_RE_Init(SDL_Window *window)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.KeyMap[ImGuiKey_Tab] = SDLK_TAB;                     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
@@ -385,16 +385,16 @@ bool    ImGui_SRE_Init(SDL_Window *window)
     return true;
 }
 
-void ImGui_SRE_Shutdown()
+void ImGui_RE_Shutdown()
 {
-    ImGui_SRE_InvalidateDeviceObjects();
+    ImGui_RE_InvalidateDeviceObjects();
     ImGui::Shutdown();
 }
 
-void ImGui_SRE_NewFrame(SDL_Window *window)
+void ImGui_RE_NewFrame(SDL_Window *window)
 {
     if (!g_FontTexture)
-        ImGui_SRE_CreateDeviceObjects();
+        ImGui_RE_CreateDeviceObjects();
 
     ImGuiIO& io = ImGui::GetIO();
 
