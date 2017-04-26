@@ -6,12 +6,14 @@
 #include <glm/glm.hpp>
 
 #include "render/Mesh.hpp"
+#include <string>
 
 using namespace glm;
 
 class Entity
 {
 public:
+    std::string name;
 
     //Transform
     vec3 position;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../engine/Engine.hpp"
+#include <string>
 
 class Player{
     public:
@@ -8,6 +9,7 @@ class Player{
 
         Player(){
             entity = Engine::entities.create();
+            entity->name = "Player";
 
         }
 
