@@ -6,6 +6,7 @@
 
 
 DynamicPool<Entity> Engine::entities = DynamicPool<Entity>(32);
+bool Engine::quit = false;
 
 Engine::Engine(int screen_width, int screen_height){
     this->screen_width = screen_width;
@@ -21,8 +22,8 @@ int Engine::initialize(Game* game){
 
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL2
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
@@ -42,8 +43,8 @@ int Engine::initialize(Game* game){
         printf("Could not create window: %s\n", SDL_GetError());
         return 1;
     }
-
     RenderEngine r{window};
+    ImGui_RE_Init(window);
     _shader = Shader::getStandard();
 
     game->initialize(this);
@@ -52,16 +53,7 @@ int Engine::initialize(Game* game){
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
 
-    bool quit=false;
-    while (!quit){
-        SDL_Event e;
-
-        //Handle events on queue
-        while( SDL_PollEvent( &e ) != 0 )
-        {
-            if (e.type == SDL_QUIT)
-                quit = true;
-        }
+    while (!input.quit){
 
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
@@ -69,6 +61,7 @@ int Engine::initialize(Game* game){
         delta_time = clamp(((NOW - LAST) / (float)SDL_GetPerformanceFrequency() ),0.0f,1.0f);
         time += delta_time;
 
+        input.update();
         update(delta_time);
         render();
 
@@ -88,6 +81,9 @@ int Engine::initialize(Game* game){
 
 void Engine::update(float delta_time){
     game->update(delta_time);
+    if(Input::keys[SDL_SCANCODE_ESCAPE]){
+        draw_debug = !draw_debug;
+    }
 }
 
 void Engine::render(){
@@ -100,6 +96,11 @@ void Engine::render(){
     r.getCamera()->setPerspectiveProjection(60,w,h,0.1,100);
     r.clearScreen({1,0,0,1});
 
+    if(draw_debug){
+        ImGui_RE_NewFrame(window);
+        game->draw_debug();
+    }
+
     for(int i = 0; i < entities.capacity;i++){
         Entity* e = entities[i];
         if(e != nullptr && e->mesh != nullptr){
@@ -109,10 +110,30 @@ void Engine::render(){
             glm::mat4 a = mat4_cast(e->rotation);
 
             r.draw(e->mesh,  t * s * a, _shader);
+
         }
 
     }
 
+    if(draw_debug){
+
+        ImGui::Begin("Hierarchy");
+        for(int i = 0; i < entities.capacity;i++){
+            Entity* e = entities[i];
+            if(e != nullptr){
+                e->draw_debug_inspector();
+            }
+        }
+        ImGui::End();
+
+        for(int i = 0; i < entities.capacity;i++){
+            Entity* e = entities[i];
+            if(e != nullptr){
+                e->draw_debug();
+            }
+        }
+
+        ImGui::Render();
+    }
     r.swapWindow();
 }
-

@@ -18,15 +18,20 @@ class Game{
 
 
             SceneLoader::load_scene("test.scene");
-            cout << "Loaded \n";
+            cout << "Loaded Scene\n";
             SceneLoader::save_scene("test1.scene");
-            cout << "Saved \n";
+            cout << "Saved Scene\n";
 
 
 
         }
 
         void update(float delta_time){
+
+        }
+
+        void draw_debug(){
+
 
         }
 
