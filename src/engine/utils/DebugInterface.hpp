@@ -12,7 +12,7 @@ class DebugInterface{
         Game* game;
         SDL_Window* window;
 
-        bool enabled;
+        bool enabled = true;
         int n;
 
         //menu
@@ -53,16 +53,6 @@ class DebugInterface{
                     if(e != nullptr){
                         e->draw_debug_inspector();
                     }
-                }
-                ImGui::End();
-
-                ImGui::Begin("Input");
-
-                const Uint8* keys = SDL_GetKeyboardState(NULL);
-                for(int i = 0; i < 284; i++){
-                    ImGui::Text((keys[i] ? "X" : " "));
-
-
                 }
                 ImGui::End();
 

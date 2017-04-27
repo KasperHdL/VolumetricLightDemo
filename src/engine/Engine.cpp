@@ -63,7 +63,6 @@ int Engine::initialize(Game* game){
         delta_time = clamp(((NOW - LAST) / (float)SDL_GetPerformanceFrequency() ),0.0f,1.0f);
         time += delta_time;
 
-        input.update();
         update(delta_time);
         render();
 
@@ -84,6 +83,7 @@ int Engine::initialize(Game* game){
 
 
 void Engine::update(float delta_time){
+    input.update();
     game->update(delta_time);
     debug->update();
 }

@@ -6,8 +6,8 @@
 
 class Input{
 private:
-    static const Uint8* _last;
-    static const Uint8* _now;
+    static bool _last[];
+    static bool _now[];
 
 public:
 
