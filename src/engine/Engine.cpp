@@ -2,6 +2,7 @@
 #include "Engine.hpp"
 
 #include "../game/Game.hpp"
+#include "utils/DebugInterface.hpp"
 
 
 
@@ -14,7 +15,6 @@ Engine::Engine(int screen_width, int screen_height){
 }
 
 Engine::~Engine(){
-
 }
 
 int Engine::initialize(Game* game){
@@ -43,12 +43,14 @@ int Engine::initialize(Game* game){
         printf("Could not create window: %s\n", SDL_GetError());
         return 1;
     }
+
     RenderEngine r{window};
-    ImGui_RE_Init(window);
     _shader = Shader::getStandard();
 
     game->initialize(this);
 
+    debug = new DebugInterface();
+    debug->initialize(window, game);
 
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
@@ -75,15 +77,15 @@ int Engine::initialize(Game* game){
     // Clean up
     SDL_Quit();
 
+    delete debug;
+
     return 0;
 }
 
 
 void Engine::update(float delta_time){
     game->update(delta_time);
-    if(Input::keys[SDL_SCANCODE_ESCAPE]){
-        draw_debug = !draw_debug;
-    }
+    debug->update();
 }
 
 void Engine::render(){
@@ -95,11 +97,6 @@ void Engine::render(){
     r.getCamera()->setViewport(0,0,w,h);
     r.getCamera()->setPerspectiveProjection(60,w,h,0.1,100);
     r.clearScreen({1,0,0,1});
-
-    if(draw_debug){
-        ImGui_RE_NewFrame(window);
-        game->draw_debug();
-    }
 
     for(int i = 0; i < entities.capacity;i++){
         Entity* e = entities[i];
@@ -115,25 +112,6 @@ void Engine::render(){
 
     }
 
-    if(draw_debug){
-
-        ImGui::Begin("Hierarchy");
-        for(int i = 0; i < entities.capacity;i++){
-            Entity* e = entities[i];
-            if(e != nullptr){
-                e->draw_debug_inspector();
-            }
-        }
-        ImGui::End();
-
-        for(int i = 0; i < entities.capacity;i++){
-            Entity* e = entities[i];
-            if(e != nullptr){
-                e->draw_debug();
-            }
-        }
-
-        ImGui::Render();
-    }
+    debug->render();
     r.swapWindow();
 }

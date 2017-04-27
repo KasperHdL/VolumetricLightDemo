@@ -5,13 +5,18 @@
 #include <iostream>
 
 class Input{
-public:
+private:
+    static const Uint8* _last;
+    static const Uint8* _now;
 
-    static bool keys[];
+public:
 
     bool quit = false;
 
     void update();
+
+    static bool get_key_down(Uint8 key);
+    static bool get_key_on_down(Uint8 key);
 
 private:
 };

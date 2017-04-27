@@ -23,6 +23,8 @@
 
 
 class Game;
+class DebugInterface;
+
 class Engine{
 private:
         
@@ -31,6 +33,7 @@ public:
     SDL_Window* window;
     Game* game;
     Input input;
+    DebugInterface* debug;
 
     int screen_width;
     int screen_height;
@@ -40,8 +43,6 @@ public:
 
     float time;
     float delta_time;
-
-    bool draw_debug = false;
 
     Engine(int screen_width, int screen_height);
     ~Engine();

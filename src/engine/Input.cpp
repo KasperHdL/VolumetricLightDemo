@@ -1,6 +1,7 @@
 #include "Input.hpp"
 
-bool Input::keys[284];
+const Uint8* Input::_last;
+const Uint8* Input::_now;
 
 void Input::update(){
     SDL_Event e; //An SDL event to figure out which keys are being manipulated
@@ -8,20 +9,21 @@ void Input::update(){
         ImGui_RE_ProcessEvent(&e);
 
         switch (e.type){
-
-            case SDL_KEYDOWN:
-                if (e.key.repeat == 0) { //if this key is not being held down
-                    Input::keys[e.key.keysym.scancode] = true;
-                }
-            break;
-
-            case SDL_KEYUP:
-                Input::keys[e.key.keysym.scancode] = false;
-            break;
-
             case SDL_QUIT:
                 quit = true;
             break;
         }
     }
+
+    Input::_last = Input::_now;
+    Input::_now = SDL_GetKeyboardState(NULL);
 }
+
+bool Input::get_key_down(Uint8 key){
+    return Input::_now[key];
+}
+
+bool Input::get_key_on_down(Uint8 key){
+    return (Input::_last[key] | Input::_now[key]) & Input::_now[key];
+}
+
