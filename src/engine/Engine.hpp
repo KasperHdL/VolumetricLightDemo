@@ -35,11 +35,12 @@ public:
     Input input;
     DebugInterface* debug;
 
+
     int screen_width;
     int screen_height;
 
     static DynamicPool<Entity> entities;
-    static bool quit;
+    static Camera* camera;
 
     float time;
     float delta_time;

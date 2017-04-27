@@ -111,7 +111,7 @@ class SceneLoader{
             int vi = 0;
 
             for(int i = 0; i < line.size(); i++){
-                if(line.at(i) = ' '){
+                if(line.at(i) == ' '){
                     v[vi++] = atof(line.substr(last, i-last).c_str());
                     last = i;
 
@@ -131,7 +131,7 @@ class SceneLoader{
             int vi = 0;
 
             for(int i = 0; i < line.size(); i++){
-                if(line.at(i) = ' '){
+                if(line.at(i) == ' '){
                     v[vi++] = atof(line.substr(last, i-last).c_str());
                     last = i;
                     if(vi == v.length() - 1){
@@ -145,7 +145,11 @@ class SceneLoader{
         }
 
         static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, quat rot){
-            Entity* e = new (Engine::entities.create()) Entity();
+            Entity* e;
+            if(name == "Camera")
+                e = Engine::camera->entity;
+            else
+                e = new (Engine::entities.create()) Entity();
 
             e->name = name;
             e->mesh = mesh;

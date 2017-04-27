@@ -32,7 +32,6 @@ bool Input::get_key_down(Uint8 key){
 }
 
 bool Input::get_key_on_down(Uint8 key){
-    Uint8 t = (Input::_last[key] ^ Input::_now[key]);
-    return t & Input::_now[key];
+    return (Input::_last[key] ^ Input::_now[key]) & Input::_now[key];
 }
 

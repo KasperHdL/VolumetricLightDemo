@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 
 #include "impl/Export.hpp"
+#include "../Entity.hpp"
 
 /**
  * The camera contains two important properties:
@@ -20,8 +21,13 @@
  */
 class DllExport Camera {
 public:
+    Entity* entity;
+
     /// Set camera at (0,0,0) looking down the negative z-axis using orthographic viewing volume between -1 to 1
     Camera();
+
+    void update();
+
     /// set position of camera in world space using
     /// eye position of the camera
     /// at position that the camera looks at (must be different from pos)

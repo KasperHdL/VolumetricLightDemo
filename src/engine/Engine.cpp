@@ -7,7 +7,7 @@
 
 
 DynamicPool<Entity> Engine::entities = DynamicPool<Entity>(32);
-bool Engine::quit = false;
+Camera* Engine::camera;
 
 Engine::Engine(int screen_width, int screen_height){
     this->screen_width = screen_width;
@@ -45,6 +45,8 @@ int Engine::initialize(Game* game){
     }
 
     RenderEngine r{window};
+    Engine::camera = r.getCamera();
+
     _shader = Shader::getStandard();
 
     game->initialize(this);
@@ -84,6 +86,7 @@ int Engine::initialize(Game* game){
 
 void Engine::update(float delta_time){
     input.update();
+    Engine::camera->update();
     game->update(delta_time);
     debug->update();
 }
@@ -94,8 +97,9 @@ void Engine::render(){
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
 
-    r.getCamera()->setViewport(0,0,w,h);
-    r.getCamera()->setPerspectiveProjection(60,w,h,0.1,100);
+    camera->setViewport(0,0,w,h);
+    camera->setPerspectiveProjection(60,w,h,0.1,100);
+
     r.clearScreen({1,0,0,1});
 
     for(int i = 0; i < entities.capacity;i++){
