@@ -52,8 +52,11 @@ class DebugInterface{
             if(Input::get_key_on_down(SDL_SCANCODE_F2))     menu         = !menu;
             if(Input::get_key_on_down(SDL_SCANCODE_F3))     hierarchy    = !hierarchy;
             if(Input::get_key_on_down(SDL_SCANCODE_F4))     save_load    = !save_load;
+            if(Input::get_key_on_down(SDL_SCANCODE_F5))     create       = !create;
             if(Input::get_key_on_down(SDL_SCANCODE_F8))     game_debug   = !game_debug;
             if(Input::get_key_on_down(SDL_SCANCODE_F9))     entity_debug = !entity_debug;
+
+            //debug camera
         }
 
         void render(){
