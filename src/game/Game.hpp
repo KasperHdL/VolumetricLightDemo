@@ -16,11 +16,7 @@ class Game{
         void initialize(Engine* engine){
             this->engine = engine;
 
-
-            SceneLoader::load_scene("test.scene");
-            cout << "Loaded Scene\n";
-            SceneLoader::save_scene("test1.scene");
-            cout << "Saved Scene\n";
+            SceneLoader::load_scene("savetest.scene");
 
 
 

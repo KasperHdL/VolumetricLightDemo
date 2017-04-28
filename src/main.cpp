@@ -2,8 +2,8 @@
 #include "engine/Engine.hpp"
 
 Game game = Game();
-int main() {
 
+int main() {
     Engine engine(800, 600);
 
     return engine.initialize(&game);

@@ -54,11 +54,7 @@ int Engine::initialize(Game* game){
     debug = new DebugInterface();
     debug->initialize(window, game);
 
-    
-
-    r.setAmbientLight({0.5,0.5,0.5});
-    r.setLight(0, Light::create().withDirectionalLight(glm::vec3(.1f,.7f,.1f)).withColor(glm::vec3(1.0f,1.0f,1.0f)).build());
-
+    Light::create().withDirectionalLight(glm::vec3(.1f,-.7f,.1f)).withColor(glm::vec3(1.0f,1.0f,1.0f)).build();
 
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
@@ -106,7 +102,7 @@ void Engine::render(){
     camera->setViewport(0,0,w,h);
     camera->setPerspectiveProjection(60,w,h,0.1,100);
 
-    r.clearScreen({0.1f,0.1f,0.1f,1});
+    r.clearScreen({1,0,0,1});
 
     for(int i = 0; i < entities.capacity;i++){
         Entity* e = entities[i];
