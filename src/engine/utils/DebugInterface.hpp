@@ -20,15 +20,16 @@ class DebugInterface{
         //menu
         bool menu = true;
         bool hierarchy = false;
-        bool save_load = false;
+        bool scene_manager = false;
         bool create = false;
+        bool hotload_shader = false;
 
         bool game_debug = false;
         bool entity_debug = false;
 
         //windows
 
-            //save/load
+            //scene manager
             char filename[50];
 
             //create menu
@@ -48,13 +49,14 @@ class DebugInterface{
         }
 
         void update(){
-            if(Input::get_key_on_down(SDL_SCANCODE_ESCAPE)) enabled      = !enabled;
-            if(Input::get_key_on_down(SDL_SCANCODE_F2))     menu         = !menu;
-            if(Input::get_key_on_down(SDL_SCANCODE_F3))     hierarchy    = !hierarchy;
-            if(Input::get_key_on_down(SDL_SCANCODE_F4))     save_load    = !save_load;
-            if(Input::get_key_on_down(SDL_SCANCODE_F5))     create       = !create;
-            if(Input::get_key_on_down(SDL_SCANCODE_F8))     game_debug   = !game_debug;
-            if(Input::get_key_on_down(SDL_SCANCODE_F9))     entity_debug = !entity_debug;
+            if(Input::get_key_on_down(SDL_SCANCODE_ESCAPE)) enabled       = !enabled;
+            if(Input::get_key_on_down(SDL_SCANCODE_F2))     menu          = !menu;
+            if(Input::get_key_on_down(SDL_SCANCODE_F3))     hierarchy     = !hierarchy;
+            if(Input::get_key_on_down(SDL_SCANCODE_F4))     scene_manager = !scene_manager;
+            if(Input::get_key_on_down(SDL_SCANCODE_F5))     create        = !create;
+            if(Input::get_key_on_down(SDL_SCANCODE_F6))     hotload_shader= !hotload_shader;
+            if(Input::get_key_on_down(SDL_SCANCODE_F8))     game_debug    = !game_debug;
+            if(Input::get_key_on_down(SDL_SCANCODE_F9))     entity_debug  = !entity_debug;
 
             //debug camera
         }
@@ -68,14 +70,16 @@ class DebugInterface{
                 //menu
                 if(menu){
                     ImGui::Begin("Menu");
-                        ImGui::Checkbox("Debug        [Esc]", &enabled);
-                        ImGui::Checkbox("Menu         [F2] ", &menu);
-                        ImGui::Checkbox("Hierarchy    [F3] ", &hierarchy);
-                        ImGui::Checkbox("Save/Load    [F4] ", &save_load);
-                        ImGui::Checkbox("Create Menu  [F5] ", &create);
+                        ImGui::Checkbox("Debug         [Esc]", &enabled);
+                        ImGui::Checkbox("Menu          [F2] ", &menu);
+                        ImGui::Checkbox("Hierarchy     [F3] ", &hierarchy);
+                        ImGui::Checkbox("SceneManager  [F4] ", &scene_manager);
+                        ImGui::Checkbox("Create Menu   [F5] ", &create);
 
-                        ImGui::Checkbox("Game Debug   [F8] ", &game_debug);
-                        ImGui::Checkbox("Entity Debug [F9] ", &entity_debug);
+                        ImGui::Checkbox("Hotload Shader[F6]", &hotload_shader);
+
+                        ImGui::Checkbox("Game Debug    [F8] ", &game_debug);
+                        ImGui::Checkbox("Entity Debug  [F9] ", &entity_debug);
                     ImGui::End();
                 }
 
@@ -97,8 +101,8 @@ class DebugInterface{
                     ImGui::End();
                 }
                 
-                if(save_load){
-                    ImGui::Begin("Save/Load Scene");
+                if(scene_manager){
+                    ImGui::Begin("Scene Manager");
                     ImGui::InputText("Filename", filename, 50);
                     if(ImGui::Button("Save")){
                         SceneLoader::save_scene(filename);

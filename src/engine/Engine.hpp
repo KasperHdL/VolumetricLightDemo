@@ -1,5 +1,12 @@
 #pragma once
 
+//
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <iostream>
+
+
 //sdl
 #include "SDL.h"
 
@@ -12,7 +19,7 @@
 #include "Entity.hpp"
 #include "Input.hpp"
 #include "utils/DynamicPool.hpp"
-
+#include "utils/FileLoader.hpp"
 //render
 #include "render/RenderEngine.hpp"
 #include "render/Camera.hpp"
@@ -29,6 +36,7 @@ class Engine{
 private:
         
     Shader* _shader;
+    int _shader_time;
 public:
     SDL_Window* window;
     Game* game;

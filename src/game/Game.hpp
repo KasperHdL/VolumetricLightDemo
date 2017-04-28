@@ -16,9 +16,7 @@ class Game{
         void initialize(Engine* engine){
             this->engine = engine;
 
-            SceneLoader::load_scene("savetest.scene");
-
-
+            SceneLoader::load_scene("standard.scene");
 
         }
 

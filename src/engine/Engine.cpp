@@ -47,18 +47,34 @@ int Engine::initialize(Game* game){
     RenderEngine r{window};
     Engine::camera = r.getCamera();
 
-    _shader = Shader::getStandard();
+    struct stat st;
+    int ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
+    if (ierr != 0) {
+            cout << "error";
+    }
+    _shader_time = st.st_mtime;
+
+    ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
+    if (ierr != 0) {
+            cout << "error";
+    }
+    if(st.st_mtime < _shader_time)
+        _shader_time = st.st_mtime;
+
+    std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
+    std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
+
+    _shader = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
+    _shader->set("color", glm::vec4(1));
+    _shader->set("tex", Texture::getWhiteTexture());
 
     game->initialize(this);
 
     debug = new DebugInterface();
     debug->initialize(window, game);
 
-    
-
     r.setAmbientLight({0.5,0.5,0.5});
     r.setLight(0, Light::create().withDirectionalLight(glm::vec3(.1f,.7f,.1f)).withColor(glm::vec3(1.0f,1.0f,1.0f)).build());
-
 
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
@@ -95,6 +111,38 @@ void Engine::update(float delta_time){
     Engine::camera->update();
     game->update(delta_time);
     debug->update();
+    if(debug->hotload_shader){
+
+        bool changed = false;
+
+        struct stat st;
+        int ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
+        if (ierr != 0) {
+                cout << "error";
+        }
+
+        if(st.st_mtime < _shader_time) changed = true;
+
+        if(!changed){
+            ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
+            if (ierr != 0) {
+                    cout << "error";
+            }
+            if(st.st_mtime < _shader_time) changed = true;
+        }
+
+        if(st.st_mtime < _shader_time){
+            _shader_time = st.st_mtime;
+
+            std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
+            std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
+
+            _shader = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
+
+            _shader->set("color", glm::vec4(1));
+            _shader->set("tex", Texture::getWhiteTexture());
+        }
+    }
 }
 
 void Engine::render(){
