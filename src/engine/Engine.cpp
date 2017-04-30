@@ -47,26 +47,7 @@ int Engine::initialize(Game* game){
     RenderEngine r{window};
     Engine::camera = r.getCamera();
 
-    struct stat st;
-    int ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
-    if (ierr != 0) {
-            cout << "error";
-    }
-    _shader_time = st.st_mtime;
-
-    ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
-    if (ierr != 0) {
-            cout << "error";
-    }
-    if(st.st_mtime < _shader_time)
-        _shader_time = st.st_mtime;
-
-    std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
-    std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
-
-    _shader = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
-    _shader->set("color", glm::vec4(1));
-    _shader->set("tex", Texture::getWhiteTexture());
+    update_shaders();
 
     game->initialize(this);
 
@@ -88,7 +69,7 @@ int Engine::initialize(Game* game){
         time += delta_time;
 
         update(delta_time);
-        render();
+        render(delta_time);
 
         SDL_Delay(16.0f);
     }
@@ -110,51 +91,24 @@ void Engine::update(float delta_time){
     input.update();
     Engine::camera->update();
     game->update(delta_time);
-    debug->update();
+    debug->update(delta_time);
     if(debug->hotload_shader){
-
-        bool changed = false;
-
-        struct stat st;
-        int ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
-        if (ierr != 0) {
-                cout << "error";
-        }
-
-        if(st.st_mtime < _shader_time) changed = true;
-
-        if(!changed){
-            ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
-            if (ierr != 0) {
-                    cout << "error";
-            }
-            if(st.st_mtime < _shader_time) changed = true;
-        }
-
-        if(st.st_mtime < _shader_time){
-            _shader_time = st.st_mtime;
-
-            std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
-            std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
-
-            _shader = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
-
-            _shader->set("color", glm::vec4(1));
-            _shader->set("tex", Texture::getWhiteTexture());
-        }
+        update_shaders();
     }
 }
 
-void Engine::render(){
+void Engine::render(float delta_time){
 
     RenderEngine &r = *RenderEngine::instance;
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
 
     camera->setViewport(0,0,w,h);
-    camera->setPerspectiveProjection(60,w,h,0.1,100);
+    camera->setPerspectiveProjection(60,w,h,0.1f,100);
 
     r.clearScreen({0.1f,0.1f,0.1f,1});
+    //glBindFramebuffer(GL_FRAMEBUFFER, r.frame_buffer);
+
 
     for(int i = 0; i < entities.capacity;i++){
         Entity* e = entities[i];
@@ -168,6 +122,52 @@ void Engine::render(){
         }
     }
 
-    debug->render();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    debug->render(delta_time);
+
     r.swapWindow();
 }
+
+void Engine::update_shaders(){
+    bool changed = false;
+
+    struct stat st;
+    int ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
+    if (ierr != 0) {
+            cout << "error";
+    }
+
+    if(st.st_mtime > _shader_time) changed = true;
+
+    if(!changed){
+        ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
+        if (ierr != 0) {
+                cout << "error";
+        }
+        if(st.st_mtime > _shader_time) changed = true;
+    }
+
+    if(st.st_mtime > _shader_time){
+        cout << "Loading Shader\n";
+        _shader_time = st.st_mtime;
+
+        std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
+        std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
+
+        Shader* s = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
+
+        if(s != nullptr){
+            cout << "Successfully loaded shader!\n";
+
+            if(_shader != nullptr)
+                delete _shader;
+
+            _shader = s;
+
+            _shader->set("color", glm::vec4(1));
+            _shader->set("tex", Texture::getWhiteTexture());
+        }else
+            cout << "Encountered Error!\n";
+    }
+}
+

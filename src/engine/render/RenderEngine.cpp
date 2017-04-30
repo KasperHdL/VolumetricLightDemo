@@ -34,7 +34,6 @@ RenderEngine::RenderEngine(SDL_Window * window)
 #ifndef EMSCRIPTEN
     glcontext = SDL_GL_CreateContext(window);
 #endif
-#if defined(_WIN32)
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -42,12 +41,9 @@ RenderEngine::RenderEngine(SDL_Window * window)
         /* Problem: glewInit failed, something is seriously wrong. */
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
     }
-#elif defined __LINUX__
-    glewInit();
-#endif
 
     std::string version = (char*)glGetString(GL_VERSION);
-    std::cout << "OpenGL version "<<glGetString(GL_VERSION) << std::endl;
+    std::cout << "OpenGL version "<< version << std::endl;
     std::cout << "Render Engine version " << version_major << "." << version_minor << "." << version_point << std::endl;
 
     // setup opengl context
@@ -64,8 +60,8 @@ RenderEngine::RenderEngine(SDL_Window * window)
         glEnable(GL_POINT_SPRITE);
     }
     SDL_GetWindowSize(window,&camera->viewportWidth,&camera->viewportHeight);
-
-    // reset render stats
+    
+// reset render stats
     renderStats.frame = 0;
     renderStats.meshCount = 0;
     renderStats.meshBytes = 0;
@@ -76,6 +72,7 @@ RenderEngine::RenderEngine(SDL_Window * window)
 }
 
 RenderEngine::~RenderEngine() {
+
     SDL_GL_DeleteContext(glcontext);
     instance = nullptr;
 }

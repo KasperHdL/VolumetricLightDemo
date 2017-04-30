@@ -14,6 +14,7 @@ class DebugInterface{
         SDL_Window* window;
 
 
+        float control_speed = 2;
         bool enabled = true;
         int n;
 
@@ -22,7 +23,7 @@ class DebugInterface{
         bool hierarchy = false;
         bool scene_manager = false;
         bool create = false;
-        bool hotload_shader = false;
+        bool hotload_shader = true;
 
         bool game_debug = false;
         bool entity_debug = false;
@@ -48,7 +49,7 @@ class DebugInterface{
             this->window = window;
         }
 
-        void update(){
+        void update(float dt){
             if(Input::get_key_on_down(SDL_SCANCODE_ESCAPE)) enabled       = !enabled;
             if(Input::get_key_on_down(SDL_SCANCODE_F2))     menu          = !menu;
             if(Input::get_key_on_down(SDL_SCANCODE_F3))     hierarchy     = !hierarchy;
@@ -61,7 +62,7 @@ class DebugInterface{
             //debug camera
         }
 
-        void render(){
+        void render(float dt){
 
             if(enabled){
 
@@ -73,10 +74,10 @@ class DebugInterface{
                         ImGui::Checkbox("Debug         [Esc]", &enabled);
                         ImGui::Checkbox("Menu          [F2] ", &menu);
                         ImGui::Checkbox("Hierarchy     [F3] ", &hierarchy);
-                        ImGui::Checkbox("SceneManager  [F4] ", &scene_manager);
+                        ImGui::Checkbox("Scene Manager [F4] ", &scene_manager);
                         ImGui::Checkbox("Create Menu   [F5] ", &create);
 
-                        ImGui::Checkbox("Hotload Shader[F6]", &hotload_shader);
+                        ImGui::Checkbox("Hotload Shader[F6] ", &hotload_shader);
 
                         ImGui::Checkbox("Game Debug    [F8] ", &game_debug);
                         ImGui::Checkbox("Entity Debug  [F9] ", &entity_debug);
@@ -90,11 +91,12 @@ class DebugInterface{
                 //windows
                 if(hierarchy){
                     ImGui::Begin("Hierarchy");
+                    ImGui::DragFloat("Control Speed", &control_speed);
                     for(int i = 0; i < Engine::entities.capacity;i++){
                         Entity* e = Engine::entities[i];
                         if(e != nullptr){
                             ImGui::PushID(i);
-                            e->draw_debug_inspector();
+                            e->draw_debug_inspector(dt, control_speed);
                             ImGui::PopID();
                         }
                     }

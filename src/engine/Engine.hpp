@@ -34,15 +34,13 @@ class DebugInterface;
 
 class Engine{
 private:
-        
-    Shader* _shader;
+    Shader* _shader = nullptr;
     int _shader_time;
 public:
     SDL_Window* window;
     Game* game;
     Input input;
     DebugInterface* debug;
-
 
     int screen_width;
     int screen_height;
@@ -60,7 +58,9 @@ public:
 
     void update(float delta_time);
 
-    void render();
+    void render(float delta_time);
+
+    void update_shaders();
 
 };
 

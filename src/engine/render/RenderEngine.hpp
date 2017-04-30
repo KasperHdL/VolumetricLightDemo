@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "Light.hpp"
 #include "Camera.hpp"
+#include "impl/GL.hpp"
 
 #include "impl/Export.hpp"
 #include "RenderStats.h"
@@ -34,6 +35,7 @@ public:
     static constexpr int version_major = 0;
     static constexpr int version_minor = 0;
     static constexpr int version_point = 1;
+    GLuint frame_buffer;
 
     /**
      * Set the light state - this affects all draw calls after the state has been set.
@@ -123,6 +125,7 @@ private:
     Camera *camera;
     SDL_Window *window;
     SDL_GLContext glcontext;
+
     friend class Camera;
 
     void setupShader(const glm::mat4 &modelTransform, Shader *shader);

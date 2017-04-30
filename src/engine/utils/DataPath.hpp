@@ -37,7 +37,11 @@ public:
                 return "";
             }
 
+#if DEBUG
+            baseRes = baseRes + ".." + PATH_SEP + "data" + PATH_SEP;
+#else
             baseRes = baseRes + "data" + PATH_SEP;
+#endif
         }
 
         //If we want a specific file path in the data dir or just the data dir

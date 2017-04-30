@@ -67,5 +67,5 @@ void main(void)
 
     vec3 l = computeLight();
 
-    fragColor = vec4(0,1,0,1);
+    fragColor = vec4(c.xyz * l, 1);
 }
