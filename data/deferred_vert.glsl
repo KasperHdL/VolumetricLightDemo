@@ -1,12 +1,12 @@
-#version 150
+#version 400
 
 in vec4 position;
 in vec3 normal;
-in vec2 uv;
+in vec2 texcoord;
 
-uniform mat4 model;
-uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
 uniform mat3 normalMat;
 
 out vec4 p;
@@ -14,8 +14,11 @@ out vec3 n;
 out vec2 t;
 
 void main(){
+    t = texcoord;
+
     p = view * model * position;
-    gl_Position = projection * p;
     n = normalMat * normal;
+
+    gl_Position = projection * p;
 }
 

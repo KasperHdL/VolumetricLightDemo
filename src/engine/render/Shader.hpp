@@ -130,6 +130,7 @@ public:
 
     BlendType getBlend();
 
+    unsigned int shaderProgramId;
 private:
     bool setLights(Light value[4], glm::vec4 ambient, glm::mat4 viewTransform);
 
@@ -138,7 +139,6 @@ private:
 
     void bind();
 
-    unsigned int shaderProgramId;
     bool depthTest = true;
     bool depthWrite = true;
     BlendType blend = BlendType::Disabled;

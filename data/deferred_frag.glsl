@@ -1,4 +1,4 @@
-#version 150
+#version 400
 
 in vec4 p;
 in vec3 n;
@@ -7,10 +7,12 @@ in vec2 t;
 uniform vec4 color;
 uniform sampler2D tex;
 
-out vec4 fragment[3];
+layout(location = 0) out vec4 position;
+layout(location = 1) out vec3 normal;
+layout(location = 2) out vec3 diffuse;
 
 void main(){
-    fragment[0].rgb = p.xyz;
-    fragment[1].rgb = normalize(n);
-    fragment[2] = color * texture(tex, t);
+    position = p;
+    normal = normalize(n);
+    diffuse = (color * texture(tex, t)).xyz;
 }

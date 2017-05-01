@@ -1,11 +1,11 @@
-#version 150
+#version 400
 
-uniform sampler2D gTex;
-uniform sampler2D nTex;
-uniform sampler2D cTex;
+uniform sampler2D position_texture;
+uniform sampler2D normal_texture;
+uniform sampler2D diffuse_texture;
 
 out vec4 fragment;
 
 void main(){
-    fragment = texture(nTex, gl_FragCoord.xy);
+    fragment = texture(diffuse_texture, gl_FragCoord.xy);
 }

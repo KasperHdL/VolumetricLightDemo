@@ -132,7 +132,7 @@ void Engine::update_shaders(){
     bool changed = false;
 
     struct stat st;
-    int ierr = stat(DataPath::get("standard_vert.glsl").c_str(), &st);
+    int ierr = stat(DataPath::get("screen_vert.glsl").c_str(), &st);
     if (ierr != 0) {
             cout << "error";
     }
@@ -140,7 +140,7 @@ void Engine::update_shaders(){
     if(st.st_mtime > _shader_time) changed = true;
 
     if(!changed){
-        ierr = stat(DataPath::get("standard_frag.glsl").c_str(), &st);
+        ierr = stat(DataPath::get("screen_frag.glsl").c_str(), &st);
         if (ierr != 0) {
                 cout << "error";
         }

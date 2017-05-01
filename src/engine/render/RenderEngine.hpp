@@ -125,15 +125,18 @@ public:
     static RenderEngine* instance;
 private:
     //textures
-    unsigned int gbuffer_texture;
-    unsigned int color_texture;
+    unsigned int position_texture;
     unsigned int normal_texture;
+    unsigned int color_texture;
+    unsigned int depth_texture;
     
     unsigned int framebuffer;
     unsigned int renderbuffer;
 
+
     //shaders
     Shader* deferred;
+
 
     Mesh* quad;
 
