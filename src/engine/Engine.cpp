@@ -44,7 +44,7 @@ int Engine::initialize(Game* game){
         return 1;
     }
 
-    RenderEngine r{window};
+    RenderEngine r{window, screen_width, screen_height};
     Engine::camera = r.getCamera();
 
     update_shaders();
@@ -106,8 +106,7 @@ void Engine::render(float delta_time){
     camera->setViewport(0,0,w,h);
     camera->setPerspectiveProjection(60,w,h,0.1f,100);
 
-    r.clearScreen({0.1f,0.1f,0.1f,1});
-    //glBindFramebuffer(GL_FRAMEBUFFER, r.frame_buffer);
+    r.bind_framebuffer();
 
 
     for(int i = 0; i < entities.capacity;i++){
@@ -118,11 +117,12 @@ void Engine::render(float delta_time){
             glm::mat4 t = glm::translate(mat4(), e->position);
             glm::mat4 a = mat4_cast(e->rotation);
 
-            r.draw(e->mesh,  t * s * a, _shader);
+            r.draw(e->mesh,  t * s * a, vec4(1,1,1,1));
         }
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    r.display(_shader);
+
     debug->render(delta_time);
 
     r.swapWindow();
@@ -151,8 +151,8 @@ void Engine::update_shaders(){
         cout << "Loading Shader\n";
         _shader_time = st.st_mtime;
 
-        std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
-        std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
+        std::string vert = FileLoader::load_file_as_string("screen_vert.glsl");
+        std::string frag = FileLoader::load_file_as_string("screen_frag.glsl");
 
         Shader* s = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
 

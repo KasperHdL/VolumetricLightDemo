@@ -11,10 +11,12 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
 
+#include "../utils/FileLoader.hpp"
 #include "RenderEngine.hpp"
 #include <cassert>
 #include "Shader.hpp"
 #include "Mesh.hpp"
+#include "Texture.hpp"
 
 #include "impl/GL.hpp"
 #include <iostream>
@@ -23,7 +25,7 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
 RenderEngine* RenderEngine::instance = nullptr;
 
-RenderEngine::RenderEngine(SDL_Window * window)
+RenderEngine::RenderEngine(SDL_Window * window, int screen_width, int screen_height)
 :window{window}
 {
     if (instance != nullptr){
@@ -60,7 +62,62 @@ RenderEngine::RenderEngine(SDL_Window * window)
         glEnable(GL_POINT_SPRITE);
     }
     SDL_GetWindowSize(window,&camera->viewportWidth,&camera->viewportHeight);
+
+    //create textures
+
+    glGenTextures(1, &gbuffer_texture);
+    glBindTexture(GL_TEXTURE_2D, gbuffer_texture);
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER , GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE ) ;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
     
+    glGenTextures(1, &color_texture);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER , GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE ) ;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    
+    glGenTextures(1,&normal_texture);
+    glBindTexture(GL_TEXTURE_2D, normal_texture);
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER , GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE ) ;
+    glTexParameterf(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE ) ;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    
+
+    //create framebuffer
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gbuffer_texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normal_texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture, 0);
+
+    //create renderbuffers
+
+    glGenRenderbuffers(1, &renderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+
+    //laod shader
+    
+    std::string vert = FileLoader::load_file_as_string("deferred_vert.glsl");
+    std::string frag = FileLoader::load_file_as_string("deferred_frag.glsl"); 
+    deferred = Shader::create().withSource(vert.c_str(), frag.c_str()).build();
+
+
+    //load mesh
+    quad = Mesh::create().withQuad().build();
+
+
+
 // reset render stats
     renderStats.frame = 0;
     renderStats.meshCount = 0;
@@ -89,13 +146,48 @@ Light RenderEngine::getLight(int lightIndex) {
     return sceneLights[lightIndex];
 }
 
-void RenderEngine::draw(Mesh *mesh, glm::mat4 modelTransform, Shader *shader) {
+void RenderEngine::bind_framebuffer(){
+    const GLenum buffers[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
+    };
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glDrawBuffers(GL_FRAMEBUFFER, buffers);
+    clearScreen(vec4(.1f,.1f,.1f,.1f), true, true);
+    glEnable(GL_DEPTH_TEST);
+
+}
+
+
+void RenderEngine::draw(Mesh *mesh, glm::mat4 modelTransform, Shader* shader) {
     renderStats.drawCalls++;
     if (camera == nullptr){
         std::cerr<<"Cannot render. Camera is null"<<std::endl;
         return;
     }
     setupShader(modelTransform, shader);
+
+    mesh->bind();
+    int indexCount = (int) mesh->getIndices().size();
+    if (indexCount == 0){
+        glDrawArrays((GLenum) mesh->getMeshTopology(), 0, mesh->getVertexCount());
+    } else {
+        glDrawElements((GLenum) mesh->getMeshTopology(), indexCount, GL_UNSIGNED_SHORT, 0);
+    }
+}
+
+void RenderEngine::draw(Mesh *mesh, glm::mat4 modelTransform, vec4 color) {
+    renderStats.drawCalls++;
+    if (camera == nullptr){
+        std::cerr<<"Cannot render. Camera is null"<<std::endl;
+        return;
+    }
+    setupShader(modelTransform, deferred);
+    deferred->set("color", color);
+    deferred->set("tex", Texture::getWhiteTexture());
 
     mesh->bind();
     int indexCount = (int) mesh->getIndices().size();
@@ -146,7 +238,29 @@ void RenderEngine::clearScreen(glm::vec4 color, bool clearColorBuffer, bool clea
     glClear(clear);
 }
 
+void RenderEngine::display(Shader* shader){
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    quad->bind();
+    glDisable(GL_DEPTH_TEST);
+    setupShader(mat4(), shader);
+
+    //bind textures
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gbuffer_texture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, normal_texture);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
+
+    glDrawArrays((GLenum)quad->getMeshTopology(), 0, quad->getVertexCount());
+
+}
+
 void RenderEngine::swapWindow() {
+
     renderStatsLast = renderStats;
     renderStats.frame++;
     renderStats.drawCalls=0;

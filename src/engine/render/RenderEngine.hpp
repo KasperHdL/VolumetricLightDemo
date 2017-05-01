@@ -29,7 +29,7 @@ class DllExport RenderEngine {
 public:
     /// SimpleRenderEngine constructor
     /// \param window pointer to the SDL window (must be initialized using OpenGL)
-    RenderEngine(SDL_Window *window);
+    RenderEngine(SDL_Window *window, int screen_width, int screen_height);
     ~RenderEngine();
     static constexpr int maxSceneLights = 4;
     static constexpr int version_major = 0;
@@ -71,7 +71,12 @@ public:
      * @param modelTransform
      * @param shader
      */
-    void draw(Mesh *mesh, glm::mat4 modelTransform, Shader *shader);
+    void draw(Mesh *mesh, glm::mat4 modelTransform, glm::vec4 color);
+    void draw(Mesh *mesh, glm::mat4 modelTransform, Shader* shader);
+
+    void bind_framebuffer();
+
+    void display(Shader* shader);
 
     /**
      * Sets the current camera object.
@@ -119,6 +124,20 @@ public:
      */
     static RenderEngine* instance;
 private:
+    //textures
+    unsigned int gbuffer_texture;
+    unsigned int color_texture;
+    unsigned int normal_texture;
+    
+    unsigned int framebuffer;
+    unsigned int renderbuffer;
+
+    //shaders
+    Shader* deferred;
+
+    Mesh* quad;
+
+    //general settings
     glm::vec4 ambientLight = glm::vec4(0.2,0.2,0.2,0.2);
     Light sceneLights[maxSceneLights];
     Camera defaultCamera;
@@ -129,6 +148,7 @@ private:
     friend class Camera;
 
     void setupShader(const glm::mat4 &modelTransform, Shader *shader);
+
 
     RenderStats renderStatsLast;
     RenderStats renderStats;
