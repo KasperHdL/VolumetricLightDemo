@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 
-#include "../render/Mesh.hpp"
 #include "../Engine.hpp"
 
 #include "DataPath.hpp"
@@ -26,7 +25,6 @@ class SceneLoader{
 
             int l = 0;
             string name;
-            Mesh* mesh;
             vec3 pos;
             vec3 scale;
             quat rot;
@@ -40,7 +38,7 @@ class SceneLoader{
                         
                         if(l == 0){
                             name = line;
-                            mesh  = _read_type(line);
+                            _read_type(line);
                         }else if(l == 1){
                             pos   = _read_vec3(line);
                         }else if(l == 2){
@@ -48,7 +46,7 @@ class SceneLoader{
                         }else if(l == 3){
                             rot   = _read_quat(line);
 
-                            _create_entity(name, mesh, pos, scale, rot);
+                            _create_entity(name, pos, scale, rot);
                         }
 
                         l++;
@@ -96,13 +94,13 @@ class SceneLoader{
 
     private:
 
-        static Mesh* _read_type(string line){
+        static void _read_type(string line){
             //@TODO(Kasper) be able to load builtin types and obj files
             if(line == "Cube"){
-                return Mesh::create().withCube().build();
+                return;
             }
 
-            return nullptr;
+            return;
         }
 
         static vec3 _read_vec3(string line){
@@ -144,15 +142,11 @@ class SceneLoader{
             return v;
         }
 
-        static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, quat rot){
+        static void _create_entity(string name, vec3 pos, vec3 scale, quat rot){
             Entity* e;
-            if(name == "Camera")
-                e = Engine::camera->entity;
-            else
-                e = new (Engine::entities.create()) Entity();
+            e = new (Engine::entities.create()) Entity();
 
             e->name = name;
-            e->mesh = mesh;
             e->position = pos;
             e->scale = scale;
             e->rotation = rot;

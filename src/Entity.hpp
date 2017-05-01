@@ -7,8 +7,7 @@
 
 #include "SDL.h"
 #include "Input.hpp"
-#include "render/Mesh.hpp"
-#include "render/imgui/imgui_re.hpp"
+#include "renderer/imgui/imgui_renderer.hpp"
 #include <string>
 
 using namespace glm;
@@ -26,9 +25,6 @@ public:
     quat rotation;
 
     //Render Properties
-    
-    Mesh* mesh;
-
 
     Entity(){
     }

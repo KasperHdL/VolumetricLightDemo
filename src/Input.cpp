@@ -7,10 +7,10 @@ void Input::update(){
     for(int i = 0; i < 284; i++)
         _last[i] = _now[i];
 
-
     SDL_Event e; //An SDL event to figure out which keys are being manipulated
     while (SDL_PollEvent(&e) != 0) { //If there is an event
-        ImGui_RE_ProcessEvent(&e);
+
+        ImGui_Renderer_ProcessEvent(&e);
 
         switch (e.type){
             case SDL_KEYDOWN:

@@ -12,15 +12,15 @@ struct SDL_Window;
 typedef union SDL_Event SDL_Event;
 
 // ImGui_RE_Init must be called before usage (usually in a setup step)
-IMGUI_API bool        ImGui_RE_Init(SDL_Window *window);
+IMGUI_API bool        ImGui_Renderer_Init(SDL_Window *window);
 // ImGui_RE_NewFrame must be invoked in the beginning of each frame before any other ImGui calls
-IMGUI_API void        ImGui_RE_NewFrame(SDL_Window *window);
+IMGUI_API void        ImGui_Renderer_NewFrame(SDL_Window *window);
 // ImGui_RE_ProcessEvent must be invoked in the beginning of each frame before any other ImGui calls
-IMGUI_API bool        ImGui_RE_ProcessEvent(SDL_Event *event);
+IMGUI_API bool        ImGui_Renderer_ProcessEvent(SDL_Event *event);
 // ImGui_RE_Shutdown destroys and releases resources owned by ImGui
-IMGUI_API void        ImGui_RE_Shutdown();
+IMGUI_API void        ImGui_Renderer_Shutdown();
 
 
 // Use if you want to reset your rendering device without losing ImGui state.
-IMGUI_API void        ImGui_RE_InvalidateDeviceObjects();
-IMGUI_API bool        ImGui_RE_CreateDeviceObjects();
+IMGUI_API void        ImGui_Renderer_InvalidateDeviceObjects();
+IMGUI_API bool        ImGui_Renderer_CreateDeviceObjects();

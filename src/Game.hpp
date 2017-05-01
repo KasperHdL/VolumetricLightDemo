@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include "../engine/Engine.hpp"
+#include "Engine.hpp"
 #include "Player.hpp"
-#include "../engine/utils/SceneLoader.hpp"
+#include "utils/SceneLoader.hpp"
 
 class Game{
     public:

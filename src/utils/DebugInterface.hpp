@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../game/Game.hpp"
+#include "../Game.hpp"
 #include "../Engine.hpp"
-#include "../render/imgui/imgui_re.hpp"
+#include "../renderer/imgui/imgui_renderer.hpp"
 #include "SDL.h"
 #include "../Input.hpp"
 #include <string>
@@ -42,8 +42,7 @@ class DebugInterface{
 
 
         void initialize(SDL_Window* window, Game* game){
-
-            ImGui_RE_Init(window);
+            ImGui_Renderer_Init(window);
 
             this->game = game;
             this->window = window;
@@ -66,7 +65,7 @@ class DebugInterface{
 
             if(enabled){
 
-                ImGui_RE_NewFrame(window);
+                ImGui_Renderer_NewFrame(window);
 
                 //menu
                 if(menu){
@@ -149,7 +148,7 @@ class DebugInterface{
             Entity* e = new (Engine::entities.create()) Entity();
 
             e->name = type_entities[type_selected_index];
-            e->mesh = Mesh::create().withCube().build();
+            //e->mesh = Mesh::create().withCube().build();
             e->position = glm::vec3();
             e->scale = glm::vec3(1,1,1);
             e->rotation = glm::quat();

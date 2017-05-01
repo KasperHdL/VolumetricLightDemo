@@ -7,10 +7,9 @@
 // https://github.com/ocornut/imgui
 
 #include "imgui.h"
-#include "imgui_re.hpp"
+#include "imgui_renderer.hpp"
 #include <string>
 #include <iostream>
-#include "../Shader.hpp"
 
 // SDL,GL3W
 #include <SDL.h>
@@ -159,7 +158,7 @@ static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
     SDL_SetClipboardText(text);
 }
 
-bool ImGui_RE_ProcessEvent(SDL_Event *event)
+bool ImGui_Renderer_ProcessEvent(SDL_Event *event)
 {
     ImGuiIO& io = ImGui::GetIO();
     switch (event->type)
@@ -228,7 +227,7 @@ void ImGui_ImplSdlGL3_CreateFontsTexture()
 
 
 
-bool ImGui_RE_CreateDeviceObjects()
+bool ImGui_Renderer_CreateDeviceObjects()
 {
     // Backup GL state
     GLint last_texture, last_array_buffer, last_vertex_array;
@@ -266,20 +265,9 @@ bool ImGui_RE_CreateDeviceObjects()
     g_ShaderHandle = glCreateProgram();
     g_VertHandle = glCreateShader(GL_VERTEX_SHADER);
     g_FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
-#ifdef EMSCRIPTEN
-    std::string vs = vertex_shader;
-    std::string fs = fragment_shader;
-    Shader::translateToGLSLES(vs, true);
-    Shader::translateToGLSLES(fs, false);
-    auto vsp = vs.c_str();
-    auto fsp = fs.c_str();
-    glShaderSource(g_VertHandle, 1, &vsp, 0);
-    glShaderSource(g_FragHandle, 1, &fsp, 0);
-#else
     glShaderSource(g_VertHandle, 1, &vertex_shader, 0);
     glShaderSource(g_FragHandle, 1, &fragment_shader, 0);
 
-#endif
 
     glCompileShader(g_VertHandle);
     glCompileShader(g_FragHandle);
@@ -295,10 +283,7 @@ bool ImGui_RE_CreateDeviceObjects()
 
     glGenBuffers(1, &g_VboHandle);
     glGenBuffers(1, &g_ElementsHandle);
-#ifndef EMSCRIPTEN
-    glGenVertexArrays(1, &g_VaoHandle);
-    glBindVertexArray(g_VaoHandle);
-#endif
+
     glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
     glEnableVertexAttribArray(g_AttribLocationPosition);
     glEnableVertexAttribArray(g_AttribLocationUV);
@@ -311,17 +296,11 @@ bool ImGui_RE_CreateDeviceObjects()
     // Restore modified GL state
     glBindTexture(GL_TEXTURE_2D, last_texture);
     glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-#ifndef EMSCRIPTEN
-    glBindVertexArray(last_vertex_array);
-#endif
     return true;
 }
 
-void    ImGui_RE_InvalidateDeviceObjects()
+void    ImGui_Renderer_InvalidateDeviceObjects()
 {
-#ifndef EMSCRIPTEN
-    if (g_VaoHandle) glDeleteVertexArrays(1, &g_VaoHandle);
-#endif
     if (g_VboHandle) glDeleteBuffers(1, &g_VboHandle);
     if (g_ElementsHandle) glDeleteBuffers(1, &g_ElementsHandle);
     g_VaoHandle = g_VboHandle = g_ElementsHandle = 0;
@@ -345,7 +324,7 @@ void    ImGui_RE_InvalidateDeviceObjects()
     }
 }
 
-bool    ImGui_RE_Init(SDL_Window *window)
+bool    ImGui_Renderer_Init(SDL_Window *window)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.KeyMap[ImGuiKey_Tab] = SDLK_TAB;                     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
@@ -385,16 +364,16 @@ bool    ImGui_RE_Init(SDL_Window *window)
     return true;
 }
 
-void ImGui_RE_Shutdown()
+void ImGui_Renderer_Shutdown()
 {
-    ImGui_RE_InvalidateDeviceObjects();
+    ImGui_Renderer_InvalidateDeviceObjects();
     ImGui::Shutdown();
 }
 
-void ImGui_RE_NewFrame(SDL_Window *window)
+void ImGui_Renderer_NewFrame(SDL_Window *window)
 {
     if (!g_FontTexture)
-        ImGui_RE_CreateDeviceObjects();
+        ImGui_Renderer_CreateDeviceObjects();
 
     ImGuiIO& io = ImGui::GetIO();
 

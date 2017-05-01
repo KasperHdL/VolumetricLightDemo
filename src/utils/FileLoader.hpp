@@ -14,6 +14,7 @@ class FileLoader{
         std::ifstream file(DataPath::get(filename));
 
         std::string vert((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+        file.close();
 
         return vert;
     }

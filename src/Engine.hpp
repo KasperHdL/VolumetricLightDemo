@@ -21,12 +21,8 @@
 #include "utils/DynamicPool.hpp"
 #include "utils/FileLoader.hpp"
 //render
-#include "render/RenderEngine.hpp"
-#include "render/Camera.hpp"
-#include "render/Mesh.hpp"
-#include "render/Shader.hpp"
-#include "render/Texture.hpp"
-#include "render/imgui/imgui_re.hpp"
+#include "renderer/Renderer.hpp"
+#include "renderer/imgui/imgui_renderer.hpp"
 
 
 class Game;
@@ -34,19 +30,20 @@ class DebugInterface;
 
 class Engine{
 private:
-    Shader* _shader = nullptr;
+ //   Shader* _shader = nullptr;
     int _shader_time;
 public:
     SDL_Window* window;
     Game* game;
     Input input;
     DebugInterface* debug;
+    Renderer renderer;
 
     int screen_width;
     int screen_height;
 
     static DynamicPool<Entity> entities;
-    static Camera* camera;
+//    static Camera* camera;
 
     float time;
     float delta_time;
@@ -60,7 +57,6 @@ public:
 
     void render(float delta_time);
 
-    void update_shaders();
 
 };
 
