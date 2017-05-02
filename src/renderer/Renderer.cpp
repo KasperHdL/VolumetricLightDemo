@@ -29,6 +29,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    camera = new Camera();
+    camera->set_viewport(0,0,screen_width, screen_height);
+    camera->set_perspective_projection();
+
     {
         std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
         std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
@@ -45,6 +49,16 @@ Renderer::~Renderer(){
 }
 
 void Renderer::render(){
+
+    int w,h;
+    SDL_GetWindowSize(window,&w,&h);
+
+    camera->set_viewport(0,0,w,h);
+    camera->set_perspective_projection(); 
+
+    glm::vec3 dir = glm::mat4_cast(camera->entity->rotation) * glm::vec4(0,0,1,0);
+    camera->view_transform = glm::lookAt(camera->entity->position, camera->entity->position + dir, glm::vec3(0,1,0));
+
     //setup deferred shader
     glUseProgram(shader->program_id);
     glEnable(GL_DEPTH_TEST);

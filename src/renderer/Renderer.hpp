@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <vector>
+
+#include "Camera.hpp"
 #include "Shader.hpp"
 #include "Mesh.hpp"
 
@@ -21,6 +23,7 @@ public:
 
     void render();
 
+    Camera* camera;
     Shader* shader;
     Mesh* mesh;
 

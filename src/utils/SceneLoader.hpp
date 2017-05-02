@@ -4,6 +4,7 @@
 
 #include "../Engine.hpp"
 #include "../renderer/Mesh.hpp"
+#include "../renderer/Camera.hpp"
 
 #include "DataPath.hpp"
 
@@ -18,7 +19,7 @@ class SceneLoader{
             /* File Spec
              *
              * # Comment
-             * Type(as String) ? @Speed
+             * Type(as String) @Speed
              * Position
              * Scale
              * Rotation
@@ -146,9 +147,9 @@ class SceneLoader{
 
         static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, quat rot){
             Entity* e;
-  //          if(name == "Camera") 
-//                e = Engine::camera->entity; 
- //           else 
+            if(name == "Camera") 
+                e = Engine::camera->entity; 
+            else 
                 e = new (Engine::entities.create()) Entity(); 
 
             e->name = name;
