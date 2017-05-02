@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "Input.hpp"
 #include "renderer/imgui/imgui_renderer.hpp"
+#include "renderer/Mesh.hpp"
 #include <string>
 
 using namespace glm;
@@ -18,6 +19,8 @@ private:
     bool _debug_control = false;
 public:
     std::string name;
+
+    Mesh* mesh;
 
     //Transform
     vec3 position;

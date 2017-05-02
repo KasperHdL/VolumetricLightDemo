@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <vector>
+#include "Shader.hpp"
+#include "Mesh.hpp"
 
 class Renderer{
 public:
@@ -19,7 +21,8 @@ public:
 
     void render();
 
-    unsigned int compile_shader(const char* vertex_shader, const char* fragment_shader);
+    Shader* shader;
+    Mesh* mesh;
 
     static Renderer* instance;
 

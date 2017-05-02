@@ -3,6 +3,7 @@
 #include "../Game.hpp"
 #include "../Engine.hpp"
 #include "../renderer/imgui/imgui_renderer.hpp"
+#include "../renderer/Mesh.hpp"
 #include "SDL.h"
 #include "../Input.hpp"
 #include <string>
@@ -148,7 +149,7 @@ class DebugInterface{
             Entity* e = new (Engine::entities.create()) Entity();
 
             e->name = type_entities[type_selected_index];
-            //e->mesh = Mesh::create().withCube().build();
+            e->mesh = Mesh::get_cube();
             e->position = glm::vec3();
             e->scale = glm::vec3(1,1,1);
             e->rotation = glm::quat();
