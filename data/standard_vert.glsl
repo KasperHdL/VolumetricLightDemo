@@ -7,6 +7,7 @@ layout(location = 3)in vec4 c;
 out vec3 vNormal;
 out vec2 vUV;
 out vec3 vEyePos;
+out vec4 vColor;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -19,5 +20,6 @@ void main(void) {
     vNormal = normal_matrix * normal;
     vUV = uv.xy;
     vEyePos = eyePos.xyz;
+    vColor = c;
 }
 

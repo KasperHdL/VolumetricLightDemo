@@ -24,7 +24,6 @@ void Input::update(){
             break;
         }
     }
-
 }
 
 bool Input::get_key_down(Uint8 key){

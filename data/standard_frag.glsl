@@ -2,6 +2,7 @@
 in vec3 vNormal;
 in vec2 vUV;
 in vec3 vEyePos;
+in vec4 vColor;
 
 uniform vec4 ambientLight;
 uniform vec4 color;
@@ -66,5 +67,5 @@ void main(void)
 {
     vec4 c = color;
 
-    fragColor = vec4(1,0,0,1);
+    fragColor = vColor;
 }
