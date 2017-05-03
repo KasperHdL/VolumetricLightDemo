@@ -24,7 +24,7 @@ public:
         view_transform = mat4(1);
         projection_transform = mat4(1);
 
-        entity = new Entity(); 
+        entity = new (Engine::entities.create()) Entity(); 
         entity->name = "Camera";
         entity->mesh = nullptr;
         entity->position = vec3();

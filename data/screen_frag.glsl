@@ -1,11 +1,14 @@
 #version 400
 
-uniform sampler2D position_texture;
-uniform sampler2D normal_texture;
-uniform sampler2D diffuse_texture;
+in vec2 uv;
 
-out vec4 fragment;
+uniform sampler2D rendered_texture;
+uniform float time;
+
+
+out vec3 color;
 
 void main(){
-    fragment = texture(diffuse_texture, gl_FragCoord.xy);
+    color = texture( rendered_texture, uv + 0.005*vec2( sin(time+1024.0*uv.x),cos(time+768.0*uv.y)) ).xyz;
+
 }

@@ -131,6 +131,8 @@ public:
     }
 
     static Mesh* get_cube();
+    static Mesh* get_quad();
 private:
     static Mesh* cube_mesh;
+    static Mesh* quad_mesh;
 };

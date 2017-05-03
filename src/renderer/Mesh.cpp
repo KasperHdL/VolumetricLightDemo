@@ -2,6 +2,7 @@
 
 //Helper Functions
 Mesh* Mesh::cube_mesh = nullptr;
+Mesh* Mesh::quad_mesh = nullptr;
 
 Mesh* Mesh::get_cube(){
     if(cube_mesh != nullptr)
@@ -92,5 +93,39 @@ Mesh* Mesh::get_cube(){
 
     return Mesh::cube_mesh;
 }
+
+Mesh* Mesh::get_quad(){
+    if(Mesh::quad_mesh != nullptr)
+        return Mesh::quad_mesh;
+
+    std::vector<glm::vec3> vertices({
+                                            glm::vec3{1, -1, 0},
+                                            glm::vec3{1, 1, 0},
+                                            glm::vec3{-1, -1, 0},
+                                            glm::vec3{-1, 1, 0}
+                                    });
+    std::vector<glm::vec3> normals({
+                                           glm::vec3{0, 0, 1},
+                                           glm::vec3{0, 0, 1},
+                                           glm::vec3{0, 0, 1},
+                                           glm::vec3{0, 0, 1}
+                                   });
+    std::vector<glm::vec4> uvs({
+                                       glm::vec4{1, 0,0,0},
+                                       glm::vec4{1, 1,0,0},
+                                       glm::vec4{0, 0,0,0},
+                                       glm::vec4{0, 1,0,0}
+                               });
+    vector<vec4> colors;
+    std::vector<uint16_t> indices = {
+            0,1,2,
+            2,1,3
+    };
+    Mesh::quad_mesh = new Mesh(vertices, normals, uvs , colors, indices);
+
+    return Mesh::quad_mesh;
+
+}
+
 
 

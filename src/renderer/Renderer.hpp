@@ -9,10 +9,10 @@
 #include <iostream>
 #include <vector>
 
-#include "Camera.hpp"
 #include "Shader.hpp"
 #include "Mesh.hpp"
 
+class Camera;
 class DebugInterface;
 class Renderer{
 public:
@@ -21,21 +21,24 @@ public:
 
     void initialize(SDL_Window* window, int screen_width, int screen_height);
 
-
-    void render();
-    GLuint vertex_buffer_id;
+    void render(float delta_time);
 
     DebugInterface* debug;
     Camera* camera;
     Shader* shader;
-    Mesh* mesh;
+    Shader* screen_shader;
 
-    static Renderer* instance;
+    GLuint framebuffer = 0;
+    GLuint rendered_texture;
+    GLuint depth_texture;
+    GLuint depth_renderbuffer;
 
     SDL_Window* window;
     SDL_GLContext glcontext;
 
+    float time = 0;
     int screen_width;
     int screen_height;
 
+    static Renderer* instance;
 };

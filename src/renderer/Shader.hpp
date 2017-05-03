@@ -86,6 +86,14 @@ public:
         if(_check_uniform(u, Uniform_Type::Vec4) == false) return;
         glUniform4fv(u.location_id, 1, glm::value_ptr(value));
     }
+    void set_uniform(std::string name, unsigned int texture_id, unsigned int slot){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Texture) == false) return;
+
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glUniform1i(u.location_id, slot);
+    }
 
     Uniform find_uniform(std::string name){
         for (auto i = uniforms.begin(); i != uniforms.end(); i++) {
