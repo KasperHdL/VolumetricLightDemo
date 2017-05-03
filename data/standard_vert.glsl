@@ -16,12 +16,12 @@ uniform mat4 projection;
 uniform mat3 normal_matrix;
 
 void main(void) {
-    p = view * model * vec4(position, 1);
-    n = mat3(view) * normal_matrix * normal;
+    p = model * vec4(position, 1); 
+    n = normal_matrix * normal;
 
     t = uv.xy;
     c = color;
 
-    gl_Position = projection * p;
+    gl_Position = projection * view * p;
 }
 

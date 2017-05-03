@@ -54,8 +54,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         frag = FileLoader::load_file_as_string("screen_frag.glsl");
 
         screen_shader = new Shader(vert, frag);
-        screen_shader->init_uniform("rendered_texture", Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("time", Shader::Uniform_Type::Float);
+        screen_shader->init_uniform("position_texture", Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("normal_texture", Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("color_texture", Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("light_dir", Shader::Uniform_Type::Vec4);
     }
 
     //setup framebuffer
@@ -64,13 +66,32 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     
     //create textures
-    glGenTextures(1, &rendered_texture);
-    glBindTexture(GL_TEXTURE_2D, rendered_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+    //position
+    glGenTextures(1, &position_texture);
+    glBindTexture(GL_TEXTURE_2D, position_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+    //normal
+    glGenTextures(1, &normal_texture);
+    glBindTexture(GL_TEXTURE_2D, normal_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    //color
+    glGenTextures(1, &color_texture);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    //depth
     glGenTextures(1, &depth_texture);
     glBindTexture(GL_TEXTURE_2D, depth_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screen_width, screen_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
@@ -82,14 +103,22 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     GLuint depthrenderbuffer;
     glGenRenderbuffers(1, &depthrenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
 
     //configure framebuffer
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
-    GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, draw_buffers);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
+
+    GLenum draw_buffers[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
+    };
+
+    glDrawBuffers(3, draw_buffers);
 
     
 }
@@ -116,16 +145,14 @@ void Renderer::render(float delta_time){
     camera->set_perspective_projection(); 
 
     //calc view transform
-    glm::vec3 dir = glm::mat4_cast(camera->entity->rotation) * glm::vec4(0,0,1,0);
-    camera->view_transform = glm::lookAt(camera->entity->position, camera->entity->position + dir, glm::vec3(0,1,0));
+    glm::vec3 pos = 20.0f * vec3(sin(time), .5f, cos(time));
+    camera->view_transform = glm::lookAt(pos, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
     glUseProgram(shader->program_id);
 
     shader->set_uniform("view"       , camera->view_transform);
     shader->set_uniform("projection" , projection);
-
-
     
     //draw scene
     for(int i = 0; i < Engine::entities.capacity;i++){
@@ -140,7 +167,7 @@ void Renderer::render(float delta_time){
 
             shader->set_uniform("model", model_transform);
 
-            mat3 normal_matrix = transpose(inverse((mat3)(camera->view_transform * model_transform)));
+            mat3 normal_matrix = transpose(inverse((mat3)(model_transform)));
 
             shader->set_uniform("normal_matrix" , normal_matrix);
             shader->set_uniform("color", vec4(1,1,1,1));
@@ -157,17 +184,23 @@ void Renderer::render(float delta_time){
         }
     }
 
+    vec4 light_dir = vec4(-1,1,-1,0); 
+
+
     //set uniforms
     time += delta_time;
     //setup screen shader
     screen_shader->use();
-    screen_shader->set_uniform("rendered_texture", rendered_texture, 0);
-    screen_shader->set_uniform("time", time);
+    screen_shader->set_uniform("position_texture" , position_texture , 0);
+    screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
+    screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+    screen_shader->set_uniform("light_dir"        , light_dir);
 
     glDisable(GL_DEPTH_TEST);
+    glClearColor(.5f,.5f,.5f,1);
     glClear(GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0,0,camera->viewport_w, camera->viewport_h);
+    glViewport(0,0,camera->viewport_w*2, camera->viewport_h*2);
 
     //draw screen
     Mesh* mesh = Mesh::get_quad();

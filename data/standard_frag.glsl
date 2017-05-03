@@ -5,10 +5,12 @@ in vec2 t;
 in vec4 e;
 in vec4 c;
 
-layout(location = 0)out vec3 fragColor;
+layout(location = 0)out vec3 position;
+layout(location = 1)out vec3 normal;
+layout(location = 2)out vec3 color;
 
-void main(void)
-{
-    vec3 c = vec3(t,1);
-    fragColor = c;
+void main(void){
+    position = vec3(p);
+    normal = n;
+    color = vec3(c);
 }

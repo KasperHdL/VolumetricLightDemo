@@ -15,7 +15,7 @@ class DebugInterface{
         SDL_Window* window;
 
 
-        float control_speed = 2;
+        float control_speed = 15;
         bool enabled = true;
         int n;
 

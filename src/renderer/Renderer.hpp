@@ -29,9 +29,12 @@ public:
     Shader* screen_shader;
 
     GLuint framebuffer = 0;
-    GLuint rendered_texture;
-    GLuint depth_texture;
     GLuint depth_renderbuffer;
+
+    GLuint position_texture;
+    GLuint normal_texture;
+    GLuint color_texture;
+    GLuint depth_texture;
 
     SDL_Window* window;
     SDL_GLContext glcontext;
