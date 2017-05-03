@@ -34,7 +34,7 @@ public:
     }
 
     void set_perspective_projection(){
-        projection_transform = perspectiveFov<float>(radians(field_of_view), viewport_w, viewport_h, near_plane, far_plane);
+        projection_transform = glm::perspectiveFov<float>(radians(field_of_view), viewport_w, viewport_h, near_plane, far_plane);
     }
 
     void set_viewport(int x, int y, int w, int h){

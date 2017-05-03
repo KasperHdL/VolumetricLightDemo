@@ -23,6 +23,7 @@ public:
 
 
     void render();
+    GLuint vertex_buffer_id;
 
     DebugInterface* debug;
     Camera* camera;

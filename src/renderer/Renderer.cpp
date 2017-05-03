@@ -27,10 +27,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-
     camera = new Camera();
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
@@ -40,7 +36,21 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->projection_transform = glm::ortho<float>(0, w, 0, h, camera->near_plane, camera->far_plane);
     camera->view_transform = glm::mat4(1);
 
-    SDL_GetWindowSize(window,&camera->viewport_w,&camera->viewport_h);
+    GLuint vertex_array_id;
+    glGenVertexArrays(1, &vertex_array_id);
+    glBindVertexArray(vertex_array_id);
+
+    // An array of 3 vectors which represents 3 vertices
+    static const GLfloat g_vertex_buffer_data[] = {
+       -1.0f, -1.0f, 0.0f,
+       1.0f, -1.0f, 0.0f,
+       0.0f,  1.0f, 0.0f,
+    };
+
+    glGenBuffers(1, &vertex_buffer_id);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_array_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
 
     {
         std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
@@ -55,8 +65,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("normal_matrix" , Shader::Uniform_Type::Mat3);
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
     }
-
-    mesh = Mesh::get_cube();
 
 }
 
@@ -76,14 +84,26 @@ void Renderer::render(){
 
     //calc view transform
     glm::vec3 dir = glm::mat4_cast(camera->entity->rotation) * glm::vec4(0,0,1,0);
-    camera->view_transform = mat4();//glm::lookAt(camera->entity->position, camera->entity->position + dir, glm::vec3(0,1,0));
+    camera->view_transform = glm::lookAt(camera->entity->position, camera->entity->position + dir, glm::vec3(0,1,0));
+
+    mat4 projection = glm::perspective<float>(glm::radians<float>(45), (float)screen_width/(float)screen_height, .1f, 100);
+    mat4 view = glm::lookAt(vec3(-5,5,5), vec3(0,0,0), vec3(0,1,0));
 
     //setup deferred shader
     glUseProgram(shader->program_id);
 
-    shader->set_uniform("view"       , camera->view_transform);
-    shader->set_uniform("projection" , camera->projection_transform);
+    /*
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
+    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 0,(void*)0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray(0);
+    */
 
+
+    shader->set_uniform("model"      , mat4(1));
+    shader->set_uniform("view"       , camera->view_transform);
+    shader->set_uniform("projection" , projection);
     //draw scene
     for(int i = 0; i < Engine::entities.capacity;i++){
         Entity* e = Engine::entities[i];
@@ -106,13 +126,12 @@ void Renderer::render(){
 
             int indexCount = (int) e->mesh->indices.size();
             if (indexCount == 0){
-                glDrawArrays((GLenum) e->mesh->topology, 0, e->mesh->vertex_count);
+                glDrawArrays((GLenum)e->mesh->topology, 0, e->mesh->vertex_count);
             } else {
                 glDrawElements((GLenum) e->mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
             }
         }
     }
-
 
     //setup screen shader
 

@@ -45,7 +45,6 @@ public:
         glDeleteVertexArrays(1, &vertex_array_object);
         glDeleteBuffers(1, &vertex_buffer_id);
         glDeleteBuffers(1, &element_buffer_id);
-
     }
 
     void update(vector<vec3>& positions, vector<vec3>& normals, vector<vec4>& uvs, vector<vec4>& colors, vector<uint16_t>& indices){
@@ -100,12 +99,10 @@ public:
     }
 
     void bind(){
-        glBindVertexArray(vertex_array_object);
+//        glBindVertexArray(vertex_array_object);
 
-        /* Emscripten
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
         set_vertex_attribute_pointers();
-        */
 
         if(indices.empty())
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
