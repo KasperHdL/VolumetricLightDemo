@@ -15,14 +15,16 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+//render
+#include "renderer/Renderer.hpp"
+#include "renderer/imgui/imgui_renderer.hpp"
+
 //engine
 #include "Entity.hpp"
 #include "Input.hpp"
 #include "utils/DynamicPool.hpp"
 #include "utils/FileLoader.hpp"
-//render
-#include "renderer/Renderer.hpp"
-#include "renderer/imgui/imgui_renderer.hpp"
+
 
 
 class Game;
@@ -37,7 +39,6 @@ public:
     Game* game;
     Input input;
     DebugInterface* debug;
-    Renderer renderer;
 
     int screen_width;
     int screen_height;

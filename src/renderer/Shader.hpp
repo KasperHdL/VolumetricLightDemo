@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include <glm/gtc/type_ptr.hpp>
 #include <SDL_video.h>
 
 #include "impl/GL.hpp"
@@ -9,14 +10,32 @@
 
 class Shader{
 public:
+
+    enum class Uniform_Type{
+        Int,
+        Float,
+        Mat3,
+        Mat4,
+        Vec4,
+        Texture
+    };
+    struct Uniform{
+        std::string name;
+        int location_id;
+
+        Uniform_Type type;
+    };
+
     bool compiled = false;
     unsigned int program_id;
+    std::vector<Uniform> uniforms;
 
     Shader(std::string vertex, std::string fragment){
        compiled = _compile_shader(vertex.c_str(), fragment.c_str());
 
        if(!compiled)
            glDeleteShader(program_id);
+
     }
 
     Shader(const char* vertex, const char* fragment){
@@ -30,8 +49,71 @@ public:
         glDeleteShader(program_id);
     }
 
+    void init_uniform(std::string name, Uniform_Type type){
+        Uniform u;
+        u.name = name;
+        u.location_id = glGetUniformLocation(program_id, name.c_str());
+        u.type = type;
+        uniforms.push_back(u);
+    }
+
+    void use(){
+        glUseProgram(program_id);
+    }
+
+    void set_uniform(std::string name, int value){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Int) == false) return;
+        glUniform1i(u.location_id, value);
+    }
+    void set_uniform(std::string name, float value){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Float) == false) return;
+        glUniform1f(u.location_id, value);
+    }
+    void set_uniform(std::string name, glm::mat3 value){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Mat3) == false) return;
+        glUniformMatrix3fv(u.location_id, 1, GL_FALSE, glm::value_ptr(value));
+    }
+    void set_uniform(std::string name, glm::mat4 value){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Mat4) == false) return;
+        glUniformMatrix4fv(u.location_id, 1, GL_FALSE, glm::value_ptr(value));
+    }
+    void set_uniform(std::string name, glm::vec4 value){
+        Uniform u = find_uniform(name);
+        if(_check_uniform(u, Uniform_Type::Vec4) == false) return;
+        glUniform4fv(u.location_id, 1, glm::value_ptr(value));
+    }
+
+    Uniform find_uniform(std::string name){
+        for (auto i = uniforms.begin(); i != uniforms.end(); i++) {
+            if (name == i->name)
+                return *i;
+        }
+        Uniform u;
+        u.location_id = -1;
+        std::cerr << "Cannot find uniform " << name << "\n";
+        return u;
+    }
+    
+
 
 private:
+
+    bool _check_uniform(Uniform uniform, Uniform_Type correctType){
+        if(uniform.location_id == -1){
+            //can be optimized away
+//            std::cerr << "Cannot find uniform has it been initialized and is the shader active\n";
+            return false;
+        }else if(uniform.type != correctType){
+            std::cerr << "Incorrect uniform type for " << uniform.name << "\n";
+            return false;
+        }
+
+        return true;
+    }
 
     bool _compile_shader(const char* vertex_shader, const char* fragment_shader){
         program_id = glCreateProgram();

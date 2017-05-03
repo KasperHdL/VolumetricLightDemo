@@ -1,4 +1,3 @@
-
 #include "Engine.hpp"
 
 #include "Game.hpp"
@@ -21,8 +20,8 @@ int Engine::initialize(Game* game){
 
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL2
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
@@ -43,6 +42,7 @@ int Engine::initialize(Game* game){
         return 1;
     }
 
+    Renderer renderer;
     renderer.initialize(window, screen_width, screen_height);
  //   Engine::camera = r.getCamera();
 
@@ -52,6 +52,7 @@ int Engine::initialize(Game* game){
 
     debug = new DebugInterface();
     debug->initialize(window, game);
+    renderer.debug = debug;
 
     //r.setAmbientLight({0.5,0.5,0.5});
     //r.setLight(0, Light::create().withDirectionalLight(glm::vec3(.1f,.7f,.1f)).withColor(glm::vec3(1.0f,1.0f,1.0f)).build());

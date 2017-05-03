@@ -22,6 +22,7 @@ public:
 
     unsigned int vertex_buffer_id;
     unsigned int element_buffer_id;
+    unsigned int vertex_array_object;
     int vertex_count;
 
     vector<vec3> positions;
@@ -30,14 +31,18 @@ public:
     vector<vec4> colors;
     vector<uint16_t> indices;
 
+    Topology topology;
+
     Mesh(vector<vec3>& positions, vector<vec3>& normals, vector<vec4>& uvs, vector<vec4>& colors, vector<uint16_t>& indices){
         glGenBuffers(1, &vertex_buffer_id);
         glGenBuffers(1, &element_buffer_id);
+        glGenVertexArrays(1, &vertex_array_object);
 
         update(positions, normals, uvs, colors, indices);
     }
 
     ~Mesh(){
+        glDeleteVertexArrays(1, &vertex_array_object);
         glDeleteBuffers(1, &vertex_buffer_id);
         glDeleteBuffers(1, &element_buffer_id);
 
@@ -51,6 +56,8 @@ public:
         this->indices = indices;
 
         this->vertex_count = (int)positions.size();
+
+        topology = Topology::triangles;
 
         bool hasNormals = normals.size() == vertex_count;
         bool hasUVs     = uvs.size()     == vertex_count;
@@ -75,6 +82,7 @@ public:
             }
         }
 
+        glBindVertexArray(vertex_array_object);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float)*interleaved_data.size(), interleaved_data.data(), GL_STATIC_DRAW);
 
@@ -92,8 +100,12 @@ public:
     }
 
     void bind(){
+        glBindVertexArray(vertex_array_object);
+
+        /* Emscripten
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
         set_vertex_attribute_pointers();
+        */
 
         if(indices.empty())
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

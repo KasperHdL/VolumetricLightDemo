@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Entity.hpp"
 #include "../Engine.hpp"
+#include "../Entity.hpp"
 
 class Camera{
 public:
@@ -10,8 +10,6 @@ public:
 
     mat4 view_transform;
     mat4 projection_transform;
-
-
 
     int viewport_x;
     int viewport_y;
@@ -26,7 +24,7 @@ public:
         view_transform = mat4(1);
         projection_transform = mat4(1);
 
-        entity = new (Engine::entities.create()) Entity(); 
+        entity = new Entity(); 
         entity->name = "Camera";
         entity->mesh = nullptr;
         entity->position = vec3();

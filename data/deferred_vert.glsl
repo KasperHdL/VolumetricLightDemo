@@ -7,7 +7,7 @@ in vec2 texcoord;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
-uniform mat3 normalMat;
+uniform mat3 normal_matrix;
 
 out vec4 p;
 out vec3 n;
@@ -17,7 +17,7 @@ void main(){
     t = texcoord;
 
     p = view * model * position;
-    n = normalMat * normal;
+    n = normal_matrix * normal;
 
     gl_Position = projection * p;
 }

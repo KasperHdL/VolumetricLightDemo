@@ -13,6 +13,7 @@
 #include "Shader.hpp"
 #include "Mesh.hpp"
 
+class DebugInterface;
 class Renderer{
 public:
     Renderer();
@@ -23,6 +24,7 @@ public:
 
     void render();
 
+    DebugInterface* debug;
     Camera* camera;
     Shader* shader;
     Mesh* mesh;

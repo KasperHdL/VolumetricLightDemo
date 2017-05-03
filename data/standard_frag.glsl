@@ -1,5 +1,4 @@
 #version 140
-out vec4 fragColor;
 in vec3 vNormal;
 in vec2 vUV;
 in vec3 vEyePos;
@@ -11,6 +10,8 @@ uniform sampler2D tex;
 uniform vec4 lightPosType[4];
 uniform vec4 lightColorRange[4];
 uniform float specularity;
+
+out vec4 fragColor;
 
 vec3 computeLight(){
     vec3 lightColor = ambientLight.xyz;
@@ -63,9 +64,8 @@ vec3 computeLight(){
 
 void main(void)
 {
-    vec4 c = color * texture(tex, vUV);
+    vec4 c = color;
 
-    vec3 l = computeLight();
 
-    fragColor = vec4(c.xyz * l, 1);
+    fragColor = vec4(1,1,1,1);
 }

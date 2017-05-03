@@ -148,7 +148,7 @@ class SceneLoader{
         static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, quat rot){
             Entity* e;
             if(name == "Camera") 
-                e = Engine::camera->entity; 
+                e = Renderer::instance->camera->entity; 
             else 
                 e = new (Engine::entities.create()) Entity(); 
 
