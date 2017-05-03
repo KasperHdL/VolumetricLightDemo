@@ -27,8 +27,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     if(err != GLEW_OK)
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
-    glEnable(GL_DEPTH_TEST);
 
+
+    glClearColor(.5f,.5f,.5f,1);
 
     camera = new Camera();
     camera->set_viewport(0,0,screen_width, screen_height);
@@ -104,12 +105,15 @@ void Renderer::render(float delta_time){
     SDL_GetWindowSize(window,&w,&h);
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(.5f,.5f,.5f,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
     camera->set_viewport(0,0,w,h);
     camera->set_perspective_projection(); 
-    glClearColor(.5f,.5f,.5f,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 
     //calc view transform
     glm::vec3 dir = glm::mat4_cast(camera->entity->rotation) * glm::vec4(0,0,1,0);
@@ -160,7 +164,6 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("time", time);
 
     glDisable(GL_DEPTH_TEST);
-    glClear(GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,camera->viewport_w, camera->viewport_h);
 
