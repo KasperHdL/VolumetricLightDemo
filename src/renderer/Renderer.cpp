@@ -105,7 +105,6 @@ void Renderer::render(float delta_time){
     SDL_GetWindowSize(window,&w,&h);
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glEnable(GL_DEPTH_TEST);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(.5f,.5f,.5f,1);
