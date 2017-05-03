@@ -17,7 +17,6 @@
 
 //render
 #include "renderer/Renderer.hpp"
-#include "renderer/imgui/imgui_renderer.hpp"
 
 //engine
 #include "Entity.hpp"

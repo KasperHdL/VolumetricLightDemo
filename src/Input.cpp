@@ -10,7 +10,7 @@ void Input::update(){
     SDL_Event e; //An SDL event to figure out which keys are being manipulated
     while (SDL_PollEvent(&e) != 0) { //If there is an event
 
-        ImGui_Renderer_ProcessEvent(&e);
+        ImGui_ImplSdlGL3_ProcessEvent(&e);
 
         switch (e.type){
             case SDL_KEYDOWN:

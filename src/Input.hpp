@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/imgui/imgui_renderer.hpp"
+#include "renderer/imgui/imgui_impl_sdl_gl3.hpp"
 #include <SDL.h>
 #include <iostream>
 

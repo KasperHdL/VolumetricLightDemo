@@ -7,7 +7,7 @@
 
 #include "SDL.h"
 #include "Input.hpp"
-#include "renderer/imgui/imgui_renderer.hpp"
+#include "renderer/imgui/imgui_impl_sdl_gl3.hpp"
 #include "renderer/Mesh.hpp"
 #include <string>
 

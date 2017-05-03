@@ -2,7 +2,7 @@
 
 #include "../Game.hpp"
 #include "../Engine.hpp"
-#include "../renderer/imgui/imgui_renderer.hpp"
+#include "../renderer/imgui/imgui_impl_sdl_gl3.hpp"
 #include "../renderer/Mesh.hpp"
 #include "SDL.h"
 #include "../Input.hpp"
@@ -43,14 +43,17 @@ class DebugInterface{
 
 
         void initialize(SDL_Window* window, Game* game){
-            ImGui_Renderer_Init(window);
+            ImGui_ImplSdlGL3_Init(window);
 
             this->game = game;
             this->window = window;
         }
 
         void update(float dt){
-            if(Input::get_key_on_down(SDL_SCANCODE_ESCAPE)) enabled       = !enabled;
+            if(Input::get_key_on_down(SDL_SCANCODE_ESCAPE)){ 
+                enabled       = !enabled;
+                if(!menu && !hierarchy && scene_manager && !create) menu = true;
+            }
             if(Input::get_key_on_down(SDL_SCANCODE_F2))     menu          = !menu;
             if(Input::get_key_on_down(SDL_SCANCODE_F3))     hierarchy     = !hierarchy;
             if(Input::get_key_on_down(SDL_SCANCODE_F4))     scene_manager = !scene_manager;
@@ -66,7 +69,7 @@ class DebugInterface{
 
             if(enabled){
 
-                ImGui_Renderer_NewFrame(window);
+                ImGui_ImplSdlGL3_NewFrame(window);
 
                 //menu
                 if(menu){
