@@ -78,12 +78,12 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-
-    //depth buffer
-    glGenRenderbuffers(1, &depth_renderbuffer); 
-    glBindBuffer(GL_RENDERBUFFER, depth_renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_renderbuffer);
+    // The depth buffer
+    GLuint depthrenderbuffer;
+    glGenRenderbuffers(1, &depthrenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
 
     //configure framebuffer
@@ -106,12 +106,13 @@ void Renderer::render(float delta_time){
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-    glEnable(GL_DEPTH_TEST);
     glClearColor(.5f,.5f,.5f,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
 
     camera->set_viewport(0,0,w,h);
+    mat4 projection = glm::perspectiveFov<float>(radians<float>(60), (float)w, (float)h, 1, 100.0);
     camera->set_perspective_projection(); 
 
     //calc view transform
@@ -122,7 +123,7 @@ void Renderer::render(float delta_time){
     glUseProgram(shader->program_id);
 
     shader->set_uniform("view"       , camera->view_transform);
-    shader->set_uniform("projection" , camera->projection_transform);
+    shader->set_uniform("projection" , projection);
 
 
     
@@ -140,6 +141,7 @@ void Renderer::render(float delta_time){
             shader->set_uniform("model", model_transform);
 
             mat3 normal_matrix = transpose(inverse((mat3)(camera->view_transform * model_transform)));
+
             shader->set_uniform("normal_matrix" , normal_matrix);
             shader->set_uniform("color", vec4(1,1,1,1));
 
@@ -163,6 +165,7 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("time", time);
 
     glDisable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,camera->viewport_w, camera->viewport_h);
 
@@ -178,7 +181,9 @@ void Renderer::render(float delta_time){
     }
 
     debug->render(delta_time);
+
     SDL_GL_SwapWindow(window);
+
     return;
 }
 

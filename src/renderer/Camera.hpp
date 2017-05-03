@@ -17,7 +17,7 @@ public:
     int viewport_h;
 
     float field_of_view = 60;
-    float near_plane = .01f;
+    float near_plane = 1;
     float far_plane = 100;
 
     Camera(){
