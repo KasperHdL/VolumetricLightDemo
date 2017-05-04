@@ -4,7 +4,7 @@
 Game game = Game();
 
 int main() {
-    Engine engine(800, 600);
+    Engine engine(1440, 900);
 
     return engine.initialize(&game);
 }

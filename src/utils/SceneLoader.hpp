@@ -101,6 +101,10 @@ class SceneLoader{
             //@TODO(Kasper) be able to load builtin types and obj files
             if(line == "Cube"){
                 return Mesh::get_cube();
+            }else if(line == "Quad"){
+                return Mesh::get_quad();
+            }else if(line == "Sphere"){
+                return Mesh::get_sphere();
             }
 
             return nullptr;

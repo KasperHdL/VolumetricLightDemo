@@ -132,7 +132,9 @@ public:
 
     static Mesh* get_cube();
     static Mesh* get_quad();
+    static Mesh* get_sphere();
 private:
     static Mesh* cube_mesh;
     static Mesh* quad_mesh;
+    static Mesh* sphere_mesh;
 };

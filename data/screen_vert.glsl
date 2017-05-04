@@ -1,10 +1,11 @@
 #version 400
 
-in vec2 position;
+layout (location = 0) in vec3 position;
+layout (location = 2) in vec4 tex;
 out vec2 uv;
 
 void main(){
-    uv = position;
-    gl_Position = vec4(position, 0.0, 1.0);
+    uv = tex.xy;
+    gl_Position = vec4(position, 1.0);
 }
 

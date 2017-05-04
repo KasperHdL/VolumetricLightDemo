@@ -40,8 +40,8 @@ class DebugInterface{
 
 
             int type_selected_index = 0;
-            static const int type_num_items = 3;
-            const char* type_entities[type_num_items] = {"Cube", "Player", "Light"};
+            static const int type_num_items = 5;
+            const char* type_entities[type_num_items] = {"Cube", "Quad", "Sphere", "Player", "Light"};
 
 
         void initialize(SDL_Window* window, Game* game){
@@ -154,7 +154,13 @@ class DebugInterface{
             Entity* e = new (God::entities.create()) Entity();
 
             e->name = type_entities[type_selected_index];
-            e->mesh = Mesh::get_cube();
+            if(e->name == "Cube")
+                e->mesh = Mesh::get_cube();
+            else if(e->name == "Quad")
+                e->mesh = Mesh::get_quad();
+            else if(e->name == "Sphere")
+                e->mesh = Mesh::get_sphere();
+
             e->position = glm::vec3();
             e->scale = glm::vec3(1,1,1);
             e->rotation = glm::quat();

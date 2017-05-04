@@ -1,8 +1,11 @@
 #include "Mesh.hpp"
+#include "glm/gtc/constants.hpp"
+
 
 //Helper Functions
 Mesh* Mesh::cube_mesh = nullptr;
 Mesh* Mesh::quad_mesh = nullptr;
+Mesh* Mesh::sphere_mesh = nullptr;
 
 Mesh* Mesh::get_cube(){
     if(cube_mesh != nullptr)
@@ -128,4 +131,72 @@ Mesh* Mesh::get_quad(){
 }
 
 
+Mesh* Mesh::get_sphere(){
+    if(Mesh::sphere_mesh != nullptr)
+        return Mesh::sphere_mesh;
 
+     using namespace glm;
+    using namespace std;
+    int stacks = 16/2;
+    int slices = 32/2;
+    float radius = 1.0f;
+    size_t vertexCount = (size_t) ((stacks + 1) * slices);
+    vector<vec3> vertices{vertexCount};
+    vector<vec3> normals{vertexCount};
+    vector<vec4> uvs{vertexCount};
+
+    int index = 0;
+    // create vertices
+    for (unsigned short j = 0; j <= stacks; j++) {
+        float latitude1 = (glm::pi<float>() / stacks) * j - (glm::pi<float>() / 2);
+        float sinLat1 = sin(latitude1);
+        float cosLat1 = cos(latitude1);
+        for (int i = 0; i < slices; i++) {
+            float longitude = ((glm::pi<float>() * 2) / slices) * i;
+            float sinLong = sin(longitude);
+            float cosLong = cos(longitude);
+            vec3 normal{cosLong * cosLat1,
+                        sinLat1,
+                        sinLong * cosLat1};
+            normal = normalize(normal);
+            normals[index] = normal;
+            uvs[index] = vec4{1 - i /(float) slices, j /(float) stacks,0,0};
+            vertices[index] = normal * radius;
+            index++;
+        }
+    }
+    vector<vec3> finalPosition;
+    vector<vec3> finalNormals;
+    vector<vec4> finalUVs;
+    // create indices
+    for (int j = 0; j < stacks; j++) {
+        for (int i = 0; i < slices; i++) {
+            glm::u8vec2 offset [] = {
+                    // first triangle
+                    glm::u8vec2{i,j},
+                    glm::u8vec2{(i+1)%slices,j+1},
+                    glm::u8vec2{(i+1)%slices,j},
+
+                    // second triangle
+                    glm::u8vec2{i,j},
+                    glm::u8vec2{i,j+1},
+                    glm::u8vec2{(i+1)%slices,j+1},
+
+            };
+            for (auto o : offset){
+                index = o[1] * slices  + o[0];
+                finalPosition.push_back(vertices[index]);
+                finalNormals.push_back(normals[index]);
+                finalUVs.push_back(uvs[index]);
+            }
+
+        }
+    }
+    vector<vec4> colors;
+    vector<uint16_t> indices;
+
+    Mesh::sphere_mesh = new Mesh(finalPosition, finalNormals, finalUVs, colors, indices);
+
+    return Mesh::sphere_mesh;
+
+}

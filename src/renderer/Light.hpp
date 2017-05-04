@@ -13,6 +13,7 @@ public:
     glm::vec3 position;
 
     glm::vec3 color;
+    glm::vec3 attenuation;
     float intensity;
 
     Type type;
@@ -23,6 +24,7 @@ public:
         this->position = position;
         this->color = color;
         this->intensity = intensity;
+        attenuation = glm::vec3(1, 0.1f, 0.01f);
 
     } 
 

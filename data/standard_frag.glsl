@@ -11,6 +11,6 @@ layout(location = 2)out vec3 color;
 
 void main(void){
     position = vec3(p);
-    normal = (normalize(n) + vec3(1,1,1)) * 0.5f;
+    normal = normalize(n);
     color = vec3(c);
 }

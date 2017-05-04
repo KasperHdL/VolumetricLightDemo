@@ -16,6 +16,7 @@
 #include "Light.hpp"
 
 class Camera;
+class Entity;
 class DebugInterface;
 class Renderer{
 public:
@@ -32,6 +33,10 @@ public:
 
     Shader* shader;
     Shader* screen_shader;
+
+    Entity* c1;
+    Entity* c2;
+    Entity* c3;
 
     GLuint framebuffer = 0;
     GLuint depth_renderbuffer;
