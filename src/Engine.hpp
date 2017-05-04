@@ -23,6 +23,7 @@
 #include "Input.hpp"
 #include "utils/DynamicPool.hpp"
 #include "utils/FileLoader.hpp"
+#include "utils/AssetManager.hpp"
 
 
 

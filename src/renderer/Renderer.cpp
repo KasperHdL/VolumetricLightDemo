@@ -36,10 +36,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_perspective_projection();
 
     {
-        std::string vert = FileLoader::load_file_as_string("standard_vert.glsl");
-        std::string frag = FileLoader::load_file_as_string("standard_frag.glsl");
-
-        shader = new Shader(vert, frag);
+        shader = AssetManager::get_shader("standard");
 
         shader->use();
         shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
@@ -50,10 +47,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
 
         //screen 
-        vert = FileLoader::load_file_as_string("screen_vert.glsl");
-        frag = FileLoader::load_file_as_string("screen_frag.glsl");
 
-        screen_shader = new Shader(vert, frag);
+        screen_shader = AssetManager::get_shader("screen");
+
         screen_shader->init_uniform("position_texture", Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture", Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture", Shader::Uniform_Type::Texture);

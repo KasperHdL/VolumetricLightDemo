@@ -91,6 +91,8 @@ void Engine::update(float delta_time){
     input.update();
     //Engine::camera->update();
     game->update(delta_time);
+
+    AssetManager::update();
     debug->update(delta_time);
     if(debug->hotload_shader){
         //update_shaders();

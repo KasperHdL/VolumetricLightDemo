@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../utils/FileLoader.hpp"
 #include <SDL_video.h>
 #include "glm/glm.hpp"
 
@@ -8,6 +7,9 @@
 
 #include <iostream>
 #include <vector>
+
+#include "../utils/FileLoader.hpp"
+#include "../utils/AssetManager.hpp"
 
 #include "Shader.hpp"
 #include "Mesh.hpp"

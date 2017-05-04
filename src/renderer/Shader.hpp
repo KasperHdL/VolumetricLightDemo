@@ -11,6 +11,13 @@
 class Shader{
 public:
 
+#if DEBUG
+    //Debug Meta data (set by the AssetManager)
+    int timestamp;
+    std::string vertex_path;
+    std::string fragment_path;
+#endif
+
     enum class Uniform_Type{
         Int,
         Float,
@@ -106,9 +113,28 @@ public:
         return u;
     }
     
+    void recompile(std::string vertex_shader, std::string fragment_shader){
+        glDeleteShader(program_id);
+
+        compiled = _compile_shader(vertex_shader.c_str(), fragment_shader.c_str());
+
+        if(!compiled){
+            glDeleteShader(program_id);
+            return;
+        }
+
+        _reinit_uniforms();
+    }
 
 
 private:
+
+
+    void _reinit_uniforms(){
+        for (auto u = uniforms.begin(); u != uniforms.end(); u++) {
+            u->location_id = glGetUniformLocation(program_id, u->name.c_str());
+        }
+    }
 
     bool _check_uniform(Uniform uniform, Uniform_Type correctType){
         if(uniform.location_id == -1){
