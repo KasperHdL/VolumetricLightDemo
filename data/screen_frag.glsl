@@ -20,5 +20,6 @@ void main(){
 
     float d =  dot(nn, normalize(vec3(light_dir)));
 
+
     color = diffuse * d;
 }

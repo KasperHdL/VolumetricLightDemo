@@ -1,7 +1,7 @@
 #pragma once 
 
 #include "Entity.hpp"
-#include "Engine.hpp" 
+#include "God.hpp" 
 #include <string> 
  
 class Player{ 
@@ -9,7 +9,7 @@ class Player{
         Entity* entity; 
  
         Player(){ 
-            entity = new (Engine::entities.create()) Entity();
+            entity = new (God::entities.create()) Entity();
             entity->name = "Player";
  
         } 

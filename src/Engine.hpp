@@ -1,9 +1,6 @@
 #pragma once
 
-//
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+//stl
 #include <iostream>
 
 
@@ -19,13 +16,8 @@
 #include "renderer/Renderer.hpp"
 
 //engine
-#include "Entity.hpp"
 #include "Input.hpp"
-#include "utils/DynamicPool.hpp"
-#include "utils/FileLoader.hpp"
 #include "utils/AssetManager.hpp"
-
-
 
 class Game;
 class DebugInterface;
@@ -42,9 +34,6 @@ public:
 
     int screen_width;
     int screen_height;
-
-    static DynamicPool<Entity> entities;
-//    static Camera* camera;
 
     float time;
     float delta_time;

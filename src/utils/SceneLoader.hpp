@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-#include "../Engine.hpp"
+#include "../God.hpp"
 #include "../renderer/Mesh.hpp"
 #include "../renderer/Camera.hpp"
 
@@ -79,8 +79,8 @@ class SceneLoader{
 
             if (file.is_open())
             {
-                for(int i = 0; i < Engine::entities.capacity; i++){
-                    Entity* e = Engine::entities[i];
+                for(int i = 0; i < God::entities.capacity; i++){
+                    Entity* e = God::entities[i];
                     if(e != nullptr){
                         file << e->name << "\n";
                         file << e->position.x << " " << e->position.y << " " << e->position.z << " \n";
@@ -150,7 +150,7 @@ class SceneLoader{
             if(name == "Camera") 
                 e = Renderer::instance->camera->entity; 
             else 
-                e = new (Engine::entities.create()) Entity(); 
+                e = new (God::entities.create()) Entity(); 
 
             e->name = name;
             e->mesh = mesh;

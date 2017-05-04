@@ -13,6 +13,7 @@
 
 #include "Shader.hpp"
 #include "Mesh.hpp"
+#include "Light.hpp"
 
 class Camera;
 class DebugInterface;
@@ -26,7 +27,9 @@ public:
     void render(float delta_time);
 
     DebugInterface* debug;
+
     Camera* camera;
+
     Shader* shader;
     Shader* screen_shader;
 

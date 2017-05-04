@@ -4,9 +4,6 @@
 #include "utils/DebugInterface.hpp"
 
 
-DynamicPool<Entity> Engine::entities = DynamicPool<Entity>(32);
-//Camera* Engine::camera;
-
 Engine::Engine(int screen_width, int screen_height){
     this->screen_width = screen_width;
     this->screen_height = screen_height;
@@ -44,7 +41,6 @@ int Engine::initialize(Game* game){
 
     Renderer renderer;
     renderer.initialize(window, screen_width, screen_height);
- //   Engine::camera = r.getCamera();
 
     //update_shaders();
 
@@ -53,9 +49,6 @@ int Engine::initialize(Game* game){
     debug = new DebugInterface();
     debug->initialize(window, game);
     renderer.debug = debug;
-
-    //r.setAmbientLight({0.5,0.5,0.5});
-    //r.setLight(0, Light::create().withDirectionalLight(glm::vec3(.1f,.7f,.1f)).withColor(glm::vec3(1.0f,1.0f,1.0f)).build());
 
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
@@ -89,13 +82,13 @@ int Engine::initialize(Game* game){
 
 void Engine::update(float delta_time){
     input.update();
-    //Engine::camera->update();
+    
     game->update(delta_time);
 
-    AssetManager::update();
     debug->update(delta_time);
     if(debug->hotload_shader){
-        //update_shaders();
+        AssetManager::update();
     }
+
 }
 

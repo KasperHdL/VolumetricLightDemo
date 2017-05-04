@@ -5,8 +5,7 @@
 
 Renderer* Renderer::instance = nullptr;
 
-Renderer::Renderer(){
-}
+Renderer::Renderer(){}
 
 void Renderer::initialize(SDL_Window* window, int screen_width, int screen_height){
     if (instance != nullptr){
@@ -34,6 +33,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera = new Camera();
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
+
+    new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,0), vec3(1,1,1), 1);
+
 
     {
         shader = AssetManager::get_shader("standard");
@@ -151,8 +153,8 @@ void Renderer::render(float delta_time){
     shader->set_uniform("projection" , projection);
     
     //draw scene
-    for(int i = 0; i < Engine::entities.capacity;i++){
-        Entity* e = Engine::entities[i];
+    for(int i = 0; i < God::entities.capacity;i++){
+        Entity* e = God::entities[i];
         if(e != nullptr && e->mesh != nullptr){
             //set uniforms
 

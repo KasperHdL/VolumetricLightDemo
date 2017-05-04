@@ -1,12 +1,14 @@
 #pragma once
 
+#include "SDL.h"
+#include <string>
+
+#include "../God.hpp"
 #include "../Game.hpp"
-#include "../Engine.hpp"
+#include "../Input.hpp"
+
 #include "../renderer/imgui/imgui_impl_sdl_gl3.hpp"
 #include "../renderer/Mesh.hpp"
-#include "SDL.h"
-#include "../Input.hpp"
-#include <string>
 
 class DebugInterface{
     public:
@@ -95,8 +97,8 @@ class DebugInterface{
                 if(hierarchy){
                     ImGui::Begin("Hierarchy");
                     ImGui::DragFloat("Control Speed", &control_speed);
-                    for(int i = 0; i < Engine::entities.capacity;i++){
-                        Entity* e = Engine::entities[i];
+                    for(int i = 0; i < God::entities.capacity;i++){
+                        Entity* e = God::entities[i];
                         if(e != nullptr){
                             ImGui::PushID(i);
                             e->draw_debug_inspector(dt, control_speed);
@@ -135,8 +137,8 @@ class DebugInterface{
 
 
                 if(entity_debug){
-                    for(int i = 0; i < Engine::entities.capacity;i++){
-                        Entity* e = Engine::entities[i];
+                    for(int i = 0; i < God::entities.capacity;i++){
+                        Entity* e = God::entities[i];
                         if(e != nullptr){
                             e->draw_debug();
                         }
@@ -149,7 +151,7 @@ class DebugInterface{
 
 
         void _create_entity(int index){
-            Entity* e = new (Engine::entities.create()) Entity();
+            Entity* e = new (God::entities.create()) Entity();
 
             e->name = type_entities[type_selected_index];
             e->mesh = Mesh::get_cube();
