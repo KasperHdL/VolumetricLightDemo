@@ -15,10 +15,10 @@ void main(){
 
     vec3 position = vec3(texture(position_texture, uv));
     vec3 normal   = vec3(texture(normal_texture, uv));
-    vec3 nn   = (normalize(normal) - vec3(0.5,0.5,0.5)) * 2.0;
+    vec3 nn   = (normal - vec3(0.5f)) * 2.0f;
     vec3 diffuse  = vec3(texture(color_texture, uv));
 
-    float d =  dot(normalize(nn), normalize(vec3(light_dir)));
+    float d =  dot(nn, normalize(vec3(light_dir)));
 
     color = diffuse * d;
 }

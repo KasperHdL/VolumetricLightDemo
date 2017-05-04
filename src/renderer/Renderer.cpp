@@ -145,8 +145,8 @@ void Renderer::render(float delta_time){
     camera->set_perspective_projection(); 
 
     //calc view transform
-    glm::vec3 pos = 20.0f * vec3(sin(time), .5f, cos(time));
-    camera->view_transform = glm::lookAt(pos, vec3(0,1,0), glm::vec3(0,1,0));
+    glm::vec3 pos = 20.0f * vec3(sin(time), sin(time) * .2f + .3f, cos(time));
+    camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
     glUseProgram(shader->program_id);
@@ -184,7 +184,8 @@ void Renderer::render(float delta_time){
         }
     }
 
-    vec4 light_dir = vec4(-1,1,-1,0); 
+    pos = vec3(-sin(time), sin(time) * .5f + .3f, cos(time));
+    vec4 light_dir = vec4(pos, 0); 
 
 
     //set uniforms
