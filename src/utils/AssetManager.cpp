@@ -10,6 +10,10 @@ Shader* AssetManager::get_shader(string vertex_path, string fragment_path){
     Shader* shader = new (shader_pool.create()) Shader(vert, frag);
 
 #if DEBUG
+
+    if(shader->compiled == false)
+        std::cout << "In either " << vertex_path << " or " << fragment_path << "\n\n";
+
     int timestamp;
     shader->vertex_path = vertex_path;
     shader->fragment_path = fragment_path;
@@ -50,7 +54,7 @@ void AssetManager::update(){
 
 
 void AssetManager::_check_shader(Shader* shader){
-    if(shader == nullptr || !shader->compiled) return;
+    if(shader == nullptr) return;
 
     bool changed = false;
 
@@ -81,8 +85,9 @@ void AssetManager::_check_shader(Shader* shader){
 
         if(shader != nullptr && shader->compiled){
             cout << "Successfully loaded shader!\n";
-        }else
-            cout << "Encountered Error!\n";
+        }else{
+            std::cout << "Error: In either " << shader->vertex_path << " or " << shader->fragment_path << "\n";
+        }
     } 
 
 }

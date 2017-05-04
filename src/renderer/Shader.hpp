@@ -109,7 +109,7 @@ public:
         }
         Uniform u;
         u.location_id = -1;
-        std::cerr << "Cannot find uniform " << name << "\n";
+        std::cout << "Cannot find uniform " << name << "\n";
         return u;
     }
     
@@ -139,10 +139,10 @@ private:
     bool _check_uniform(Uniform uniform, Uniform_Type correctType){
         if(uniform.location_id == -1){
             //can be optimized away
-//            std::cerr << "Cannot find uniform has it been initialized and is the shader active\n";
+//            std::cout << "Cannot find uniform has it been initialized and is the shader active\n";
             return false;
         }else if(uniform.type != correctType){
-            std::cerr << "Incorrect uniform type for " << uniform.name << "\n";
+            std::cout << "Incorrect uniform type for " << uniform.name << "\n";
             return false;
         }
 
@@ -161,8 +161,9 @@ private:
 
         //fragment
         shader = 0;
-        if(!_compile_shader_part(GL_FRAGMENT_SHADER, fragment_shader, shader))
+        if(!_compile_shader_part(GL_FRAGMENT_SHADER, fragment_shader, shader)){
             return false;
+        }
 
         glAttachShader(program_id, shader);
 
@@ -177,7 +178,7 @@ private:
             std::vector<char> errorLog((size_t) log_length);
             glGetProgramInfoLog(program_id, log_length, NULL, errorLog.data() );
 
-            std::cerr << (errorLog.data()) << std::endl;
+            std::cout << (errorLog.data()) << std::endl;
             return false;
         }
 
@@ -213,7 +214,7 @@ private:
                 break;
             }
 
-            std::cerr<<(std::string{errorLog.data()}+"\n"+ type_string +" error\n")<<std::endl;
+            std::cout<<"\n"<<(std::string{errorLog.data()}+"\n"+ type_string +" error")<<std::endl;
             return false;
         }
 

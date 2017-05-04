@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/DynamicPool.hpp"
+#include "utils/Pool.hpp"
 
 class Entity;
 class Light;

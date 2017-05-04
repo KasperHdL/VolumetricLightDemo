@@ -34,7 +34,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
-    new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,0), vec3(1,1,1), 1);
+    new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,0,0), vec3(1,0,0), 1);
+    new (God::lights.create()) Light(Light::Type::Directional, vec3(0,1,0), vec3(0,1,0), 1);
+    new (God::lights.create()) Light(Light::Type::Directional, vec3(0,0,-1), vec3(0,0,1), 1);
 
 
     {
@@ -55,7 +57,14 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("position_texture", Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture", Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture", Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("light_dir", Shader::Uniform_Type::Vec4);
+
+        screen_shader->init_uniform("num_lights", Shader::Uniform_Type::Int);
+
+        const int max_lights = 10;
+        for(int i = 0; i < max_lights; i++){
+            screen_shader->init_uniform("lights[" + to_string(i) + "].position", Shader::Uniform_Type::Vec4);
+            screen_shader->init_uniform("lights[" + to_string(i) + "].color", Shader::Uniform_Type::Vec4);
+        }
     }
 
     //setup framebuffer
@@ -182,8 +191,16 @@ void Renderer::render(float delta_time){
         }
     }
 
-    pos = vec3(-sin(time), sin(time) * .5f + .3f, cos(time));
-    vec4 light_dir = vec4(pos, 0); 
+    float offset = 0;
+
+    pos = vec3(-sin(time + offset), sin(time + offset) * .5f + .3f, cos(time + offset));
+    God::lights[0]->position = pos;
+    offset = 1;
+    pos = vec3(-sin(time + offset), sin(time + offset) * .5f + .3f, cos(time + offset));
+    God::lights[1]->position = pos;
+    offset = 2;
+    pos = vec3(-sin(time + offset), sin(time + offset) * .5f + .3f, cos(time + offset));
+    God::lights[2]->position = pos;
 
 
     //set uniforms
@@ -193,7 +210,17 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
-    screen_shader->set_uniform("light_dir"        , light_dir);
+
+    //setup light
+
+    screen_shader->set_uniform("num_lights"       , God::lights.count);
+    for(int i = 0; i < God::lights.capacity;i++){
+        Light* l = God::lights[i];
+        if(l != nullptr){
+            screen_shader->set_uniform("lights[" + to_string(i) + "].position" , vec4(l->position, l->type));
+            screen_shader->set_uniform("lights[" + to_string(i) + "].color"    , vec4(l->color, l->intensity));
+        }
+    }
 
     glDisable(GL_DEPTH_TEST);
     glClearColor(.5f,.5f,.5f,1);

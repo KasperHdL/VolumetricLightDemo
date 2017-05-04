@@ -10,17 +10,17 @@ public:
         Volumetric
     };
 
-    glm::vec4 position;
+    glm::vec3 position;
 
     glm::vec3 color;
     float intensity;
 
     Type type;
 
-    Light(Type type, glm::vec3 vector, glm::vec3 color, float intensity){
+    Light(Type type, glm::vec3 position, glm::vec3 color, float intensity){
         this->type = type;
 
-        this->position = glm::vec4(vector, type);
+        this->position = position;
         this->color = color;
         this->intensity = intensity;
 
