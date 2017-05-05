@@ -32,6 +32,7 @@ public:
     Light(Type type, glm::vec3 position, glm::vec3 color, float intensity){
         //Point or Directional
         this->type = type;
+        type_selected_index = (int)type;
 
         this->position = position;
         this->direction = glm::vec3();
@@ -46,6 +47,7 @@ public:
     Light(Type type, glm::vec3 position, glm::vec3 direction, float cutoff, glm::vec3 color, float intensity){
         //Spot
         this->type = type;
+        type_selected_index = (int)type;
 
         this->position = position;
         this->direction = direction;

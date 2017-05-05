@@ -43,6 +43,7 @@ class DebugInterface{
             //hierarchy
             float control_speed = 15;
             bool hierarchy_lights = true;
+            bool draw_light_pos = true;
 
 
         void initialize(SDL_Window* window, Game* game){
@@ -100,6 +101,8 @@ class DebugInterface{
                     ImGui::Begin("Hierarchy");
                     ImGui::DragFloat("Control Speed", &control_speed);
                     ImGui::Checkbox("Show Lights", &hierarchy_lights);
+                    ImGui::Checkbox("Show Light Pos", &draw_light_pos);
+
                     //light
 
                     for(int i = 0; i < God::lights.capacity;i++){

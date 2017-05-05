@@ -165,7 +165,7 @@ void Renderer::render(float delta_time){
             glm::mat4 t = glm::translate(mat4(), e->position);
             glm::mat4 s = glm::scale(mat4(), e->scale);
             glm::mat4 a = mat4_cast(e->rotation); 
-            glm::mat4 model_transform = t * s * a;
+            glm::mat4 model_transform = t * a * s;
 
             shader->set_uniform("model", model_transform);
             shader->set_uniform("color", vec4(1,1,1,1));
@@ -181,6 +181,46 @@ void Renderer::render(float delta_time){
             }
         }
     }
+
+    //debug draw light
+
+    if(debug->draw_light_pos){
+        for(int i = 0; i < God::lights.capacity;i++){
+            Light* l = God::lights[i];
+            if(l != nullptr){
+                //set uniforms
+
+                glm::mat4 t = glm::translate(mat4(), l->position);
+                glm::mat4 s = glm::scale(mat4(), vec3(.2f));
+                glm::mat4 model = t * s;
+
+                shader->set_uniform("model", model);
+                shader->set_uniform("color", vec4(l->color,1));
+
+                //draw mesh
+                Mesh* mesh;
+
+                if(l->type == Light::Type::Directional){
+                    mesh = Mesh::get_quad();
+                }else if(l->type == Light::Type::Point){
+                    mesh = Mesh::get_sphere();
+                }else if(l->type == Light::Type::Spot){
+                    mesh = Mesh::get_cube();
+                }
+
+                mesh->bind();
+
+                int indexCount = (int) mesh->indices.size();
+                if (indexCount == 0){
+                    glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
+                } else {
+                    glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+                }
+            }
+        }
+    }
+
+
 
     //set uniforms
     time += delta_time;
@@ -213,6 +253,7 @@ void Renderer::render(float delta_time){
     glClearColor(0, 0, 0, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,camera->viewport_w, camera->viewport_h);
+
 
     //draw screen
     Mesh* mesh = Mesh::get_quad();
