@@ -26,35 +26,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     if(err != GLEW_OK)
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
-
-
-    glClearColor(.5f,.5f,.5f,1);
-
     camera = new Camera();
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
-
-    new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(1,0,0), 1);
-    new (God::lights.create()) Light(Light::Type::Point, vec3(0,1,0), vec3(0,1,0), 1);
-    new (God::lights.create()) Light(Light::Type::Point, vec3(0,0,-1), vec3(0,0,1), 1);
-
-    c1 = new (God::entities.create()) Entity();
-    c1->name = "Light Follower 1";
-    c1->scale = vec3(0.1f,0.1f,1);
-    c1->rotation = quat();
-    c1->mesh = Mesh::get_cube();
-
-    c2 = new (God::entities.create()) Entity();
-    c2->name = "Light Follower 2";
-    c2->scale = vec3(0.1f);
-    c2->rotation = quat();
-    c2->mesh = Mesh::get_cube();
-
-    c3 = new (God::entities.create()) Entity();
-    c3->name = "Light Follower 3";
-    c3->scale = vec3(0.1f);
-    c3->rotation = quat();
-    c3->mesh = Mesh::get_cube();
 
     {
         shader = AssetManager::get_shader("standard");
@@ -163,7 +137,7 @@ void Renderer::render(float delta_time){
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-    glClearColor(.5f,.5f,.5f,1);
+    glClearColor(0,0,-999,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -207,33 +181,6 @@ void Renderer::render(float delta_time){
             }
         }
     }
-
-    float o= 0;
-    h = 4;
-    float ho = 2;
-    float m = 5;
-
-    pos = vec3(m * -sin(time + o), h + sin(time + ho), m * cos(time + o));
-    //pos = vec3(m * -sin(0 + o), h + ho * sin(time + o), m * cos(0 + o));
-//    God::lights[0]->position = pos;
- //   c1->position = pos;
-
-    o= 2;
-    ho = 2;
-    h = 4;
-    pos = vec3(m * -sin(time + o), h + sin(time + ho), m * cos(time + o));
-    //pos = vec3(m * -sin(0 + o), h + ho * sin(time + o), m * cos(0 + o));
-    God::lights[1]->position = pos;
-    c2->position = pos;
-
-    o= 4;
-    ho = 2;
-    h = 4;
-    pos = vec3(m * -sin(time + o), h + sin(time + ho), m * cos(time + o));
-    //pos = vec3(m * -sin(0 + o), h + ho * sin(time + o), m * cos(0 + o));
-    God::lights[2]->position = pos;
-    c3->position = pos;
-
 
     //set uniforms
     time += delta_time;

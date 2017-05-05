@@ -33,7 +33,7 @@ void main(){
     float dist;
     float cut_off;
     vec3 light_direction;
-    for(int i = 0; i < 1; i++){
+    for(int i = 0; i < num_lights; i++){
         cut_off = 0;
 
         if(lights[i].position.w == 0){
