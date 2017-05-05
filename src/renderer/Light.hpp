@@ -35,12 +35,12 @@ public:
         type_selected_index = (int)type;
 
         this->position = position;
-        this->direction = glm::vec3();
+        this->direction = glm::vec3(0,0,1);
         this->color = color;
         this->intensity = intensity;
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
-        cutoff = 0.5f;
+        cutoff = 0.0f;
 
     } 
 

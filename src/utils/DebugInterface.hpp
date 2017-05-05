@@ -105,12 +105,14 @@ class DebugInterface{
 
                     //light
 
-                    for(int i = 0; i < God::lights.capacity;i++){
-                        Light* l = God::lights[i];
-                        if(l != nullptr){
-                            ImGui::PushID(id++);
-                            l->draw_debug_inspector(dt, control_speed);
-                            ImGui::PopID();
+                    if(hierarchy_lights){
+                        for(int i = 0; i < God::lights.capacity;i++){
+                            Light* l = God::lights[i];
+                            if(l != nullptr){
+                                ImGui::PushID(id++);
+                                l->draw_debug_inspector(dt, control_speed);
+                                ImGui::PopID();
+                            }
                         }
                     }
 

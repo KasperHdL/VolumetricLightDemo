@@ -58,7 +58,7 @@ void main(){
             spot = dot(normalize(from_light), light_direction);
             if(spot < cut_off) continue;
 
-            light_direction = -light_direction;
+            light_direction = -from_light;
         }
 
 

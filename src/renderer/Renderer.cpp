@@ -31,7 +31,19 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_perspective_projection();
 
     {
-        shader = AssetManager::get_shader("standard");
+
+        //debug
+
+        debug_shader = AssetManager::get_shader("debug");
+
+        debug_shader->use();
+        debug_shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
+        debug_shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
+        debug_shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
+        debug_shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
+
+
+        shader = AssetManager::get_shader("deferred");
 
         shader->use();
         shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
@@ -184,46 +196,6 @@ void Renderer::render(float delta_time){
         }
     }
 
-    //debug draw light
-
-    if(debug->draw_light_pos){
-        for(int i = 0; i < God::lights.capacity;i++){
-            Light* l = God::lights[i];
-            if(l != nullptr){
-                //set uniforms
-
-                glm::mat4 t = glm::translate(mat4(), l->position);
-                glm::mat4 s = glm::scale(mat4(), vec3(.2f));
-                glm::mat4 model = t * s;
-
-                shader->set_uniform("model", model);
-                shader->set_uniform("color", vec4(l->color,1));
-
-                //draw mesh
-                Mesh* mesh;
-
-                if(l->type == Light::Type::Directional){
-                    mesh = Mesh::get_quad();
-                }else if(l->type == Light::Type::Point){
-                    mesh = Mesh::get_sphere();
-                }else if(l->type == Light::Type::Spot){
-                    mesh = Mesh::get_cube();
-                }
-
-                mesh->bind();
-
-                int indexCount = (int) mesh->indices.size();
-                if (indexCount == 0){
-                    glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
-                } else {
-                    glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
-                }
-            }
-        }
-    }
-
-
-
     //set uniforms
     time += delta_time;
     //setup screen shader
@@ -267,6 +239,60 @@ void Renderer::render(float delta_time){
     } else {
         glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
     }
+
+    glEnable(GL_DEPTH_TEST);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(  0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    debug_shader->use();
+
+    debug_shader->set_uniform("view"       , camera->view_transform);
+    debug_shader->set_uniform("projection" , projection);
+
+    //debug draw light
+
+    if(debug->draw_light_pos){
+        for(int i = 0; i < God::lights.capacity;i++){
+            Light* l = God::lights[i];
+            if(l != nullptr){
+                //set uniforms
+
+                glm::mat4 t = glm::translate(mat4(), l->position);
+                glm::mat4 s = glm::scale(mat4(), vec3(.2f));
+                glm::mat4 model = t * s;
+
+                shader->set_uniform("model", model);
+                shader->set_uniform("color", vec4(l->color,1));
+
+                //draw mesh
+                Mesh* mesh;
+
+                if(l->type == Light::Type::Directional){
+                    mesh = Mesh::get_quad();
+                }else if(l->type == Light::Type::Point){
+                    mesh = Mesh::get_sphere();
+                }else if(l->type == Light::Type::Spot){
+                    mesh = Mesh::get_cube();
+                }
+
+                mesh->bind();
+
+                int indexCount = (int) mesh->indices.size();
+                if (indexCount == 0){
+                    glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
+                } else {
+                    glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+                }
+            }
+        }
+    }
+
+
+
 
     debug->render(delta_time);
 

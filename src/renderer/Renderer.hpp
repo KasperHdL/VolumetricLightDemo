@@ -33,6 +33,7 @@ public:
 
     Shader* shader;
     Shader* screen_shader;
+    Shader* debug_shader;
 
     Entity* c1;
     Entity* c2;

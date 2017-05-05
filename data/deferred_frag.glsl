@@ -1,18 +1,16 @@
 #version 400
-
 in vec4 p;
 in vec3 n;
 in vec2 t;
+in vec4 e;
+in vec4 c;
 
-uniform vec4 color;
-uniform sampler2D tex;
+layout(location = 0)out vec3 position;
+layout(location = 1)out vec3 normal;
+layout(location = 2)out vec3 color;
 
-layout(location = 0) out vec4 position;
-layout(location = 1) out vec3 normal;
-layout(location = 2) out vec3 diffuse;
-
-void main(){
-    position = p;
+void main(void){
+    position = vec3(p);
     normal = normalize(n);
-    diffuse = (color * texture(tex, t)).xyz;
+    color = vec3(c);
 }
