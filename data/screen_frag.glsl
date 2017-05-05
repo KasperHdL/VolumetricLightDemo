@@ -20,11 +20,9 @@ uniform struct Light{
 out vec3 color;
 
 void main(){
-
-
     vec3 position = vec3(texture(position_texture, uv));
     vec3 normal   = vec3(texture(normal_texture, uv));
-    vec3 albedo  = vec3(texture(color_texture, uv));
+    vec3 albedo   = vec3(texture(color_texture, uv));
 
     vec3 diffuse = vec3(0);
 
@@ -32,13 +30,13 @@ void main(){
 
     float att = 1;
 
-    float dist = -1;
-    bool draw_white = false;
+    float dist;
+    vec3 light_direction;
     for(int i = 0; i < num_lights; i++){
-        vec3 light_direction;
 
         if(lights[i].position.w == 0){
             light_direction = -lights[i].position.xyz;
+            att = 1;
         }else if(lights[i].position.w == 1){
             light_direction = lights[i].position.xyz - position;
  
@@ -51,13 +49,6 @@ void main(){
         diffuse += max(d, 0.0) * lights[i].color.rgb * lights[i].color.a * att;
         
         //specular
-
-
-        if(dist != -1 && dist < 5){
-            draw_white = true;
-            continue;
-        }
-
     }
 
     diffuse *= albedo;

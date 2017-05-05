@@ -13,11 +13,10 @@ out vec4 c;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat3 normal_matrix;
 
 void main(void) {
     p = model * vec4(position, 1); 
-    n = normal_matrix * normal;
+    n = transpose(inverse(mat3(model))) * normal;
 
     t = uv.xy;
     c = color;

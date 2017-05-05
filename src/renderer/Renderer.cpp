@@ -63,7 +63,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
         shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
         shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
-        shader->init_uniform("normal_matrix" , Shader::Uniform_Type::Mat3);
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
 
 
@@ -97,7 +96,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     //position
     glGenTextures(1, &position_texture);
     glBindTexture(GL_TEXTURE_2D, position_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -105,7 +104,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     //normal
     glGenTextures(1, &normal_texture);
     glBindTexture(GL_TEXTURE_2D, normal_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -193,10 +192,6 @@ void Renderer::render(float delta_time){
             glm::mat4 model_transform = t * s * a;
 
             shader->set_uniform("model", model_transform);
-
-            mat3 normal_matrix = transpose(inverse((mat3)(model_transform)));
-
-            shader->set_uniform("normal_matrix" , normal_matrix);
             shader->set_uniform("color", vec4(1,1,1,1));
 
             //draw mesh
@@ -263,8 +258,7 @@ void Renderer::render(float delta_time){
     }
 
     glDisable(GL_DEPTH_TEST);
-    glClearColor(.5f,.5f,.5f,1);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0, 0, 0, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,camera->viewport_w, camera->viewport_h);
 
