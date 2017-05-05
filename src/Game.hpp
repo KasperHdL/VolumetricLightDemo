@@ -33,6 +33,14 @@ class Game{
                     ents.push_back(e);
                 }
             }
+            Entity* e = new (God::entities.create()) Entity();
+            e->position = vec3(0);
+            e->scale = vec3(10,10,1);
+            e->rotation = quat();
+            e->mesh = Mesh::get_quad();
+            e->name = "Floor";
+
+
 
             new (God::lights.create()) Light(Light::Type::Point, vec3(-1,-1,1), vec3(1,0,0), 1);
             new (God::lights.create()) Light(Light::Type::Point, vec3(0,1,0), vec3(0,1,0), 1);
