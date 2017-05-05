@@ -34,13 +34,13 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
-    new (God::lights.create()) Light(Light::Type::Point, vec3(-1,0,0), vec3(1,0,0), 1);
+    new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(1,0,0), 1);
     new (God::lights.create()) Light(Light::Type::Point, vec3(0,1,0), vec3(0,1,0), 1);
     new (God::lights.create()) Light(Light::Type::Point, vec3(0,0,-1), vec3(0,0,1), 1);
 
     c1 = new (God::entities.create()) Entity();
     c1->name = "Light Follower 1";
-    c1->scale = vec3(0.1f);
+    c1->scale = vec3(0.1f,0.1f,1);
     c1->rotation = quat();
     c1->mesh = Mesh::get_cube();
 
@@ -80,9 +80,11 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         const int max_lights = 10;
         for(int i = 0; i < max_lights; i++){
-            screen_shader->init_uniform("lights[" + to_string(i) + "].position", Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform("lights[" + to_string(i) + "].color", Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform("lights[" + to_string(i) + "].attenuation", Shader::Uniform_Type::Vec4);
+            string l = "lights[" + to_string(i) + "].";
+            screen_shader->init_uniform(l + "position"    , Shader::Uniform_Type::Vec4);
+            screen_shader->init_uniform(l + "color"       , Shader::Uniform_Type::Vec4);
+            screen_shader->init_uniform(l + "attenuation" , Shader::Uniform_Type::Vec4);
+            screen_shader->init_uniform(l + "cone"        , Shader::Uniform_Type::Vec4);
         }
     }
 
@@ -213,8 +215,8 @@ void Renderer::render(float delta_time){
 
     pos = vec3(m * -sin(time + o), h + sin(time + ho), m * cos(time + o));
     //pos = vec3(m * -sin(0 + o), h + ho * sin(time + o), m * cos(0 + o));
-    God::lights[0]->position = pos;
-    c1->position = pos;
+//    God::lights[0]->position = pos;
+ //   c1->position = pos;
 
     o= 2;
     ho = 2;
@@ -249,11 +251,14 @@ void Renderer::render(float delta_time){
     for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr){
-            screen_shader->set_uniform("lights[" + to_string(i) + "].position" , vec4(l->position, l->type));
-            screen_shader->set_uniform("lights[" + to_string(i) + "].color"    , vec4(l->color, l->intensity));
+            string name = "lights[" + to_string(i) + "].";
+            screen_shader->set_uniform(name + "position" , vec4(l->position, l->type));
+            screen_shader->set_uniform(name + "color"    , vec4(l->color, l->intensity));
             if(l->type >= Light::Type::Point){
-                screen_shader->set_uniform("lights[" + to_string(i) + "].attenuation"    , vec4(l->attenuation, 1));
+                screen_shader->set_uniform(name + "attenuation" , vec4(l->attenuation , 1));
             }
+            if(l->type == Light::Type::Spot)
+                screen_shader->set_uniform(name + "cone"        , vec4(l->direction,l->cutoff));
         }
     }
 

@@ -17,7 +17,6 @@ class DebugInterface{
         SDL_Window* window;
 
 
-        float control_speed = 15;
         bool enabled = true;
         int n;
 
@@ -37,11 +36,13 @@ class DebugInterface{
             char filename[50];
 
             //create menu
-
-
             int type_selected_index = 0;
             static const int type_num_items = 5;
             const char* type_entities[type_num_items] = {"Cube", "Quad", "Sphere", "Player", "Light"};
+
+            //hierarchy
+            float control_speed = 15;
+            bool hierarchy_lights = true;
 
 
         void initialize(SDL_Window* window, Game* game){
@@ -70,6 +71,7 @@ class DebugInterface{
         void render(float dt){
 
             if(enabled){
+                int id = 0;
 
                 ImGui_ImplSdlGL3_NewFrame(window);
 
@@ -97,10 +99,23 @@ class DebugInterface{
                 if(hierarchy){
                     ImGui::Begin("Hierarchy");
                     ImGui::DragFloat("Control Speed", &control_speed);
+                    ImGui::Checkbox("Show Lights", &hierarchy_lights);
+                    //light
+
+                    for(int i = 0; i < God::lights.capacity;i++){
+                        Light* l = God::lights[i];
+                        if(l != nullptr){
+                            ImGui::PushID(id++);
+                            l->draw_debug_inspector(dt, control_speed);
+                            ImGui::PopID();
+                        }
+                    }
+
+                    //entities
                     for(int i = 0; i < God::entities.capacity;i++){
                         Entity* e = God::entities[i];
                         if(e != nullptr){
-                            ImGui::PushID(i);
+                            ImGui::PushID(id++);
                             e->draw_debug_inspector(dt, control_speed);
                             ImGui::PopID();
                         }
