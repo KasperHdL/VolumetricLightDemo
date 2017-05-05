@@ -33,6 +33,7 @@ public:
 
     Shader* shader;
     Shader* screen_shader;
+    Shader* depth_shader;
     Shader* debug_shader;
 
     Entity* c1;
@@ -55,4 +56,6 @@ public:
     int screen_height;
 
     static Renderer* instance;
+private:
+    void _render_scene();
 };

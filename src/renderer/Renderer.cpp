@@ -42,7 +42,15 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         debug_shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
         debug_shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
 
+        //depth
+        depth_shader = AssetManager::get_shader("depth");
 
+        depth_shader->use();
+        depth_shader->init_uniform("mvp", Shader::Uniform_Type::Mat4);
+        depth_shader->init_uniform("light_index", Shader::Uniform_Type::Int);
+
+
+        //deferred
         shader = AssetManager::get_shader("deferred");
 
         shader->use();
@@ -50,6 +58,8 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
         shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
+        shader->init_uniform("shadow_map"   , Shader::Uniform_Type::Vec4);
+        shader->init_uniform("depth_bias_mvp", Shader::Uniform_Type::Mat4);
 
 
         //screen 
@@ -153,6 +163,52 @@ void Renderer::render(float delta_time){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
+    const GLenum depth_buffers[] = {
+        GL_NONE
+    };
+
+    glDrawBuffers(1,depth_buffers);
+
+    depth_shader->use();
+
+    glm::mat4 depth_mvp;
+    //Depth
+    for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
+        Light* l = God::lights[i];
+        if(l != nullptr){
+            glm::mat4 proj = glm::ortho<float>(-20, 20,-20,20,-20,40);
+            glm::mat4 view = glm::lookAt(l->position, l->position + normalize(l->direction),glm::vec3(0,1,0));
+            depth_mvp = proj * view * mat4(1);
+            depth_shader->set_uniform("mvp", depth_mvp);
+            //depth_shader->set_uniform("light_index", i);
+
+            //render scene
+            _render_scene();
+
+        }
+    }
+
+    glClearColor(0,0,-999,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    const GLenum draw_buffers[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
+    };
+
+    glDrawBuffers(3, draw_buffers);
+
+    glm::mat4 bias_matrix(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+        );
+
+    mat4 depth_bias_mvp = bias_matrix * depth_mvp;
+
 
     camera->set_viewport(0,0,w,h);
     mat4 projection = glm::perspectiveFov<float>(radians<float>(60), (float)w, (float)h, 1, 100.0);
@@ -163,38 +219,14 @@ void Renderer::render(float delta_time){
     camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
-    glUseProgram(shader->program_id);
+    shader->use();
 
     shader->set_uniform("view"       , camera->view_transform);
     shader->set_uniform("projection" , projection);
-    
-    //draw scene
-    for(int i = 0; i < God::entities.capacity;i++){
-        Entity* e = God::entities[i];
-        if(e != nullptr && e->mesh != nullptr){
-            //set uniforms
+    shader->set_uniform("depth_bias_mvp", depth_bias_mvp);
+    shader->set_uniform("shadow_map", depth_texture, 0);
 
-            glm::mat4 t = glm::translate(mat4(), e->position);
-            glm::mat4 s = glm::scale(mat4(), e->scale);
-            glm::mat4 a = glm::eulerAngleYXZ(e->rotation.x,e->rotation.y,e->rotation.z);
-
-
-            glm::mat4 model_transform = t * a * s;
-
-            shader->set_uniform("model", model_transform);
-            shader->set_uniform("color", vec4(1,1,1,1));
-
-            //draw mesh
-            e->mesh->bind();
-
-            int indexCount = (int) e->mesh->indices.size();
-            if (indexCount == 0){
-                glDrawArrays((GLenum)e->mesh->topology, 0, e->mesh->vertex_count);
-            } else {
-                glDrawElements((GLenum) e->mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
-            }
-        }
-    }
+    _render_scene();
 
     //set uniforms
     time += delta_time;
@@ -299,5 +331,36 @@ void Renderer::render(float delta_time){
     SDL_GL_SwapWindow(window);
 
     return;
+}
+
+void Renderer::_render_scene(){
+    //draw scene
+    for(int i = 0; i < God::entities.capacity;i++){
+        Entity* e = God::entities[i];
+        if(e != nullptr && e->mesh != nullptr){
+            //set uniforms
+
+            glm::mat4 t = glm::translate(mat4(), e->position);
+            glm::mat4 s = glm::scale(mat4(), e->scale);
+            glm::mat4 a = glm::eulerAngleYXZ(e->rotation.x,e->rotation.y,e->rotation.z);
+
+
+            glm::mat4 model_transform = t * a * s;
+
+            shader->set_uniform("model", model_transform);
+            shader->set_uniform("color", vec4(1,1,1,1));
+
+            //draw mesh
+            e->mesh->bind();
+
+            int indexCount = (int) e->mesh->indices.size();
+            if (indexCount == 0){
+                glDrawArrays((GLenum)e->mesh->topology, 0, e->mesh->vertex_count);
+            } else {
+                glDrawElements((GLenum) e->mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+            }
+        }
+    }
+
 }
 
