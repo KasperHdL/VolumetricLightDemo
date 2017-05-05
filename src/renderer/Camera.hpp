@@ -29,7 +29,7 @@ public:
         entity->mesh = nullptr;
         entity->position = vec3();
         entity->scale = vec3();
-        entity->rotation = quat();
+        entity->rotation = vec3();
 
     }
 

@@ -164,7 +164,9 @@ void Renderer::render(float delta_time){
 
             glm::mat4 t = glm::translate(mat4(), e->position);
             glm::mat4 s = glm::scale(mat4(), e->scale);
-            glm::mat4 a = mat4_cast(e->rotation); 
+            glm::mat4 a = glm::eulerAngleYXZ(e->rotation.x,e->rotation.y,e->rotation.z);
+
+
             glm::mat4 model_transform = t * a * s;
 
             shader->set_uniform("model", model_transform);

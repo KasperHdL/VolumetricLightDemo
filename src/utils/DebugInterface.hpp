@@ -181,7 +181,7 @@ class DebugInterface{
 
             e->position = glm::vec3();
             e->scale = glm::vec3(1,1,1);
-            e->rotation = glm::quat();
+            e->rotation = glm::vec3();
         }
 
 };

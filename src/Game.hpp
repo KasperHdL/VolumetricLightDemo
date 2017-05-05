@@ -21,24 +21,33 @@ class Game{
 
             SceneLoader::load_scene("standard.scene");
 
+            Entity* e = new (God::entities.create()) Entity(); 
+            e->position = vec3(0,0,0);
+            e->scale = vec3(10,10,1);
+            e->rotation = vec3(0,-3.14f / 2, 0);
+            e->mesh = Mesh::get_quad();
+            e->name = "Floor";
+
+            e = new (God::entities.create()) Entity();
+            e->position = vec3(0,5,7);
+            e->scale = vec3(10,10,1);
+            e->rotation = vec3(0, -3.14, 0);
+            e->mesh = Mesh::get_quad();
+            e->name = "Wall";
+
+            /*
             for(int x = -10; x < 10; x ++){
                 for(int y = -10; y < 10; y ++){
                     Entity* e = new (God::entities.create()) Entity();
                     e->position = vec3(x,0,y);
                     e->scale = vec3(.5f);
-                    e->rotation = quat();
+                    e->rotation = vec3();
                     e->mesh = Mesh::get_sphere();
                     e->name = "E (" + to_string(x) + ", " + to_string(y) + ")";
 
                     ents.push_back(e);
                 }
-            }
-            Entity* e = new (God::entities.create()) Entity();
-            e->position = vec3(0);
-            e->scale = vec3(10,10,1);
-            e->rotation = quat();
-            e->mesh = Mesh::get_quad();
-            e->name = "Floor";
+            }*/
 
 
 

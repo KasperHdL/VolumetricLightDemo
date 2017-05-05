@@ -5,6 +5,7 @@
 #include "../God.hpp"
 #include "../renderer/Mesh.hpp"
 #include "../renderer/Camera.hpp"
+#include "../renderer/Renderer.hpp"
 
 #include "DataPath.hpp"
 
@@ -30,7 +31,7 @@ class SceneLoader{
             Mesh* mesh;
             vec3 pos;
             vec3 scale;
-            quat rot;
+            vec3 rot;
 
             string line;
             ifstream file(DataPath::get(filename));
@@ -47,7 +48,7 @@ class SceneLoader{
                         }else if(l == 2){
                             scale = _read_vec3(line);
                         }else if(l == 3){
-                            rot   = _read_quat(line);
+                            rot   = _read_vec3(line);
 
                             _create_entity(name, mesh, pos, scale, rot);
                         }
@@ -85,7 +86,7 @@ class SceneLoader{
                         file << e->name << "\n";
                         file << e->position.x << " " << e->position.y << " " << e->position.z << " \n";
                         file << e->scale.x << " " << e->scale.y << " " << e->scale.z << " \n";
-                        file << e->rotation.x << " " << e->rotation.y << " " << e->rotation.z << " " << e->rotation.w << " \n";
+                        file << e->rotation.x << " " << e->rotation.y << " " << e->rotation.z << " \n";
                     }
                 }
 
@@ -149,7 +150,7 @@ class SceneLoader{
             return v;
         }
 
-        static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, quat rot){
+        static void _create_entity(string name, Mesh* mesh, vec3 pos, vec3 scale, vec3 rot){
             Entity* e;
             if(name == "Camera") 
                 e = Renderer::instance->camera->entity; 

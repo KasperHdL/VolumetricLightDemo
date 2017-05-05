@@ -25,7 +25,7 @@ public:
     //Transform
     vec3 position;
     vec3 scale;
-    quat rotation;
+    vec3 rotation;
 
     //Render Properties
 
@@ -46,7 +46,7 @@ public:
             if(_debug_control){
                 if(Input::get_key_down(SDL_SCANCODE_W))
                     position.z += control_speed * dt;
-                if(Input::get_key_down(SDL_SCANCODE_A))
+                 if(Input::get_key_down(SDL_SCANCODE_A))
                     position.x += control_speed * dt;
                 if(Input::get_key_down(SDL_SCANCODE_S))
                     position.z -= control_speed * dt;
@@ -60,7 +60,7 @@ public:
 
             ImGui::DragFloat3("Position", &position.x, 0.1f);
             ImGui::DragFloat3("Scale",    &scale.x,    0.1f);
-            ImGui::DragFloat4("Rotation", &rotation.x, 0.01f);
+            ImGui::DragFloat3("Rotation", &rotation.x, 0.01f);
 
             ImGui::TreePop();
         }
