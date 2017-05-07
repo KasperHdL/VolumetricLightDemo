@@ -15,9 +15,8 @@ using namespace glm;
 
 class Entity
 {
-private:
-    bool _debug_control = false;
 public:
+    bool debug_control = false;
     std::string name;
 
     Mesh* mesh;
@@ -42,8 +41,8 @@ public:
 
     void draw_debug_inspector(float dt, float control_speed){
         if(ImGui::TreeNode(name.c_str())){
-            ImGui::Checkbox("Control", &_debug_control);
-            if(_debug_control){
+            ImGui::Checkbox("Control", &debug_control);
+            if(debug_control){
                 if(Input::get_key_down(SDL_SCANCODE_W))
                     position.z += control_speed * dt;
                  if(Input::get_key_down(SDL_SCANCODE_A))

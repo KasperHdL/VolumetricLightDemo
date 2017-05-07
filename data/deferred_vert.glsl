@@ -9,10 +9,6 @@ out vec3 n;
 out vec2 t;
 out vec4 c;
 
-out vec4 shadow_coord;
-
-uniform mat4 depth_bias_mvp;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -25,7 +21,5 @@ void main(void) {
     c = color;
 
     gl_Position = projection * view * p;
-
-    shadow_coord = depth_bias_mvp * vec4(position, 1);
 }
 

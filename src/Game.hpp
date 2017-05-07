@@ -50,8 +50,8 @@ class Game{
             }*/
 
 
-            new (God::lights.create()) Light(Light::Type::Spot, vec3(-1,-1,1), vec3(1,1,1), 1);
-//            new (God::lights.create()) Light(Light::Type::Point, vec3(0,1,0), vec3(0,1,0), 1);
+//            new (God::lights.create()) Light(Light::Type::Spot, vec3(-1,-1,1), vec3(1,1,1), 1);
+            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-5), vec3(0,1,0), 1);
  //           new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
 
 
@@ -74,10 +74,10 @@ class Game{
             float h  = 4;
             float ho = 2;
             float m  = 3;
-            float z  = -3;
+            float z  = -5;
 
             vec3 pos = vec3(m * sin(time * 2 + o), h + ho * sin(time + o), z);
-            God::lights[0]->position = pos;
+            //God::lights[0]->position = pos;
 
             /*
             o = 2;

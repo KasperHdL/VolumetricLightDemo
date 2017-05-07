@@ -47,10 +47,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         depth_shader = AssetManager::get_shader("depth");
 
         depth_shader->use();
-        depth_shader->init_uniform("shadow_mvp"  , Shader::Uniform_Type::Mat4);
         depth_shader->init_uniform("model"       , Shader::Uniform_Type::Mat4);
         depth_shader->init_uniform("light_index" , Shader::Uniform_Type::Int);
         depth_shader->init_uniform("color"       , Shader::Uniform_Type::Vec4);
+        depth_shader->init_uniform("shadow_vp"   , Shader::Uniform_Type::Mat4);
 
 
         //deferred
@@ -61,8 +61,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
         shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
-        shader->init_uniform("depth_bias_mvp",Shader::Uniform_Type::Mat4);
-        shader->init_uniform("shadow_map"   , Shader::Uniform_Type::Texture);
 
 
         //screen 
@@ -73,6 +71,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("num_lights"       , Shader::Uniform_Type::Int);
+        screen_shader->init_uniform("shadow_vp"        , Shader::Uniform_Type::Mat4);
+        screen_shader->init_uniform("shadow_map"       , Shader::Uniform_Type::Texture);
+
 
         const int max_lights = 10;
         for(int i = 0; i < max_lights; i++){
@@ -102,12 +103,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
-
-        GLuint depthrenderbuffer;
-        glGenRenderbuffers(1, &depthrenderbuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
     }
 
@@ -182,19 +177,18 @@ void Renderer::render(float delta_time){
     glReadBuffer(GL_NONE);
     depth_shader->use();
 
-    glm::mat4 depth_mvp;
+    glm::mat4 shadow_vp;
 
     for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr){
-            //mat4 proj = glm::perspectiveFov<float>(radians<float>(60), 1024,1024, 1, 100.0);
-            mat4 proj = glm::ortho<float>(-10,10,-10,10,-10,20);
-            glm::mat4 view = glm::lookAt(-l->direction, vec3(0,0,0),glm::vec3(0,1,0));
+            mat4 proj = glm::perspectiveFov<float>(radians<float>(60), 1024,1024, 0.1f, 10.0);
+            //mat4 proj = glm::ortho<float>(-10,10,-10,10,-10,20);
+            glm::mat4 view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
 
-            depth_mvp = proj * view;
-            depth_shader->set_uniform("shadow_mvp", depth_mvp);
+            shadow_vp = proj * view;
+            depth_shader->set_uniform("shadow_vp", shadow_vp);
             //depth_shader->set_uniform("light_index", i);
-
 
             //render scene
             _render_scene(depth_shader);
@@ -216,15 +210,6 @@ void Renderer::render(float delta_time){
 
     glDrawBuffers(3, draw_buffers);
 
-    glm::mat4 bias_matrix(
-        0.5, 0.0, 0.0, 0.0,
-        0.0, 0.5, 0.0, 0.0,
-        0.0, 0.0, 0.5, 0.0,
-        0.5, 0.5, 0.5, 1.0
-    );
-
-    //mat4 depth_bias_mvp = bias_matrix * depth_mvp;
-
 
     camera->set_viewport(0,0,w,h);
     camera->set_perspective_projection(); 
@@ -238,8 +223,6 @@ void Renderer::render(float delta_time){
 
     shader->set_uniform("view"       , camera->view_transform);
     shader->set_uniform("projection" , projection);
-    //shader->set_uniform("depth_bias_mvp", depth_bias_mvp);
-    shader->set_uniform("shadow_map", depth_texture, 3);
 
     _render_scene(shader);
 
@@ -252,6 +235,9 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+
+    screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
+    screen_shader->set_uniform("shadow_vp"        , shadow_vp);
 
     //setup light
 

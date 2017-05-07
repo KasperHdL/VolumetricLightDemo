@@ -1,8 +1,8 @@
 #version 400
 
-layout(location = 0) out float fragment_depth;
+//layout(location = 0) out float fragment_depth;
 
 
 void main(){
-    fragment_depth = gl_FragCoord.z;
+//    fragment_depth = gl_FragCoord.z;
 }

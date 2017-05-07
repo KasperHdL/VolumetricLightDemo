@@ -1,12 +1,15 @@
 #version 400
 
 in vec2 uv;
+in vec4 shadow_pos;
 
 uniform vec4 camera_position;
 
 uniform sampler2D position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D color_texture;
+
+uniform sampler2D shadow_map;
 
 #define MAX_LIGHTS 10
 uniform int num_lights;
@@ -18,6 +21,27 @@ uniform struct Light{
 } lights[MAX_LIGHTS];
 
 out vec3 color;
+
+float shadow_calc(vec4 frag_light, vec3 position, vec3 light_dir, vec3 normal){
+    vec3 coord = frag_light.xyz / frag_light.w;
+
+    coord = coord * 0.5 + 0.5;
+
+    float light_depth = texture(shadow_map, uv).r;
+    return light_depth;
+
+    float depth = coord.z;
+    if(light_depth > 1.0) return 0.0;
+
+    float bias = max(0.05 * (1.0 - dot(normal, normalize(-light_dir))), 0.005);
+
+    float shadow = 0;
+
+    shadow = depth > light_depth ? 1.0 : 0.0;
+
+    return depth;
+
+}
 
 void main(){
     vec3 position = vec3(texture(position_texture, uv));
@@ -33,7 +57,7 @@ void main(){
     float dist;
     float cut_off;
     vec3 light_direction;
-    for(int i = 0; i < num_lights; i++){
+    for(int i = 0; i < 1; i++){
         cut_off = 0;
 
         if(lights[i].position.w == 0){
@@ -62,13 +86,17 @@ void main(){
         }
 
 
+        float shadow = shadow_calc(shadow_pos, position, light_direction, normal);
+        
         
         //diffuse
         float d = dot(normal, normalize(light_direction));
-        diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot;
+        //diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * (1-shadow);
+        diffuse = vec3(shadow);
     }
 
-    diffuse *= albedo;
+    //diffuse *= albedo;
     color = diffuse;
 
 }
+

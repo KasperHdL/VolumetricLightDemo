@@ -109,7 +109,7 @@ public:
         }
         Uniform u;
         u.location_id = -1;
-        std::cout << "Cannot find uniform " << name << "\n";
+        std::cout << "Cannot find uniform " << name << " in " << vertex_path << " or " << fragment_path << "\n";
         return u;
     }
     
