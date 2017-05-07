@@ -1,12 +1,12 @@
 #version 400
-layout (location = 0)in vec4 p;
-layout (location = 1)in vec3 n;
-layout (location = 2)in vec2 t;
-layout (location = 3)in vec4 c;
+in vec4 p;
+in vec3 n;
+in vec2 t;
+in vec4 c;
 
 in vec4 shadow_coord;
 
-uniform sampler2D depth_texture;
+uniform sampler2D shadow_map;
 
 layout(location = 0)out vec3 position;
 layout(location = 1)out vec3 normal;
@@ -18,8 +18,10 @@ void main(void){
 
     float visibility = 1;
 
-    if(texture(shadow_texture, shadow_coord.xy).z < shadow_coord.z)
+    float shadow_depth = texture(shadow_map, shadow_coord.xy).z;
+    
+    if(shadow_depth > 0 && shadow_depth < shadow_coord.z)
         visibility = 0.5f;
 
-    color = visibility * c.xyz;
+    color = visibility * c.rgb;
 }

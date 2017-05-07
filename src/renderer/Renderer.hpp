@@ -36,11 +36,8 @@ public:
     Shader* depth_shader;
     Shader* debug_shader;
 
-    Entity* c1;
-    Entity* c2;
-    Entity* c3;
-
     GLuint framebuffer = 0;
+    GLuint depth_framebuffer = 0;
     GLuint depth_renderbuffer;
 
     GLuint position_texture;
@@ -57,5 +54,5 @@ public:
 
     static Renderer* instance;
 private:
-    void _render_scene();
+    void _render_scene(Shader* shader);
 };

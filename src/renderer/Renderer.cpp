@@ -26,14 +26,15 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     if(err != GLEW_OK)
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
+    //camera
     camera = new Camera();
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
+    //Shader setup
     {
 
         //debug
-
         debug_shader = AssetManager::get_shader("debug");
 
         debug_shader->use();
@@ -46,8 +47,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         depth_shader = AssetManager::get_shader("depth");
 
         depth_shader->use();
-        depth_shader->init_uniform("mvp", Shader::Uniform_Type::Mat4);
-        depth_shader->init_uniform("light_index", Shader::Uniform_Type::Int);
+        depth_shader->init_uniform("shadow_mvp"  , Shader::Uniform_Type::Mat4);
+        depth_shader->init_uniform("model"       , Shader::Uniform_Type::Mat4);
+        depth_shader->init_uniform("light_index" , Shader::Uniform_Type::Int);
+        depth_shader->init_uniform("color"       , Shader::Uniform_Type::Vec4);
 
 
         //deferred
@@ -58,21 +61,18 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
         shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
-        shader->init_uniform("shadow_map"   , Shader::Uniform_Type::Vec4);
-        shader->init_uniform("depth_bias_mvp", Shader::Uniform_Type::Mat4);
+        shader->init_uniform("depth_bias_mvp",Shader::Uniform_Type::Mat4);
+        shader->init_uniform("shadow_map"   , Shader::Uniform_Type::Texture);
 
 
         //screen 
-
         screen_shader = AssetManager::get_shader("screen");
 
-        screen_shader->init_uniform("camera_position", Shader::Uniform_Type::Vec4);
-
-        screen_shader->init_uniform("position_texture", Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("normal_texture", Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("color_texture", Shader::Uniform_Type::Texture);
-
-        screen_shader->init_uniform("num_lights", Shader::Uniform_Type::Int);
+        screen_shader->init_uniform("camera_position"  , Shader::Uniform_Type::Vec4);
+        screen_shader->init_uniform("position_texture" , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("num_lights"       , Shader::Uniform_Type::Int);
 
         const int max_lights = 10;
         for(int i = 0; i < max_lights; i++){
@@ -84,67 +84,78 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         }
     }
 
-    //setup framebuffer
+    //depth framebuffer
+    {
+        glGenFramebuffers(1, &depth_framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
+        
+        //depth
+        glGenTextures(1, &depth_texture);
+        glBindTexture(GL_TEXTURE_2D, depth_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    
-    //create textures
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-    //position
-    glGenTextures(1, &position_texture);
-    glBindTexture(GL_TEXTURE_2D, position_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        GLuint depthrenderbuffer;
+        glGenRenderbuffers(1, &depthrenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
-    //normal
-    glGenTextures(1, &normal_texture);
-    glBindTexture(GL_TEXTURE_2D, normal_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
+    }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //deferred framebuffer
+    {
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        
+        //create textures
 
-    //color
-    glGenTextures(1, &color_texture);
-    glBindTexture(GL_TEXTURE_2D, color_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        //position
+        glGenTextures(1, &position_texture);
+        glBindTexture(GL_TEXTURE_2D, position_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    //depth
-    glGenTextures(1, &depth_texture);
-    glBindTexture(GL_TEXTURE_2D, depth_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screen_width, screen_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+        //normal
+        glGenTextures(1, &normal_texture);
+        glBindTexture(GL_TEXTURE_2D, normal_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // The depth buffer
-    GLuint depthrenderbuffer;
-    glGenRenderbuffers(1, &depthrenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+        //color
+        glGenTextures(1, &color_texture);
+        glBindTexture(GL_TEXTURE_2D, color_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        // The depth buffer
+        GLuint depthrenderbuffer;
+        glGenRenderbuffers(1, &depthrenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
 
-    //configure framebuffer
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
+        //configure framebuffer
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
+    }
 
-    GLenum draw_buffers[] = {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2
-    };
-
-    glDrawBuffers(3, draw_buffers);
-
-    
 }
 
 Renderer::~Renderer(){
@@ -157,38 +168,43 @@ void Renderer::render(float delta_time){
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    //Depth Pass
 
-    glClearColor(0,0,-999,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    const GLenum depth_buffers[] = {
-        GL_NONE
-    };
+    glViewport(0,0,1024,1024);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
 
-    glDrawBuffers(1,depth_buffers);
+    glClearColor(0.1,0.1,0.1,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
     depth_shader->use();
 
     glm::mat4 depth_mvp;
-    //Depth
+
     for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr){
-            glm::mat4 proj = glm::ortho<float>(-20, 20,-20,20,-20,40);
-            glm::mat4 view = glm::lookAt(l->position, l->position + normalize(l->direction),glm::vec3(0,1,0));
-            depth_mvp = proj * view * mat4(1);
-            depth_shader->set_uniform("mvp", depth_mvp);
+            //mat4 proj = glm::perspectiveFov<float>(radians<float>(60), 1024,1024, 1, 100.0);
+            mat4 proj = glm::ortho<float>(-10,10,-10,10,-10,20);
+            glm::mat4 view = glm::lookAt(-l->direction, vec3(0,0,0),glm::vec3(0,1,0));
+
+            depth_mvp = proj * view;
+            depth_shader->set_uniform("shadow_mvp", depth_mvp);
             //depth_shader->set_uniform("light_index", i);
 
+
             //render scene
-            _render_scene();
+            _render_scene(depth_shader);
 
         }
     }
 
-    glClearColor(0,0,-999,1);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -205,17 +221,16 @@ void Renderer::render(float delta_time){
         0.0, 0.5, 0.0, 0.0,
         0.0, 0.0, 0.5, 0.0,
         0.5, 0.5, 0.5, 1.0
-        );
+    );
 
-    mat4 depth_bias_mvp = bias_matrix * depth_mvp;
+    //mat4 depth_bias_mvp = bias_matrix * depth_mvp;
 
 
     camera->set_viewport(0,0,w,h);
-    mat4 projection = glm::perspectiveFov<float>(radians<float>(60), (float)w, (float)h, 1, 100.0);
     camera->set_perspective_projection(); 
+    mat4 projection = camera->projection_transform;
 
     //calc view transform
-    glm::vec3 pos = 20.0f * vec3(sin(time), sin(time) * .2f + .3f, cos(time));
     camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
@@ -223,10 +238,10 @@ void Renderer::render(float delta_time){
 
     shader->set_uniform("view"       , camera->view_transform);
     shader->set_uniform("projection" , projection);
-    shader->set_uniform("depth_bias_mvp", depth_bias_mvp);
-    shader->set_uniform("shadow_map", depth_texture, 0);
+    //shader->set_uniform("depth_bias_mvp", depth_bias_mvp);
+    shader->set_uniform("shadow_map", depth_texture, 3);
 
-    _render_scene();
+    _render_scene(shader);
 
     //set uniforms
     time += delta_time;
@@ -333,7 +348,7 @@ void Renderer::render(float delta_time){
     return;
 }
 
-void Renderer::_render_scene(){
+void Renderer::_render_scene(Shader* shader){
     //draw scene
     for(int i = 0; i < God::entities.capacity;i++){
         Entity* e = God::entities[i];
