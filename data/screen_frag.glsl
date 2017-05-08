@@ -36,7 +36,7 @@ float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 norma
 
     float bias = max(0.05 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
 
-    float visibility = coord.z > depth ? 0.0 : 1.0;
+    float visibility = coord.z > depth + bias ? 0.0 : 1.0;
 
     return visibility;
 

@@ -182,11 +182,12 @@ void Renderer::render(float delta_time){
     glViewport(0,0,screen_width, screen_height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
 
-    glClearColor(0.1,0.1,0.1,1);
+    glClearColor(0,0,-999,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+
     depth_shader->use();
 
     glm::mat4 shadow_vp;
