@@ -50,9 +50,9 @@ class Game{
             }*/
 
 
-//            new (God::lights.create()) Light(Light::Type::Spot, vec3(-1,-1,1), vec3(1,1,1), 1);
-            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-5), vec3(0,1,0), 1);
- //           new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
+            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-6),vec3(0,0,1),0, vec3(1,1,1), 1);
+            //new (God::lights.create()) Light(Light::Type::Directional, vec3(1,-5,1), vec3(0,1,0), 1);
+            //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
 
 
         }

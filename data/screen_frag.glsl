@@ -30,11 +30,12 @@ float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 norma
     //frag_from_light = vec4(frag_from_light.xyz * 0.5f + vec3(0.5f), frag_from_light.w);
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
+    coord = coord * 0.5 + 0.5;
     
-
     float depth = texture(shadow_map, coord.xy).r;
 
-    float bias = max(0.05 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
+
+    float bias = 0.005;
 
     float visibility = coord.z > depth + bias ? 0.0 : 1.0;
 
