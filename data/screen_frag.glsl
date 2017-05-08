@@ -27,19 +27,29 @@ out vec3 color;
 
 float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 normal){
     vec4 frag_from_light = shadow_vp * vec4(position,1);
-    //frag_from_light = vec4(frag_from_light.xyz * 0.5f + vec3(0.5f), frag_from_light.w);
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
     coord = coord * 0.5 + 0.5;
+
+    if(coord.z > 1.0) return 1.0;
     
-    float depth = texture(shadow_map, coord.xy).r;
 
+    float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
 
-    float bias = 0.005;
+    float shadow = 0.0;
 
-    float visibility = coord.z > depth + bias ? 0.0 : 1.0;
+    vec2 texel_size = 1.0  / textureSize(shadow_map, 0);
 
-    return visibility;
+    for(int x = -1; x <= 1; x++){
+        for(int y = -1; y <= 1; y++){
+            float adj_depth = texture(shadow_map, coord.xy + vec2(x,y) * texel_size).r;
+            shadow +=  coord.z > adj_depth + bias ? 1.0 : 0.0;
+
+        }
+    }
+    shadow /= 9;
+
+    return shadow;
 
 }
 
@@ -87,16 +97,15 @@ void main(){
         }
 
 
-        float visibility = shadow_calc(position, local_position, light_direction, normal);
+        float shadow = shadow_calc(position, local_position, light_direction, normal);
         
         
         //diffuse
         float d = dot(normal, normalize(light_direction));
-        diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * visibility;
-        //diffuse = vec3(visibility);
+        diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * (1 - shadow);
     }
 
-    //diffuse *= albedo;
+    diffuse *= albedo;
     color = diffuse;
 
 }

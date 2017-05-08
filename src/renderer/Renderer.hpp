@@ -50,6 +50,10 @@ public:
     SDL_GLContext glcontext;
 
     float time = 0;
+
+    int shadow_width = 1024;
+    int shadow_height = 1024;
+
     int screen_width;
     int screen_height;
 
