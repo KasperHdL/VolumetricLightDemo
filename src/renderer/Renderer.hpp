@@ -41,6 +41,7 @@ public:
     GLuint depth_renderbuffer;
 
     GLuint position_texture;
+    GLuint local_position_texture;
     GLuint normal_texture;
     GLuint color_texture;
     GLuint depth_texture;

@@ -68,11 +68,13 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         screen_shader->init_uniform("camera_position"  , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("position_texture" , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("local_position_texture" , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("num_lights"       , Shader::Uniform_Type::Int);
         screen_shader->init_uniform("shadow_vp"        , Shader::Uniform_Type::Mat4);
         screen_shader->init_uniform("shadow_map"       , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("inverse_mvp"      , Shader::Uniform_Type::Texture);
 
 
         const int max_lights = 10;
@@ -93,10 +95,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //depth
         glGenTextures(1, &depth_texture);
         glBindTexture(GL_TEXTURE_2D, depth_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, screen_width, screen_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
@@ -137,6 +139,15 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+        //local position
+        glGenTextures(1, &local_position_texture);
+        glBindTexture(GL_TEXTURE_2D, local_position_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+
         // The depth buffer
         GLuint depthrenderbuffer;
         glGenRenderbuffers(1, &depthrenderbuffer);
@@ -149,6 +160,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, local_position_texture, 0);
     }
 
 }
@@ -167,7 +179,7 @@ void Renderer::render(float delta_time){
 
     glEnable(GL_DEPTH_TEST);
 
-    glViewport(0,0,1024,1024);
+    glViewport(0,0,screen_width, screen_height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
 
     glClearColor(0.1,0.1,0.1,1);
@@ -182,7 +194,7 @@ void Renderer::render(float delta_time){
     for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr){
-            mat4 proj = glm::perspectiveFov<float>(radians<float>(60), 1024,1024, 0.1f, 10.0);
+            mat4 proj = glm::perspectiveFov<float>(radians<float>(60), screen_width, screen_height, 0.1f, 40.0);
             //mat4 proj = glm::ortho<float>(-10,10,-10,10,-10,20);
             glm::mat4 view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
 
@@ -228,6 +240,7 @@ void Renderer::render(float delta_time){
 
     //set uniforms
     time += delta_time;
+
     //setup screen shader
     screen_shader->use();
     screen_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
@@ -235,6 +248,7 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+    screen_shader->set_uniform("local_position_texture"    , local_position_texture    , 3);
 
     screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
     screen_shader->set_uniform("shadow_vp"        , shadow_vp);
@@ -323,8 +337,6 @@ void Renderer::render(float delta_time){
             }
         }
     }
-
-
 
 
     debug->render(delta_time);

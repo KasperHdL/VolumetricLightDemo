@@ -1,15 +1,18 @@
 #version 400
 
 in vec2 uv;
-in vec4 shadow_pos;
 
 uniform vec4 camera_position;
 
 uniform sampler2D position_texture;
+uniform sampler2D local_position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D color_texture;
 
+uniform mat4 inverse_mvp;
+
 uniform sampler2D shadow_map;
+uniform mat4 shadow_vp;
 
 #define MAX_LIGHTS 10
 uniform int num_lights;
@@ -22,31 +25,28 @@ uniform struct Light{
 
 out vec3 color;
 
-float shadow_calc(vec4 frag_light, vec3 position, vec3 light_dir, vec3 normal){
-    vec3 coord = frag_light.xyz / frag_light.w;
+float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 normal){
+    vec4 frag_from_light = shadow_vp * vec4(position,1);
+    //frag_from_light = vec4(frag_from_light.xyz * 0.5f + vec3(0.5f), frag_from_light.w);
 
-    coord = coord * 0.5 + 0.5;
+    vec3 coord = frag_from_light.xyz / frag_from_light.w;
+    
 
-    float light_depth = texture(shadow_map, uv).r;
-    return light_depth;
+    float depth = texture(shadow_map, coord.xy).r;
 
-    float depth = coord.z;
-    if(light_depth > 1.0) return 0.0;
+    float bias = max(0.05 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
 
-    float bias = max(0.05 * (1.0 - dot(normal, normalize(-light_dir))), 0.005);
+    float visibility = coord.z > depth ? 0.0 : 1.0;
 
-    float shadow = 0;
-
-    shadow = depth > light_depth ? 1.0 : 0.0;
-
-    return depth;
+    return visibility;
 
 }
 
 void main(){
-    vec3 position = vec3(texture(position_texture, uv));
-    vec3 normal   = vec3(texture(normal_texture, uv));
-    vec3 albedo   = vec3(texture(color_texture, uv));
+    vec3 position       = vec3(texture(position_texture       , uv));
+    vec3 local_position = vec3(texture(local_position_texture , uv));
+    vec3 normal         = vec3(texture(normal_texture         , uv));
+    vec3 albedo         = vec3(texture(color_texture          , uv));
 
     vec3 diffuse = vec3(0);
 
@@ -86,13 +86,13 @@ void main(){
         }
 
 
-        float shadow = shadow_calc(shadow_pos, position, light_direction, normal);
+        float visibility = shadow_calc(position, local_position, light_direction, normal);
         
         
         //diffuse
         float d = dot(normal, normalize(light_direction));
-        //diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * (1-shadow);
-        diffuse = vec3(shadow);
+        diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * visibility;
+        //diffuse = vec3(visibility);
     }
 
     //diffuse *= albedo;

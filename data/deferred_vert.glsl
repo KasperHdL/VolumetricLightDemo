@@ -5,6 +5,7 @@ layout(location = 2)in vec4 uv;
 layout(location = 3)in vec4 color;
 
 out vec4 p;
+out vec4 lp;
 out vec3 n;
 out vec2 t;
 out vec4 c;
@@ -14,6 +15,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 void main(void) {
+    lp = vec4(position, 1);
     p = model * vec4(position, 1); 
     n = transpose(inverse(mat3(model))) * normal;
 
