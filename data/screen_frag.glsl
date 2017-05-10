@@ -68,6 +68,7 @@ void main(){
     float dist;
     float cut_off;
     vec3 light_direction;
+    float contribution;
     for(int i = 0; i < 1; i++){
         cut_off = 0;
 
@@ -75,24 +76,30 @@ void main(){
             //directional
             light_direction = -lights[i].position.xyz;
             att = 1;
+            contribution = 1;
         }else if(lights[i].position.w == 1){
             //point
             light_direction = lights[i].position.xyz - position;
  
             dist = length(light_direction);
-            att = 1.0 / (lights[i].attenuation.x + lights[i].attenuation.y * dist + lights[i].attenuation.z * dist * dist);
+
+            //attenuation
+            contribution = 1.0 / (lights[i].attenuation.x + lights[i].attenuation.y * dist + lights[i].attenuation.z * dist * dist);
+
         }
         
-        float spot = 1;
         if(lights[i].position.w == 2){
             //spot
             vec3 from_light = position - lights[i].position.xyz;
             light_direction = normalize(lights[i].cone.xyz);
             cut_off = lights[i].cone.w;
 
-            spot = dot(normalize(from_light), light_direction);
-            if(spot < cut_off) continue;
+            float spot = pow(max(dot(normalize(from_light), light_direction),0),lights[i].cone.w);
+            dist = length(from_light);
 
+            float att = 1.0 / (lights[i].attenuation.x + lights[i].attenuation.y * dist + lights[i].attenuation.z * dist * dist);
+
+            contribution = spot * att;
             light_direction = -from_light;
         }
 
@@ -102,7 +109,7 @@ void main(){
         
         //diffuse
         float d = dot(normal, normalize(light_direction));
-        diffuse += d * lights[i].color.rgb * lights[i].color.a * att * spot * (1 - shadow);
+        diffuse += d * lights[i].color.rgb * lights[i].color.a * contribution * (1 - shadow);
     }
 
     diffuse *= albedo;
