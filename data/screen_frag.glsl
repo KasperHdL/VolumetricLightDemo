@@ -66,11 +66,9 @@ void main(){
     float att = 1;
 
     float dist;
-    float cut_off;
     vec3 light_direction;
     float contribution;
     for(int i = 0; i < 1; i++){
-        cut_off = 0;
 
         if(lights[i].position.w == 0){
             //directional
@@ -92,7 +90,6 @@ void main(){
             //spot
             vec3 from_light = position - lights[i].position.xyz;
             light_direction = normalize(lights[i].cone.xyz);
-            cut_off = lights[i].cone.w;
 
             float spot = pow(max(dot(normalize(from_light), light_direction),0),lights[i].cone.w);
             dist = length(from_light);

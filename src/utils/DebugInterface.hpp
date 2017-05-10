@@ -20,6 +20,14 @@ class DebugInterface{
         bool enabled = true;
         int n;
 
+        //plots
+        static const int array_length = 500;
+        int array_index = 0;
+        float delta_time_plot[array_length] = {};
+        float delta_time_sum = 0;
+
+
+
         //menu
         bool menu = true;
         bool hierarchy = false;
@@ -89,6 +97,22 @@ class DebugInterface{
 
                         ImGui::Checkbox("Game Debug    [F8] ", &game_debug);
                         ImGui::Checkbox("Entity Debug  [F9] ", &entity_debug);
+
+                        //DT Plot
+                        
+                        delta_time_sum -= delta_time_plot[array_index];
+                        delta_time_plot[array_index] = dt;
+                        delta_time_sum += delta_time_plot[array_index];
+
+
+                        ImGui::Separator();
+
+                        ImGui::Text("Delta time in ms");
+                        ImGui::PlotLines("", delta_time_plot, array_length);
+                        ImGui::Text("%3.3f \t- Avg: %3.3f",1000 * dt, (1000 * delta_time_sum) / (double)array_length);
+
+                        array_index = ++array_index % array_length;
+
                     ImGui::End();
                 }
 

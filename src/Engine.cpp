@@ -63,8 +63,6 @@ int Engine::initialize(Game* game){
 
         update(delta_time);
         renderer.render(delta_time);
-
-        SDL_Delay(16.0f);
     }
 
 

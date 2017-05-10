@@ -40,7 +40,7 @@ public:
         this->intensity = intensity;
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
-        cutoff = 0.0f;
+        cutoff = 1.0f;
 
     } 
 
