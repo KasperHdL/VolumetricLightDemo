@@ -33,6 +33,9 @@ public:
 
     //shadow map projection settings
     bool create_shadow_map = false;
+    int shadow_map_index = 0;
+    glm::mat4 shadow_vp;
+    
     //proj
     float field_of_view    = 90;
     //proj and ortho

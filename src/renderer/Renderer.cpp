@@ -48,8 +48,8 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         depth_shader->use();
         depth_shader->init_uniform("model"       , Shader::Uniform_Type::Mat4);
-        depth_shader->init_uniform("light_index" , Shader::Uniform_Type::Int);
         depth_shader->init_uniform("color"       , Shader::Uniform_Type::Vec4);
+        depth_shader->init_uniform("shadow_index" , Shader::Uniform_Type::Int);
         depth_shader->init_uniform("shadow_vp"   , Shader::Uniform_Type::Mat4);
 
 
@@ -84,6 +84,8 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
             screen_shader->init_uniform(l + "color"       , Shader::Uniform_Type::Vec4);
             screen_shader->init_uniform(l + "attenuation" , Shader::Uniform_Type::Vec4);
             screen_shader->init_uniform(l + "cone"        , Shader::Uniform_Type::Vec4);
+            screen_shader->init_uniform(l + "shadow_vp"        , Shader::Uniform_Type::Mat4);
+            screen_shader->init_uniform(l + "shadow_index"        , Shader::Uniform_Type::Int);
         }
     }
 
@@ -205,6 +207,8 @@ void Renderer::render(float delta_time){
 
     glm::mat4 shadow_vp;
 
+    int shadow_count;
+
     for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr && l->create_shadow_map){
@@ -224,7 +228,10 @@ void Renderer::render(float delta_time){
 
             shadow_vp = proj * view;
             depth_shader->set_uniform("shadow_vp", shadow_vp);
-    //        depth_shader->set_uniform("light_index", i);
+            depth_shader->set_uniform("shadow_index", shadow_count);
+
+            l->shadow_vp = shadow_vp;
+            l->shadow_map_index = shadow_count++;
 
             //render scene
             _render_scene(depth_shader);
@@ -267,7 +274,6 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("local_position_texture"    , local_position_texture    , 3);
 
     screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
-    screen_shader->set_uniform("shadow_vp"        , shadow_vp);
 
     //setup light
 
@@ -276,13 +282,25 @@ void Renderer::render(float delta_time){
         Light* l = God::lights[i];
         if(l != nullptr){
             string name = "lights[" + to_string(i) + "].";
+
             screen_shader->set_uniform(name + "position" , vec4(l->position, l->type));
             screen_shader->set_uniform(name + "color"    , vec4(l->color, l->intensity));
+
             if(l->type >= Light::Type::Point){
                 screen_shader->set_uniform(name + "attenuation" , vec4(l->attenuation , 1));
             }
+
             if(l->type == Light::Type::Spot)
-                screen_shader->set_uniform(name + "cone"        , vec4(l->direction,l->falloff));
+                screen_shader->set_uniform(name + "cone" , vec4(l->direction , l->falloff));
+
+            if(l->create_shadow_map){
+                screen_shader->set_uniform(name + "shadow_vp"    , l->shadow_vp);
+                screen_shader->set_uniform(name + "shadow_index" , l->shadow_map_index);
+
+            }else{
+                screen_shader->set_uniform(name + "shadow_index" , -1);
+            }
+
         }
     }
 

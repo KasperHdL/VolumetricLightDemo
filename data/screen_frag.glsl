@@ -12,7 +12,6 @@ uniform sampler2D color_texture;
 uniform mat4 inverse_mvp;
 
 uniform sampler2D shadow_map;
-uniform mat4 shadow_vp;
 
 #define MAX_LIGHTS 10
 uniform int num_lights;
@@ -21,12 +20,14 @@ uniform struct Light{
     vec4 color;
     vec4 attenuation;
     vec4 cone;
+    int shadow_index;
+    mat4 shadow_vp;
 } lights[MAX_LIGHTS];
 
 out vec3 color;
 
-float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 normal){
-    vec4 frag_from_light = shadow_vp * vec4(position,1);
+float shadow_calc(int index, vec3 position, vec3 light_dir, vec3 normal){
+    vec4 frag_from_light = lights[index].shadow_vp * vec4(position,1);
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
     coord = coord * 0.5 + 0.5;
@@ -67,7 +68,7 @@ void main(){
     float dist;
     vec3 light_direction;
     float contribution;
-    for(int i = 0; i < 1; i++){
+    for(int i = 0; i < num_lights; i++){
 
         if(lights[i].position.w == 0){
             //directional
@@ -100,7 +101,10 @@ void main(){
         }
 
 
-        float shadow = shadow_calc(position, local_position, light_direction, normal);
+        float shadow = 0;
+        if(lights[i].shadow_index != -1){
+            shadow = shadow_calc(lights[i].shadow_index, position, light_direction, normal);
+        }
         
         
         //diffuse
