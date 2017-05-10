@@ -24,14 +24,21 @@ public:
         Mat3,
         Mat4,
         Vec4,
-        Texture
+        Texture,
+        Subroutine
     };
+
     struct Uniform{
         std::string name;
         int location_id;
-
         Uniform_Type type;
+
+        //subroutine
+        GLenum shader_type;
+        int sub_index;
+        int sub_max_indices;
     };
+
 
     bool compiled = false;
     unsigned int program_id;
@@ -57,11 +64,30 @@ public:
     }
 
     void init_uniform(std::string name, Uniform_Type type){
+        if(type == Uniform_Type::Subroutine){
+            std::cout << "Subroutines should be called with shader_type example(GL_VERTEX_SHADER or GL_FRAGMENT_SHADER)\n";
+        std::cout << "Wrong init uniform call for " << name << " in " << vertex_path << " or " << fragment_path << " should be subroutine call\n";
+            return;
+        }
         Uniform u;
         u.name = name;
         u.location_id = glGetUniformLocation(program_id, name.c_str());
         u.type = type;
         uniforms.push_back(u);
+    }
+
+    void init_subroutine(std::string routine_name, GLenum shader_type, std::string method_name){
+
+        Uniform u;
+        u.name = method_name;
+        u.location_id = glGetSubroutineUniformLocation(program_id, shader_type, routine_name.c_str());
+        u.type = Uniform_Type::Subroutine;
+
+        u.shader_type = shader_type;
+        u.sub_index = glGetSubroutineIndex(program_id, shader_type, method_name.c_str());
+        
+        uniforms.push_back(u);
+
     }
 
     void use(){
@@ -100,6 +126,21 @@ public:
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, texture_id);
         glUniform1i(u.location_id, slot);
+    }
+
+    void set_subroutine(GLenum shader_type, int num, std::string name[]){
+        GLuint *indices = new GLuint[num];
+
+        for(int i = 0; i < num; i++){
+            Uniform u = find_uniform(name[i]);
+            if(_check_uniform(u, Uniform_Type::Subroutine) == false) return;
+            indices[u.location_id] = u.sub_index;
+        }
+
+        glUniformSubroutinesuiv(shader_type, num, indices);
+
+        delete [] indices;
+        delete [] name;
     }
 
     Uniform find_uniform(std::string name){

@@ -63,29 +63,45 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
 
 
-        //screen 
+        //Light
+        light_shader = AssetManager::get_shader("light");
+
+        light_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
+        light_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
+        light_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
+
+        light_shader->init_uniform("shadow_map"         , Shader::Uniform_Type::Texture);
+        light_shader->init_uniform("camera_position"    , Shader::Uniform_Type::Vec4);
+        light_shader->init_uniform("mvp"                , Shader::Uniform_Type::Mat4);
+
+        light_shader->init_uniform("light_position"     , Shader::Uniform_Type::Vec4);
+        light_shader->init_uniform("light_color"        , Shader::Uniform_Type::Vec4);
+        light_shader->init_uniform("light_attenuation"  , Shader::Uniform_Type::Vec4);
+        light_shader->init_uniform("light_cone"         , Shader::Uniform_Type::Vec4);
+        light_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
+        light_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
+
+        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "directional");
+        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "point");
+        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "spot");
+
+        light_shader->init_subroutine("shadow_function", GL_FRAGMENT_SHADER, "no_shadows");
+        light_shader->init_subroutine("shadow_function", GL_FRAGMENT_SHADER, "create_shadows");
+
+        //screen
         screen_shader = AssetManager::get_shader("screen");
 
-        screen_shader->init_uniform("camera_position"  , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("position_texture" , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("num_lights"       , Shader::Uniform_Type::Int);
-        screen_shader->init_uniform("shadow_vp"        , Shader::Uniform_Type::Mat4);
+
         screen_shader->init_uniform("shadow_map"       , Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("inverse_mvp"      , Shader::Uniform_Type::Texture);
 
+        screen_shader->init_uniform("light_position"     , Shader::Uniform_Type::Vec4);
+        screen_shader->init_uniform("light_color"        , Shader::Uniform_Type::Vec4);
+        screen_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
+        screen_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
 
-        const int max_lights = 10;
-        for(int i = 0; i < max_lights; i++){
-            string l = "lights[" + to_string(i) + "].";
-            screen_shader->init_uniform(l + "position"    , Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform(l + "color"       , Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform(l + "attenuation" , Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform(l + "cone"        , Shader::Uniform_Type::Vec4);
-            screen_shader->init_uniform(l + "shadow_vp"        , Shader::Uniform_Type::Mat4);
-            screen_shader->init_uniform(l + "shadow_index"        , Shader::Uniform_Type::Int);
-        }
     }
 
     //depth framebuffer
@@ -186,9 +202,12 @@ void Renderer::render(float delta_time){
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
 
-    //Shadow map
+    ////////////////////////////////
+    //Create Shadow map
+    ////////////////////////////////
 
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
     glViewport(0,0,shadow_width, shadow_height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
@@ -198,20 +217,37 @@ void Renderer::render(float delta_time){
 
     depth_shader->use();
 
-    glm::mat4 shadow_vp;
 
     int shadow_count;
 
+    //shadow map for sun
+
+    if(sun != nullptr){
+        Light* l = sun;
+
+        mat4 proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
+        mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
+
+        mat4 shadow_vp = proj * view;
+        depth_shader->set_uniform("shadow_vp", shadow_vp);
+        depth_shader->set_uniform("shadow_index", shadow_count);
+
+        l->shadow_vp = shadow_vp;
+        l->shadow_map_index = shadow_count++;
+
+        //render scene
+        _render_scene(depth_shader);
+
+    }
+
+    //shadow map for other lights
     for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr && l->create_shadow_map){
             mat4 proj;
             mat4 view;
 
-            if(l->type == Light::Type::Directional){
-                proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
-                view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
-            }else if(l->type == Light::Type::Spot){
+            if(l->type == Light::Type::Spot){
                 proj = glm::perspectiveFov<float>(radians<float>(l->field_of_view), shadow_width, shadow_height, l->near_plane, l->far_plane);
                 view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
             }else{
@@ -219,7 +255,7 @@ void Renderer::render(float delta_time){
 
             }
 
-            shadow_vp = proj * view;
+            mat4 shadow_vp = proj * view;
             depth_shader->set_uniform("shadow_vp", shadow_vp);
             depth_shader->set_uniform("shadow_index", shadow_count);
 
@@ -232,8 +268,10 @@ void Renderer::render(float delta_time){
         }
     }
 
-    //write to Textures(pos, normal, color)
 
+    ////////////////////////////////
+    //Write to Opaque Objects to G-Buffer
+    ////////////////////////////////
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glClearColor(0,0,0,1);
@@ -256,51 +294,107 @@ void Renderer::render(float delta_time){
 
     _render_scene(shader);
 
+
+    ////////////////////////////////
+    //Render Light Influence 
+    ////////////////////////////////
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+
+   	glBlendEquation(GL_FUNC_ADD);
+   	glBlendFunc(GL_ONE, GL_ONE);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
     //set uniforms
-    time += delta_time;
+    light_shader->use();
+    light_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
 
-    //setup screen shader
-    screen_shader->use();
-    screen_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
+    light_shader->set_uniform("position_texture" , position_texture , 0);
+    light_shader->set_uniform("normal_texture"   , normal_texture   , 1);
+    light_shader->set_uniform("color_texture"    , color_texture    , 2);
 
-    screen_shader->set_uniform("position_texture" , position_texture , 0);
-    screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
-    screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+    light_shader->set_uniform("shadow_map"       , depth_texture    , 3);
 
-    screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
 
-    //setup light
+    mat4 vp = projection * camera->view_transform;
 
-    screen_shader->set_uniform("num_lights"       , God::lights.count);
     for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
-        if(l != nullptr){
-            string name = "lights[" + to_string(i) + "].";
+        if(l != nullptr && l->mesh != nullptr){
+            if(l->type == Light::Type::Directional) continue;
 
-            screen_shader->set_uniform(name + "position" , vec4(l->position, l->type));
-            screen_shader->set_uniform(name + "color"    , vec4(l->color, l->intensity));
+            std::string routines[2];
+            routines[0] = l->type == Light::Type::Point ? "point" : "spot";
+            routines[1] = l->create_shadow_map ? "create_shadows" : "no_shadows";
 
-            if(l->type >= Light::Type::Point){
-                screen_shader->set_uniform(name + "attenuation" , vec4(l->attenuation , 1));
-            }
+            light_shader->set_subroutine(GL_FRAGMENT_SHADER, 2, routines);
+
+            light_shader->set_uniform("light_position" , vec4(l->position, 1));
+            light_shader->set_uniform("light_color"    , vec4(l->color, l->intensity));
+
+            light_shader->set_uniform("light_attenuation" , vec4(l->attenuation , 1));
 
             if(l->type == Light::Type::Spot)
-                screen_shader->set_uniform(name + "cone" , vec4(l->direction , l->falloff));
+                light_shader->set_uniform("light_cone" , vec4(l->direction , l->falloff));
 
             if(l->create_shadow_map){
-                screen_shader->set_uniform(name + "shadow_vp"    , l->shadow_vp);
-                screen_shader->set_uniform(name + "shadow_index" , l->shadow_map_index);
+                light_shader->set_uniform("light_shadow_vp"    , l->shadow_vp);
+                light_shader->set_uniform("light_shadow_index" , l->shadow_map_index);
 
             }else{
-                screen_shader->set_uniform(name + "shadow_index" , -1);
+                light_shader->set_uniform("light_shadow_index" , -1);
+            }
+
+            //render
+            //@TODO(Kasper) no rotation currently
+            glm::mat4 t = glm::translate(mat4(), l->position);
+            glm::mat4 s = glm::scale(mat4(), vec3(1,1,1));
+
+            glm::mat4 model_transform = t * s;
+            light_shader->set_uniform("mvp", vp * model_transform);
+
+            Mesh* mesh = l->mesh;
+            
+
+            int indexCount = (int) mesh->indices.size();
+            if (indexCount == 0){
+                glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
+            } else {
+                glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
             }
 
         }
     }
 
-    glDisable(GL_DEPTH_TEST);
+
+
+    ////////////////////////////////
+    //Write to Screen
+    ////////////////////////////////
+
+
+    //set uniforms
+    time += delta_time;
+
+    //setup screen shader
+    screen_shader->use();
+
+    screen_shader->set_uniform("position_texture" , position_texture , 0);
+    screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
+    screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+
+//    screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
+
+    //setup sun
+
+
+
+
     glClearColor(0, 0, 0, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,camera->viewport_w, camera->viewport_h);
 
 
@@ -315,13 +409,18 @@ void Renderer::render(float delta_time){
         glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
     }
 
+
+
+    ///////////////////////////////
+    //Debug Draw for light sources
+    ///////////////////////////////
+
     glEnable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(  0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     debug_shader->use();
 
@@ -366,9 +465,17 @@ void Renderer::render(float delta_time){
         }
     }
 
+    glDisable(GL_BLEND);
 
+
+    ///////////////////////////////
+    //Debug UI
+    ///////////////////////////////
     debug->render(delta_time);
 
+    ///////////////////////////////
+    //Swap Window
+    ///////////////////////////////
     SDL_GL_SwapWindow(window);
 
     return;
