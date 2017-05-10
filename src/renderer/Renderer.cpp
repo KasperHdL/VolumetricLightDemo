@@ -81,12 +81,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         light_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
 
-        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "directional");
-        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "point");
-        light_shader->init_subroutine("light_function", GL_FRAGMENT_SHADER, "spot");
-
-        light_shader->init_subroutine("shadow_function", GL_FRAGMENT_SHADER, "no_shadows");
-        light_shader->init_subroutine("shadow_function", GL_FRAGMENT_SHADER, "create_shadows");
 
         //screen
         screen_shader = AssetManager::get_shader("screen");
@@ -326,12 +320,6 @@ void Renderer::render(float delta_time){
         Light* l = God::lights[i];
         if(l != nullptr && l->mesh != nullptr){
             if(l->type == Light::Type::Directional) continue;
-
-            std::string routines[2];
-            routines[0] = l->type == Light::Type::Point ? "point" : "spot";
-            routines[1] = l->create_shadow_map ? "create_shadows" : "no_shadows";
-
-            light_shader->set_subroutine(GL_FRAGMENT_SHADER, 2, routines);
 
             light_shader->set_uniform("light_position" , vec4(l->position, 1));
             light_shader->set_uniform("light_color"    , vec4(l->color, l->intensity));

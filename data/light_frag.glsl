@@ -17,19 +17,18 @@ uniform mat4 light_shadow_vp;
 
 out vec3 color;
 
-//////////////////
-//Subroutines
-//////////////////
 
 /////////////////
 //Light Calc
-subroutine vec4 light_calculation(vec3); 
+/////////////////
 
-subroutine (light_calculation) vec4 directional(vec3 position){
-        return vec4(-light_position.xyz, 1);
-}
+vec4 light_function(vec3 position){
+    vec4 light = vec4(1,1,1,0);
 
-subroutine (light_calculation) vec4 point(vec3 position){
+    if(light_position.w == 0){
+        light = vec4(-light_position.xyz, 1);
+
+    }else if(light_position.w == 1){
 
         vec3 light_direction = light_position.xyz - position;
 
@@ -38,11 +37,10 @@ subroutine (light_calculation) vec4 point(vec3 position){
         //attenuation
         float contribution = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
 
-        return vec4(light_direction.xyz, contribution);
-}
+        light = vec4(light_direction.xyz, contribution);
 
+    }else if(light_position.w == 2){
 
-subroutine (light_calculation) vec4 spot(vec3 position){
         vec3 from_light = position - light_position.xyz;
 
         float spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
@@ -50,19 +48,21 @@ subroutine (light_calculation) vec4 spot(vec3 position){
 
         float att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
 
-        return vec4(-from_light.xyz, spot * att);
+        light = vec4(-from_light.xyz, spot * att);
+
+    }else{
+        light = vec4(1,1,1,1);
+    }
+
+    return light;
 }
 
 
 /////////////////
 //Shadow Calc
-subroutine float shadow_calculation(int, vec3, vec3, vec3);
+/////////////////
 
-subroutine (shadow_calculation) float no_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
-    return 0.0;
-}
-
-subroutine (shadow_calculation) float create_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
+float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
     vec4 frag_from_light = light_shadow_vp * vec4(position,1);
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
@@ -90,10 +90,6 @@ subroutine (shadow_calculation) float create_shadows(int index, vec3 position, v
 }
 
 
-subroutine uniform light_calculation light_function;
-subroutine uniform shadow_calculation shadow_function;
-
-
 /////////////////
 //Main
 /////////////////
@@ -110,12 +106,16 @@ void main(){
     vec3 view_direction = camera_position.xyz - position;
 
     //Calculate Light Contribution
+
     vec4 light = light_function(position);
         //xyz = light_direction
         //w   = contribution
 
     //Calculate Shadow
-    float shadow = shadow_function(light_shadow_index, position, light.xyz, normal);
+    float shadow = 0.0;
+
+    if(light_shadow_index >= 0)
+        shadow = calc_shadows(light_shadow_index, position, light.xyz, normal);
 
 
     //Calculate Frag
