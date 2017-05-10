@@ -68,7 +68,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         screen_shader->init_uniform("camera_position"  , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("position_texture" , Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("local_position_texture" , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("num_lights"       , Shader::Uniform_Type::Int);
@@ -148,11 +147,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        //local position
-        glGenTextures(1, &local_position_texture);
-        glBindTexture(GL_TEXTURE_2D, local_position_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -169,7 +163,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, local_position_texture, 0);
 
         const GLenum draw_buffers[] = {
             GL_COLOR_ATTACHMENT0,
@@ -193,7 +186,7 @@ void Renderer::render(float delta_time){
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
 
-    //Depth Pass
+    //Shadow map
 
     glEnable(GL_DEPTH_TEST);
 
@@ -209,7 +202,7 @@ void Renderer::render(float delta_time){
 
     int shadow_count;
 
-    for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
+    for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr && l->create_shadow_map){
             mat4 proj;
@@ -238,6 +231,8 @@ void Renderer::render(float delta_time){
 
         }
     }
+
+    //write to Textures(pos, normal, color)
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -271,7 +266,6 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
-    screen_shader->set_uniform("local_position_texture"    , local_position_texture    , 3);
 
     screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
 
