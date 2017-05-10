@@ -123,6 +123,8 @@ void main(){
     diffuse += d * light_color.rgb * light_color.a * light.w * (1 - shadow);
 
     color = diffuse * albedo;
+
+    //@TEMP(KASPER)
     color = light_color.rgb;
 
 }
