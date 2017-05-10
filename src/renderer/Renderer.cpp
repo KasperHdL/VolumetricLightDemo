@@ -293,6 +293,7 @@ void Renderer::render(float delta_time){
     //Render Light Influence 
     ////////////////////////////////
 
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glDisable(GL_DEPTH_TEST);
@@ -340,24 +341,23 @@ void Renderer::render(float delta_time){
             //render
             //@TODO(Kasper) no rotation currently
             glm::mat4 t = glm::translate(mat4(), l->position);
-            glm::mat4 s = glm::scale(mat4(), vec3(1,1,1));
+            glm::mat4 s = glm::scale(mat4(), vec3(1));//l->scale);
 
             glm::mat4 model_transform = t * s;
+
             light_shader->set_uniform("mvp", vp * model_transform);
 
-            Mesh* mesh = l->mesh;
-            
+            l->mesh->bind();
 
-            int indexCount = (int) mesh->indices.size();
+            int indexCount = (int) l->mesh->indices.size();
             if (indexCount == 0){
-                glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
+                glDrawArrays((GLenum)l->mesh->topology, 0, l->mesh->vertex_count);
             } else {
-                glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+                glDrawElements((GLenum) l->mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
             }
 
         }
     }
-
 
 
     ////////////////////////////////

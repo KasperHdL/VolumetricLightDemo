@@ -96,7 +96,6 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
 
 
 void main(){
-/*
     vec3 position       = vec3(texture(position_texture , gl_FragCoord.xy));
     vec3 normal         = vec3(texture(normal_texture   , gl_FragCoord.xy));
     vec3 albedo         = vec3(texture(color_texture    , gl_FragCoord.xy));
@@ -124,7 +123,6 @@ void main(){
     diffuse += d * light_color.rgb * light_color.a * light.w * (1 - shadow);
 
     color = diffuse * albedo;
-    */
     color = light_color.rgb;
 
 }
