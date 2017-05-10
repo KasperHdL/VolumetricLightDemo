@@ -19,32 +19,49 @@ public:
         Volumetric
     };
 
+    Type type;
     glm::vec3 position;
-    glm::vec3 direction;
-    float cutoff;
-
     glm::vec3 color;
+
+    //point / spot
     glm::vec3 attenuation;
     float intensity;
 
-    Type type;
+    //spot
+    float falloff;
+    glm::vec3 direction;
+
+    //shadow map projection settings
+    bool create_shadow_map = false;
+    //proj
+    float field_of_view    = 90;
+    //proj and ortho
+    float near_plane       = .1f;
+    float far_plane        = 100;
+    //ortho
+    float left_plane       = -10;
+    float right_plane      = 10;
+    float bottom_plane     = -10;
+    float top_plane        = 10;
+
+    
 
     Light(Type type, glm::vec3 position, glm::vec3 color, float intensity){
         //Point or Directional
         this->type = type;
         type_selected_index = (int)type;
 
-        this->position = position;
+        this->position  = position;
         this->direction = glm::vec3(0,0,1);
-        this->color = color;
+        this->color     = color;
         this->intensity = intensity;
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
-        cutoff = 1.0f;
+        falloff = 1.0f;
 
     } 
 
-    Light(Type type, glm::vec3 position, glm::vec3 direction, float cutoff, glm::vec3 color, float intensity){
+    Light(Type type, glm::vec3 position, glm::vec3 direction, float falloff, glm::vec3 color, float intensity){
         //Spot
         this->type = type;
         type_selected_index = (int)type;
@@ -53,7 +70,7 @@ public:
         this->direction = direction;
         this->color = color;
         this->intensity = intensity;
-        this->cutoff = cutoff;
+        this->falloff = falloff;
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
 
@@ -99,7 +116,30 @@ public:
                 ImGui::DragFloat3("Attenuation" , &attenuation.x , 0.01f);
 
             if(type == Type::Spot)
-                ImGui::DragFloat("Cut Off"      , &cutoff        , 0.01f);
+                ImGui::DragFloat("Fall Off"      , &falloff        , 0.01f);
+
+            if(type == Type::Directional || type == Type::Spot)
+                ImGui::Checkbox("Shadow Map", &create_shadow_map);
+
+            if(create_shadow_map){
+                if(type == Type::Spot){
+                    ImGui::DragFloat("Field of View", &field_of_view, 0.1f);
+                    field_of_view = glm::clamp<float>(field_of_view, 1, 360);
+                }
+
+                if(type == Type::Directional){
+                    ImGui::DragFloat("Left Plane"   , &left_plane   , 0.1f);
+                    ImGui::DragFloat("Right Plane"  , &right_plane  , 0.1f);
+                    ImGui::DragFloat("Bottom Plane" , &bottom_plane , 0.1f);
+                    ImGui::DragFloat("Top Plane"    , &top_plane    , 0.1f);
+
+                }
+
+                ImGui::DragFloat("Near Plane" , &near_plane , 0.1f);
+                ImGui::DragFloat("Far Plane"  , &far_plane  , 0.1f);
+
+            }
+
 
             ImGui::TreePop();
 

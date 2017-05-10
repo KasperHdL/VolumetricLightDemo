@@ -207,15 +207,24 @@ void Renderer::render(float delta_time){
 
     for(int i = 0; i < 1;i++){//God::lights.capacity;i++){
         Light* l = God::lights[i];
-        if(l != nullptr){
-            mat4 proj = glm::perspectiveFov<float>(radians<float>(90), shadow_width, shadow_height, 0.1f, 100.0);
-            //mat4 proj = glm::ortho<float>(-10,10,-10,10,-10,20);
-            //glm::mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
-            glm::mat4 view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
+        if(l != nullptr && l->create_shadow_map){
+            mat4 proj;
+            mat4 view;
+
+            if(l->type == Light::Type::Directional){
+                proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
+                view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
+            }else if(l->type == Light::Type::Spot){
+                proj = glm::perspectiveFov<float>(radians<float>(l->field_of_view), shadow_width, shadow_height, l->near_plane, l->far_plane);
+                view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
+            }else{
+                continue;
+
+            }
 
             shadow_vp = proj * view;
             depth_shader->set_uniform("shadow_vp", shadow_vp);
-            //depth_shader->set_uniform("light_index", i);
+    //        depth_shader->set_uniform("light_index", i);
 
             //render scene
             _render_scene(depth_shader);
@@ -273,7 +282,7 @@ void Renderer::render(float delta_time){
                 screen_shader->set_uniform(name + "attenuation" , vec4(l->attenuation , 1));
             }
             if(l->type == Light::Type::Spot)
-                screen_shader->set_uniform(name + "cone"        , vec4(l->direction,l->cutoff));
+                screen_shader->set_uniform(name + "cone"        , vec4(l->direction,l->falloff));
         }
     }
 

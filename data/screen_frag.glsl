@@ -30,7 +30,6 @@ float shadow_calc(vec3 position, vec3 local_position, vec3 light_dir, vec3 norma
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
     coord = coord * 0.5 + 0.5;
-
     if(coord.z > 1.0) return 1.0;
     
 
@@ -91,7 +90,7 @@ void main(){
             vec3 from_light = position - lights[i].position.xyz;
             light_direction = normalize(lights[i].cone.xyz);
 
-            float spot = pow(max(dot(normalize(from_light), light_direction),0),lights[i].cone.w);
+            float spot = pow(max(dot(normalize(from_light), light_direction),0), lights[i].cone.w);
             dist = length(from_light);
 
             float att = 1.0 / (lights[i].attenuation.x + lights[i].attenuation.y * dist + lights[i].attenuation.z * dist * dist);
@@ -105,7 +104,7 @@ void main(){
         
         
         //diffuse
-        float d = dot(normal, normalize(light_direction));
+        float d = max(dot(normal, normalize(light_direction)), 0.0);
         diffuse += d * lights[i].color.rgb * lights[i].color.a * contribution * (1 - shadow);
     }
 
