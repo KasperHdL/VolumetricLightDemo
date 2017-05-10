@@ -29,8 +29,8 @@ public:
     //[point / spot]
     glm::vec3 attenuation;
     float intensity;
-    Mesh* mesh;
-    glm::vec3 scale;
+    Mesh* mesh = nullptr;
+    glm::vec3 scale = glm::vec3(1,1,1);
 
     //[spot]
     float falloff;
@@ -38,7 +38,7 @@ public:
 
     //shadow map projection settings
     bool create_shadow_map = false;
-    int shadow_map_index = 0;
+    int shadow_map_index = -1;
     glm::mat4 shadow_vp;
     
     //[proj]

@@ -30,15 +30,16 @@ public:
     DebugInterface* debug;
 
     Camera* camera;
+    Light* sun = nullptr;
 
     Shader* shader;
     Shader* screen_shader;
+    Shader* light_shader;
     Shader* depth_shader;
     Shader* debug_shader;
 
     GLuint framebuffer = 0;
     GLuint depth_framebuffer = 0;
-    GLuint depth_renderbuffer;
 
     GLuint position_texture;
     GLuint normal_texture;
