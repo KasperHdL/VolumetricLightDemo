@@ -34,33 +34,33 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     //Shader setup
     {
 
-        //debug
-        debug_shader = AssetManager::get_shader("debug");
-
-        debug_shader->use();
-        debug_shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
-        debug_shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
-        debug_shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
-        debug_shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
 
         //depth
-        depth_shader = AssetManager::get_shader("depth");
+        shadow_map_shader = AssetManager::get_shader("pass_vert.glsl","empty_frag.glsl");
 
-        depth_shader->use();
-        depth_shader->init_uniform("model"       , Shader::Uniform_Type::Mat4);
-        depth_shader->init_uniform("color"       , Shader::Uniform_Type::Vec4);
-        depth_shader->init_uniform("shadow_index" , Shader::Uniform_Type::Int);
-        depth_shader->init_uniform("shadow_vp"   , Shader::Uniform_Type::Mat4);
+        shadow_map_shader->use();
+        shadow_map_shader->init_uniform("model"       , Shader::Uniform_Type::Mat4);
+        shadow_map_shader->init_uniform("color"       , Shader::Uniform_Type::Vec4); //because it is using _render_scene
+        shadow_map_shader->init_uniform("shadow_index" , Shader::Uniform_Type::Int); //note used
+        shadow_map_shader->init_uniform("vp"   , Shader::Uniform_Type::Mat4);
 
 
-        //deferred
-        shader = AssetManager::get_shader("deferred");
+        //geometry
+        geom_shader = AssetManager::get_shader("geom");
 
-        shader->use();
-        shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
-        shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
-        shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
-        shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
+        geom_shader->use();
+        geom_shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
+        geom_shader->init_uniform("view"         , Shader::Uniform_Type::Mat4);
+        geom_shader->init_uniform("projection"   , Shader::Uniform_Type::Mat4);
+        geom_shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
+
+
+        //stencil
+        stencil_shader = AssetManager::get_shader("pass_vert.glsl", "empty_frag.glsl");
+
+        stencil_shader->use();
+        stencil_shader->init_uniform("model" , Shader::Uniform_Type::Mat4);
+        stencil_shader->init_uniform("vp"    , Shader::Uniform_Type::Mat4);
 
 
         //Light
@@ -98,6 +98,14 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         screen_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
 
+
+        //debug
+        debug_shader = AssetManager::get_shader("pass_vert.glsl","debug_frag.glsl");
+
+        debug_shader->use();
+        debug_shader->init_uniform("model"        , Shader::Uniform_Type::Mat4);
+        debug_shader->init_uniform("vp"         , Shader::Uniform_Type::Mat4);
+        debug_shader->init_uniform("color"        , Shader::Uniform_Type::Vec4);
     }
 
     //depth framebuffer
@@ -106,7 +114,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //depth
         glGenTextures(1, &depth_texture);
         glBindTexture(GL_TEXTURE_2D, depth_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, shadow_width, shadow_height, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0);
 
         GLfloat border[] = {1,1,1,1};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
@@ -124,7 +132,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depth_texture, 0);
 
     }
 
@@ -211,7 +219,7 @@ void Renderer::render(float delta_time){
     glClearColor(0,0,-999,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    depth_shader->use();
+    shadow_map_shader->use();
 
 
     int shadow_count;
@@ -225,14 +233,14 @@ void Renderer::render(float delta_time){
         mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
 
         mat4 shadow_vp = proj * view;
-        depth_shader->set_uniform("shadow_vp", shadow_vp);
-        depth_shader->set_uniform("shadow_index", shadow_count);
+        shadow_map_shader->set_uniform("vp", shadow_vp);
+        shadow_map_shader->set_uniform("shadow_index", shadow_count);
 
         l->shadow_vp = shadow_vp;
         l->shadow_map_index = shadow_count++;
 
         //render scene
-        _render_scene(depth_shader);
+        _render_scene(shadow_map_shader);
 
     }
 
@@ -252,14 +260,14 @@ void Renderer::render(float delta_time){
             }
 
             mat4 shadow_vp = proj * view;
-            depth_shader->set_uniform("shadow_vp", shadow_vp);
-            depth_shader->set_uniform("shadow_index", shadow_count);
+            shadow_map_shader->set_uniform("vp", shadow_vp);
+            shadow_map_shader->set_uniform("shadow_index", shadow_count);
 
             l->shadow_vp = shadow_vp;
             l->shadow_map_index = shadow_count++;
 
             //render scene
-            _render_scene(depth_shader);
+            _render_scene(shadow_map_shader);
 
         }
     }
@@ -282,12 +290,60 @@ void Renderer::render(float delta_time){
     camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
-    shader->use();
+    geom_shader->use();
 
-    shader->set_uniform("view"       , camera->view_transform);
-    shader->set_uniform("projection" , camera->projection_transform);
+    geom_shader->set_uniform("view"       , camera->view_transform);
+    geom_shader->set_uniform("projection" , camera->projection_transform);
 
-    _render_scene(shader);
+    _render_scene(geom_shader);
+
+    ////////////////////////////////
+    //Stencil Light Calculation
+    ////////////////////////////////
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_CULL_FACE);
+    glClear(GL_STENCIL_BUFFER_BIT);
+
+    glStencilFunc(GL_ALWAYS, 0, 0);
+
+
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
+    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
+
+    //
+
+    stencil_shader->use();
+
+
+    mat4 camera_vp = camera->projection_transform * camera->view_transform;
+
+    for(int i = 0; i < God::lights.capacity;i++){
+        Light* l = God::lights[i];
+        if(l != nullptr && l->mesh != nullptr){
+            if(l->type == Light::Type::Directional) continue;
+
+            //render
+            //@TODO(Kasper) no rotation currently
+            glm::mat4 t = glm::translate(mat4(), l->position);
+            glm::mat4 s = glm::scale(mat4(), l->scale);
+
+            glm::mat4 model_transform = t * s;
+
+            stencil_shader->set_uniform("vp", camera_vp);
+            stencil_shader->set_uniform("model", model_transform);
+
+            l->mesh->bind();
+
+            int indexCount = (int) l->mesh->indices.size();
+            if (indexCount == 0){
+                glDrawArrays((GLenum)l->mesh->topology, 0, l->mesh->vertex_count);
+            } else {
+                glDrawElements((GLenum) l->mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+            }
+
+        }
+    }
 
 
     ////////////////////////////////
@@ -295,7 +351,6 @@ void Renderer::render(float delta_time){
     ////////////////////////////////
 
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -317,7 +372,6 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
 
 
-    mat4 vp = camera->projection_transform * camera->view_transform;
 
     for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
@@ -347,7 +401,7 @@ void Renderer::render(float delta_time){
 
             glm::mat4 model_transform = t * s;
 
-            light_shader->set_uniform("mvp", vp * model_transform);
+            light_shader->set_uniform("mvp", camera_vp * model_transform);
 
             l->mesh->bind();
 
@@ -414,8 +468,7 @@ void Renderer::render(float delta_time){
 
     debug_shader->use();
 
-    debug_shader->set_uniform("view"       , camera->view_transform);
-    debug_shader->set_uniform("projection" , camera->projection_transform);
+    debug_shader->set_uniform("vp"       , camera_vp);
 
     //debug draw light
 

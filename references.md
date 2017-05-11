@@ -1,6 +1,9 @@
 Deferred Shading:
     https://learnopengl.com/#!Advanced-Lighting/Deferred-Shading (And Light Volume Trick)
 
+Light Influence Mesh and stencil fix
+    http://ogldev.atspace.co.uk/www/tutorial37/tutorial37.html
+
 Shadows:
     https://learnopengl.com/#!Advanced-Lighting/Shadows/Shadow-Mapping
     http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/

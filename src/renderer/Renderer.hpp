@@ -32,10 +32,11 @@ public:
     Camera* camera;
     Light* sun = nullptr;
 
-    Shader* shader;
-    Shader* screen_shader;
+    Shader* geom_shader;
+    Shader* stencil_shader;
     Shader* light_shader;
-    Shader* depth_shader;
+    Shader* screen_shader;
+    Shader* shadow_map_shader;
     Shader* debug_shader;
 
     GLuint framebuffer = 0;
