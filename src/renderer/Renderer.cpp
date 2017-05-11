@@ -366,7 +366,6 @@ void Renderer::render(float delta_time){
     //Write to Screen
     ////////////////////////////////
 
-    /*
 
     //set uniforms
     time += delta_time;
@@ -397,7 +396,6 @@ void Renderer::render(float delta_time){
     } else {
         glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
     }
-    */
 
 
 
@@ -405,8 +403,9 @@ void Renderer::render(float delta_time){
     //Debug Draw for light sources
     ///////////////////////////////
 
-    /*
     glEnable(GL_DEPTH_TEST);
+
+    glDisable(GL_BLEND);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -416,7 +415,7 @@ void Renderer::render(float delta_time){
     debug_shader->use();
 
     debug_shader->set_uniform("view"       , camera->view_transform);
-    debug_shader->set_uniform("projection" , projection);
+    debug_shader->set_uniform("projection" , camera->projection_transform);
 
     //debug draw light
 
@@ -427,11 +426,11 @@ void Renderer::render(float delta_time){
                 //set uniforms
 
                 glm::mat4 t = glm::translate(mat4(), l->position);
-                glm::mat4 s = glm::scale(mat4(), vec3(.2f));
+                glm::mat4 s = glm::scale(mat4(), vec3(.1f));
                 glm::mat4 model = t * s;
 
-                shader->set_uniform("model", model);
-                shader->set_uniform("color", vec4(l->color,1));
+                debug_shader->set_uniform("model", model);
+                debug_shader->set_uniform("color", vec4(l->color,1));
 
                 //draw mesh
                 Mesh* mesh;
@@ -455,9 +454,6 @@ void Renderer::render(float delta_time){
             }
         }
     }
-    */
-
-    glDisable(GL_BLEND);
 
 
     ///////////////////////////////

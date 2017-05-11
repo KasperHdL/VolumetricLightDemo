@@ -65,7 +65,7 @@ public:
         this->intensity = intensity;
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
-        falloff = 1.0f;
+        falloff = 10;
 
 
         calc_influence_mesh();
