@@ -1,5 +1,7 @@
 #version 400
 
+uniform vec4 screen_size;
+
 uniform sampler2D position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D color_texture;
@@ -96,19 +98,15 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
 
 
 void main(){
-    vec3 position       = vec3(texture(position_texture , gl_FragCoord.xy));
-    vec3 normal         = vec3(texture(normal_texture   , gl_FragCoord.xy));
-    vec3 albedo         = vec3(texture(color_texture    , gl_FragCoord.xy));
-
-    vec3 diffuse = vec3(0);
-
-    vec3 view_direction = camera_position.xyz - position;
+    vec2 uv = gl_FragCoord.xy / screen_size.xy;
+    vec3 position = vec3(texture(position_texture , uv));
+    vec3 normal   = vec3(texture(normal_texture   , uv));
+    vec3 albedo   = vec3(texture(color_texture    , uv));
 
     //Calculate Light Contribution
-
-    vec4 light = light_function(position);
         //xyz = light_direction
         //w   = contribution
+    vec4 light = light_function(position);
 
     //Calculate Shadow
     float shadow = 0.0;
@@ -118,13 +116,8 @@ void main(){
 
 
     //Calculate Frag
-
     float d = max(dot(normal, normalize(light.xyz)), 0.0);
-    diffuse += d * light_color.rgb * light_color.a * light.w * (1 - shadow);
+    vec3 diffuse = d * light_color.rgb * light_color.a * light.w * (1 - shadow);
 
     color = diffuse * albedo;
-
-    //@TEMP(KASPER)
-    color = light_color.rgb;
-
 }

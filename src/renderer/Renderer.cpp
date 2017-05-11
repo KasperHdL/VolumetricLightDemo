@@ -66,13 +66,15 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //Light
         light_shader = AssetManager::get_shader("light");
 
+        light_shader->init_uniform("mvp"                , Shader::Uniform_Type::Mat4);
+        light_shader->init_uniform("screen_size"        , Shader::Uniform_Type::Vec4);
+
         light_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
 
         light_shader->init_uniform("shadow_map"         , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("camera_position"    , Shader::Uniform_Type::Vec4);
-        light_shader->init_uniform("mvp"                , Shader::Uniform_Type::Mat4);
 
         light_shader->init_uniform("light_position"     , Shader::Uniform_Type::Vec4);
         light_shader->init_uniform("light_color"        , Shader::Uniform_Type::Vec4);
@@ -275,7 +277,6 @@ void Renderer::render(float delta_time){
 
     camera->set_viewport(0,0,w,h);
     camera->set_perspective_projection(); 
-    mat4 projection = camera->projection_transform;
 
     //calc view transform
     camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
@@ -284,7 +285,7 @@ void Renderer::render(float delta_time){
     shader->use();
 
     shader->set_uniform("view"       , camera->view_transform);
-    shader->set_uniform("projection" , projection);
+    shader->set_uniform("projection" , camera->projection_transform);
 
     _render_scene(shader);
 
@@ -313,16 +314,17 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("color_texture"    , color_texture    , 2);
 
     light_shader->set_uniform("shadow_map"       , depth_texture    , 3);
+    light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
 
 
-    mat4 vp = projection * camera->view_transform;
+    mat4 vp = camera->projection_transform * camera->view_transform;
 
     for(int i = 0; i < God::lights.capacity;i++){
         Light* l = God::lights[i];
         if(l != nullptr && l->mesh != nullptr){
             if(l->type == Light::Type::Directional) continue;
 
-            light_shader->set_uniform("light_position" , vec4(l->position, 1));
+            light_shader->set_uniform("light_position" , vec4(l->position, l->type));
             light_shader->set_uniform("light_color"    , vec4(l->color, l->intensity));
 
             light_shader->set_uniform("light_attenuation" , vec4(l->attenuation , 1));
@@ -341,7 +343,7 @@ void Renderer::render(float delta_time){
             //render
             //@TODO(Kasper) no rotation currently
             glm::mat4 t = glm::translate(mat4(), l->position);
-            glm::mat4 s = glm::scale(mat4(), vec3(1));//l->scale);
+            glm::mat4 s = glm::scale(mat4(), l->scale);
 
             glm::mat4 model_transform = t * s;
 
@@ -364,6 +366,7 @@ void Renderer::render(float delta_time){
     //Write to Screen
     ////////////////////////////////
 
+    /*
 
     //set uniforms
     time += delta_time;
@@ -382,8 +385,6 @@ void Renderer::render(float delta_time){
 
 
 
-    glClearColor(0, 0, 0, 0);
-    glViewport(0,0,camera->viewport_w, camera->viewport_h);
 
 
     //draw screen
@@ -396,6 +397,7 @@ void Renderer::render(float delta_time){
     } else {
         glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
     }
+    */
 
 
 
@@ -403,6 +405,7 @@ void Renderer::render(float delta_time){
     //Debug Draw for light sources
     ///////////////////////////////
 
+    /*
     glEnable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
@@ -452,6 +455,7 @@ void Renderer::render(float delta_time){
             }
         }
     }
+    */
 
     glDisable(GL_BLEND);
 

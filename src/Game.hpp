@@ -52,6 +52,7 @@ class Game{
 
 //            new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(0,1,0), 1);
             new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,1),0, vec3(1,1,1), 1);
+            //new (God::lights.create()) Light(Light::Type::Point, vec3(0,0,0),vec3(0,-0.01,1),0, vec3(1,1,1), 1);
             //God::lights[0]->near_plane = -10;
             //God::lights[0]->far_plane = 10;
 

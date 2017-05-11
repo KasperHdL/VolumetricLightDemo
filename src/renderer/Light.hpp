@@ -68,7 +68,7 @@ public:
         falloff = 1.0f;
 
 
-        mesh = calc_influence_mesh();
+        calc_influence_mesh();
     } 
 
     Light(Type type, glm::vec3 position, glm::vec3 direction, float falloff, glm::vec3 color, float intensity){
@@ -84,11 +84,11 @@ public:
 
         attenuation = glm::vec3(1, 0.1f, 0.01f);
 
-        mesh = calc_influence_mesh();
+        calc_influence_mesh();
     }
 
-    Mesh* calc_influence_mesh(){
-        if(type == Type::Directional) return nullptr;
+    void calc_influence_mesh(){
+        if(type == Type::Directional) mesh = nullptr;
 
         if(type <= Type::Spot){
             //Point or Spot

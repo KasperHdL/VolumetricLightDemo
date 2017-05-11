@@ -135,7 +135,7 @@ Mesh* Mesh::get_sphere(){
     if(Mesh::sphere_mesh != nullptr)
         return Mesh::sphere_mesh;
 
-     using namespace glm;
+    using namespace glm;
     using namespace std;
     int stacks = 16/2;
     int slices = 32/2;
