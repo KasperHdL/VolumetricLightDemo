@@ -26,6 +26,8 @@ public:
     glm::vec3 position;
     glm::vec3 color;
 
+    bool volumetric = true;
+
     //[point / spot]
     glm::vec3 attenuation;
     float intensity;
@@ -88,9 +90,9 @@ public:
     }
 
     void calc_influence_mesh(){
-        if(type == Type::Directional) mesh = nullptr;
-
-        if(type <= Type::Spot){
+        if(type == Type::Directional){
+            mesh = nullptr;
+        }else if(type <= Type::Spot){
             //Point or Spot
 
             mesh = Mesh::get_sphere();
@@ -102,7 +104,10 @@ public:
             scale = vec3(radius, radius, radius);
 
         }else{
-            mesh = nullptr;
+            //volumetric light
+
+            mesh = Mesh::get_cube();
+            scale = vec3(3,2,3);
 
         }
     }
@@ -148,8 +153,10 @@ public:
             if(type >= Type::Point)
                 ImGui::DragFloat3("Attenuation" , &attenuation.x , 0.01f);
 
-            if(type == Type::Spot)
+            if(type == Type::Spot){
                 ImGui::DragFloat("Fall Off"      , &falloff        , 0.01f);
+            }
+            ImGui::Checkbox("Volumetric", &volumetric);
 
             if(type == Type::Directional || type == Type::Spot)
                 ImGui::Checkbox("Shadow Map", &create_shadow_map);
