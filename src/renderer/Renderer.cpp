@@ -281,6 +281,7 @@ void Renderer::render(float delta_time){
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
 
     camera->set_viewport(0,0,w,h);
@@ -297,10 +298,14 @@ void Renderer::render(float delta_time){
 
     _render_scene(geom_shader);
 
+    glDepthMask(GL_FALSE);
+
     ////////////////////////////////
     //Stencil Light Calculation
     ////////////////////////////////
-    
+
+    glEnable(GL_STENCIL_TEST);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_CULL_FACE);
     glClear(GL_STENCIL_BUFFER_BIT);
@@ -344,12 +349,17 @@ void Renderer::render(float delta_time){
 
         }
     }
+    glDisable(GL_STENCIL_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
 
 
     ////////////////////////////////
     //Render Light Influence 
     ////////////////////////////////
 
+
+    glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 
     glDisable(GL_DEPTH_TEST);
@@ -415,6 +425,8 @@ void Renderer::render(float delta_time){
         }
     }
 
+    glDepthMask(GL_FALSE);
+    glCullFace(GL_BACK);
 
     ////////////////////////////////
     //Write to Screen
