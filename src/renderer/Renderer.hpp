@@ -32,6 +32,7 @@ public:
     Camera* camera;
     Light* sun = nullptr;
 
+
     Shader* geom_shader;
     Shader* stencil_shader;
     Shader* light_shader;

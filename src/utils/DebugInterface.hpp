@@ -27,6 +27,9 @@ class DebugInterface{
         float delta_time_sum = 0;
 
 
+        //fog
+        float fog_intensity = 0.04;
+        vec3 fog_color = vec3(.3f, .4f, .5f);
 
         //menu
         bool menu = true;
@@ -98,6 +101,8 @@ class DebugInterface{
                         ImGui::Checkbox("Game Debug    [F8] ", &game_debug);
                         ImGui::Checkbox("Entity Debug  [F9] ", &entity_debug);
 
+                        ImGui::ColorEdit3("Fog Color", &fog_color.r);
+                        ImGui::DragFloat("Fog Intensity", &fog_intensity);
                         //DT Plot
                         
                         delta_time_sum -= delta_time_plot[array_index];

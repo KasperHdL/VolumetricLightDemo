@@ -45,9 +45,11 @@ public:
     
     //[proj]
     float field_of_view    = 90;
+
     //[proj and ortho]
     float near_plane       = .1f;
     float far_plane        = 100;
+
     //[ortho]
     float left_plane       = -10;
     float right_plane      = 10;

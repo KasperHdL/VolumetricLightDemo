@@ -87,16 +87,12 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //screen
         screen_shader = AssetManager::get_shader("screen");
 
+        screen_shader->init_uniform("camera_position"  , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("position_texture" , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
 
-        screen_shader->init_uniform("shadow_map"       , Shader::Uniform_Type::Texture);
-
-        screen_shader->init_uniform("light_position"     , Shader::Uniform_Type::Vec4);
-        screen_shader->init_uniform("light_color"        , Shader::Uniform_Type::Vec4);
-        screen_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
-        screen_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
+        screen_shader->init_uniform("fog"              , Shader::Uniform_Type::Vec4);
 
 
         //debug
@@ -439,9 +435,11 @@ void Renderer::render(float delta_time){
     //setup screen shader
     screen_shader->use();
 
+    screen_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+    screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
 
 //    screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
 
