@@ -97,6 +97,43 @@ vec4 light_function(vec3 position){
     }else if(light_position.w == 2){
         //spot
 
+        vec3 start = camera_position.xyz;
+        vec3 dir = position - start;
+
+        float l = length(dir);
+        int n = 100;
+        float f = l / n;
+
+        dir = normalize(dir);
+
+        float p = 0;
+
+        color.r = 0;
+
+
+        while(p < l){
+            vec3 pos = start + dir * p;
+
+            //add light
+
+            vec3 from_light = pos - light_position.xyz;
+
+            float spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
+            float dist = length(from_light);
+
+            float att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
+
+            float shadow = 0;
+
+            if(light_shadow_index >= 0)
+                shadow = calc_shadows(light_shadow_index, pos);
+
+            color.r += spot * att * (1-shadow);
+
+            //increment
+            p += f;
+        } 
+        color.r /= n;
 
 
         vec3 from_light = position - light_position.xyz;
