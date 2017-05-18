@@ -28,7 +28,7 @@ class DebugInterface{
 
 
         //fog
-        float fog_intensity = 0.04;
+        float fog_intensity = 0.005;
         vec3 fog_color = vec3(.3f, .4f, .5f);
 
         //menu

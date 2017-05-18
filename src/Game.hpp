@@ -23,6 +23,13 @@ class Game{
 
             Entity* e   = new (God::entities.create()) Entity();
             e->position = vec3(0,0,0);
+            e->scale    = vec3(1,1,1);
+            e->rotation = vec3(0,0,0);
+            e->mesh     = AssetManager::get_mesh("landscape.obj");
+            e->name     = "Landscape";
+
+            e   = new (God::entities.create()) Entity();
+            e->position = vec3(0,0,0);
             e->scale    = vec3(10,10,1);
             e->rotation = vec3(0,-3.14f / 2, 0);
             e->mesh     = Mesh::get_quad();
@@ -51,10 +58,11 @@ class Game{
 
 
 //            new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(0,1,0), 1);
-            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,1),0, vec3(1,0.5,0), 1);
+            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,1),0, vec3(1,1,1), 1);
 
             God::lights[0]->create_shadow_map = true;
-            God::lights[0]->falloff = 1;
+            God::lights[0]->falloff = 15;
+            God::lights[0]->intensity = 2;
             //God::lights[0]->far_plane = 10;
 
             //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);

@@ -1,7 +1,5 @@
 #version 400
 
-in vec3 worldPos;
-
 uniform vec4 screen_size;
 
 uniform sampler2D position_texture;
@@ -21,7 +19,7 @@ uniform mat4 light_shadow_vp;
 
 out vec3 color;
 
-
+float rand(float n){return fract(sin(n) * 43758.5453123);}
 
 /////////////////
 //Shadow Calc
@@ -101,7 +99,7 @@ vec4 light_function(vec3 position){
         vec3 dir = position - start;
 
         float l = length(dir);
-        int n = 100;
+        int n = 128;
         float f = l / n;
 
         dir = normalize(dir);
@@ -133,21 +131,17 @@ vec4 light_function(vec3 position){
             //increment
             p += f;
         } 
+
         color.r /= n;
 
 
         vec3 from_light = position - light_position.xyz;
 
-        float spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
-        float dist = length(from_light);
-
-        float att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
-
-        light = vec4(-from_light.xyz, spot * att);
+        light = vec4(-from_light.xyz, 0);
 
     }else{
 
-        vec3 dir = position - worldPos;
+        vec3 dir = position - camera_position.xyz;
 
 
         light = vec4(0,0,0, 1);
