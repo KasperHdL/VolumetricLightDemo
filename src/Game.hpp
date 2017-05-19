@@ -52,6 +52,7 @@ class Game{
             God::lights[0]->create_shadow_map = true;
             God::lights[0]->falloff = 15;
             God::lights[0]->intensity = 4;
+            God::lights[0]->calc_influence_mesh();
             //God::lights[0]->far_plane = 10;
 
             //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);

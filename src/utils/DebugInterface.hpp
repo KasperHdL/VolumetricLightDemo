@@ -9,6 +9,7 @@
 
 #include "../renderer/imgui/imgui_impl_sdl_gl3.hpp"
 #include "../renderer/Mesh.hpp"
+#include "../renderer/Light.hpp"
 
 class DebugInterface{
     public:
@@ -26,6 +27,7 @@ class DebugInterface{
         float delta_time_plot[array_length] = {};
         float delta_time_sum = 0;
 
+        float exposure = 1;
 
         //fog
         float fog_intensity = 0.005;
@@ -77,7 +79,6 @@ class DebugInterface{
             if(Input::get_key_on_down(SDL_SCANCODE_F8))     game_debug    = !game_debug;
             if(Input::get_key_on_down(SDL_SCANCODE_F9))     entity_debug  = !entity_debug;
 
-            //debug camera
         }
 
         void render(float dt){
@@ -103,6 +104,7 @@ class DebugInterface{
 
                         ImGui::ColorEdit3("Fog Color", &fog_color.r);
                         ImGui::DragFloat("Fog Intensity", &fog_intensity);
+                        ImGui::DragFloat("Exposure", &exposure, 0.1f);
                         //DT Plot
                         
                         delta_time_sum -= delta_time_plot[array_index];
@@ -196,19 +198,27 @@ class DebugInterface{
 
 
         void _create_entity(int index){
-            Entity* e = new (God::entities.create()) Entity();
+            if(index == 4){
+                //Light
 
-            e->name = type_entities[type_selected_index];
-            if(e->name == "Cube")
-                e->mesh = Mesh::get_cube();
-            else if(e->name == "Quad")
-                e->mesh = Mesh::get_quad();
-            else if(e->name == "Sphere")
-                e->mesh = Mesh::get_sphere();
+                Light* l = new (God::lights.create()) Light();
+                
 
-            e->position = glm::vec3();
-            e->scale = glm::vec3(1,1,1);
-            e->rotation = glm::vec3();
+            }else{
+                Entity* e = new (God::entities.create()) Entity();
+
+                e->name = type_entities[type_selected_index];
+                if(e->name == "Cube")
+                    e->mesh = Mesh::get_cube();
+                else if(e->name == "Quad")
+                    e->mesh = Mesh::get_quad();
+                else if(e->name == "Sphere")
+                    e->mesh = Mesh::get_sphere();
+
+                e->position = glm::vec3();
+                e->scale = glm::vec3(1,1,1);
+                e->rotation = glm::vec3();
+            }
         }
 
 };

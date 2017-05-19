@@ -35,7 +35,7 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
     if(coord.z > 1.0) return 1.0;
     
 
-    float bias = max(0.05 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
+    float bias = max(0.025 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
 
     float shadow = 0.0;
 
@@ -104,11 +104,14 @@ vec4 light_function(vec3 position){
         vec3 start = camera_position.xyz;
         vec3 dir = position - start;
 
+
+
         float l = length(dir);
-        int n = 128;
+        int n = int(2 * l);
         float f = l / n;
 
-        dir = normalize(dir);
+
+        dir = dir / l;
 
         float p = 0;
 
@@ -124,13 +127,13 @@ vec4 light_function(vec3 position){
 
         float shadow = 0;
 
-        float i =  spot * att * (1-shadow);
+        float i =  spot * att;
 
 
 
 
         while(p < l){
-            vec3 pos = start + dir * (p * rand(p * time));
+            vec3 pos = start + p * (dir * rand(p * time));
 
             //add light
 
@@ -202,4 +205,14 @@ void main(){
     vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow) + light_color.rgb * light_color.a * color.r);
 
     color = diffuse * albedo;
+
+    float exposure = camera_position.w;
+    const float gamma = 2.2;
+
+    // Exposure tone mapping
+    vec3 mapped = vec3(1.0) - exp(-color * exposure);
+    // Gamma correction
+    mapped = pow(mapped, vec3(1.0 / gamma));
+
+    color = mapped;
 }

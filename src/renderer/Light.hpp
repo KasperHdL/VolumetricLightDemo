@@ -58,6 +58,16 @@ public:
 
     
 
+    Light(){
+        this->type = Type::Point;
+        type_selected_index = (int)type;
+        this->position = vec3(0);
+        this->color = vec3(1);
+        this->intensity = 1;
+        attenuation = glm::vec3(1, 0.1f, 0.01f);
+
+        calc_influence_mesh();
+    }
     Light(Type type, glm::vec3 position, glm::vec3 color, float intensity){
         //[Point or Directional]
         this->type = type;
@@ -103,7 +113,7 @@ public:
             float lightMax  = glm::max(glm::max(color.r, color.g), color.b) * intensity;
             float radius    = (-attenuation.x +  glm::sqrt(attenuation.x * attenuation.x - 4 * attenuation.z * (attenuation.y - min_darkness * lightMax))) / (2 * attenuation.z);  
               
-            scale = vec3(radius, radius, radius);
+            scale = vec3(radius, radius, radius) * 2.0f;
 
         }else{
             //volumetric light
