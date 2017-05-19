@@ -5,9 +5,9 @@
 #include "Entity.hpp"
 #include "God.hpp" 
 
-#include <string> 
 #include "renderer/Camera.hpp"
  
+#include <string> 
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -15,6 +15,7 @@ class Player{
     public: 
         Entity* entity; 
         Camera* camera;
+        DebugInterface* debug;
 
         float speed = 20;
         float rotation_speed = .5f;
@@ -26,9 +27,12 @@ class Player{
             entity->position = vec3(10,10,10);
 
             camera = Renderer::instance->camera;
+            debug = Renderer::instance->debug;
+
         } 
 
         void update(float dt){
+
 
             vec3 move_direction = vec3(0,0,0);
 

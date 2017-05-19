@@ -100,7 +100,7 @@ public:
             mesh = Mesh::get_sphere();
 
             const float min_darkness= (256.0 / 5.0);
-            float lightMax  = glm::max(glm::max(color.r, color.g), color.b);
+            float lightMax  = glm::max(glm::max(color.r, color.g), color.b) * intensity;
             float radius    = (-attenuation.x +  glm::sqrt(attenuation.x * attenuation.x - 4 * attenuation.z * (attenuation.y - min_darkness * lightMax))) / (2 * attenuation.z);  
               
             scale = vec3(radius, radius, radius);
@@ -181,7 +181,9 @@ public:
                 ImGui::DragFloat("Far Plane"  , &far_plane  , 0.1f);
 
             }
+                ImGui::DragFloat3("Scale"  , &scale.x, 0.1f);
 
+            calc_influence_mesh();
 
             ImGui::TreePop();
 

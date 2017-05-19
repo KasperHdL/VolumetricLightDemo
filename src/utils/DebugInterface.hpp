@@ -121,10 +121,6 @@ class DebugInterface{
                     ImGui::End();
                 }
 
-                //game
-                if(game_debug)
-                    game->draw_debug();
-
                 //windows
                 if(hierarchy){
                     ImGui::Begin("Hierarchy");

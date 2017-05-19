@@ -31,6 +31,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
+
     //Shader setup
     {
 
@@ -82,6 +83,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("light_cone"         , Shader::Uniform_Type::Vec4);
         light_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         light_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
+        light_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
 
 
         //screen
@@ -93,6 +95,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("color_texture"    , Shader::Uniform_Type::Texture);
 
         screen_shader->init_uniform("fog"              , Shader::Uniform_Type::Vec4);
+        screen_shader->init_uniform("time"             , Shader::Uniform_Type::Float);
 
 
         //debug
@@ -187,7 +190,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         glDrawBuffers(3, draw_buffers);
 
-
     }
 
 }
@@ -206,6 +208,9 @@ void Renderer::render(float delta_time){
 
     int w,h;
     SDL_GetWindowSize(window,&w,&h);
+
+    //set uniforms
+    time += delta_time;
 
     ////////////////////////////////
     //Create Shadow map
@@ -381,6 +386,7 @@ void Renderer::render(float delta_time){
 
     light_shader->set_uniform("shadow_map"       , depth_texture    , 3);
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
+    light_shader->set_uniform("time", time);
 
 
 
@@ -445,8 +451,8 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
     screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
+    screen_shader->set_uniform("time", time);
 
-//    screen_shader->set_uniform("shadow_map"       , depth_texture    , 3);
 
     //setup sun
 

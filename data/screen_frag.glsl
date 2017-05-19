@@ -9,9 +9,14 @@ uniform sampler2D color_texture;
 uniform vec4 camera_position;
 
 uniform vec4 fog;
+uniform float time;
 
 
 out vec3 color;
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 void main(){
     vec3 position       = vec3(texture(position_texture       , uv));
@@ -24,7 +29,7 @@ void main(){
     float i = l * fog.w;
     if(i > 1)i = 1;
 
-    color = fog.rgb * i;
+    color = fog.xyz * i;
 
 }
 

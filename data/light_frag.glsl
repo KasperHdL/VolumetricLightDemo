@@ -17,6 +17,8 @@ uniform sampler2D shadow_map;
 uniform int  light_shadow_index;
 uniform mat4 light_shadow_vp;
 
+uniform float time;
+
 out vec3 color;
 
 float rand(float n){return fract(sin(n) * 43758.5453123);}
@@ -52,6 +54,10 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
 
 }
 
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 float calc_shadows(int index, vec3 position){
     vec4 frag_from_light = light_shadow_vp * vec4(position,1);
@@ -109,19 +115,33 @@ vec4 light_function(vec3 position){
         color.r = 0;
 
 
+        vec3 from_light = position - light_position.xyz;
+
+        float spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
+        float dist = length(from_light);
+
+        float att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
+
+        float shadow = 0;
+
+        float i =  spot * att * (1-shadow);
+
+
+
+
         while(p < l){
-            vec3 pos = start + dir * p;
+            vec3 pos = start + dir * (p * rand(p * time));
 
             //add light
 
-            vec3 from_light = pos - light_position.xyz;
+            from_light = pos - light_position.xyz;
 
-            float spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
-            float dist = length(from_light);
+            spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
+            dist = length(from_light);
 
-            float att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
+            att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
 
-            float shadow = 0;
+            shadow = 0;
 
             if(light_shadow_index >= 0)
                 shadow = calc_shadows(light_shadow_index, pos);
@@ -132,12 +152,15 @@ vec4 light_function(vec3 position){
             p += f;
         } 
 
+        //add light
         color.r /= n;
 
 
-        vec3 from_light = position - light_position.xyz;
 
-        light = vec4(-from_light.xyz, 0);
+
+        from_light = position - light_position.xyz;
+
+        light = vec4(-from_light.xyz, i);
 
     }else{
 
