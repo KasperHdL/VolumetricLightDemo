@@ -15,8 +15,10 @@ class Player{
     public: 
         Entity* entity; 
         Camera* camera;
+
         float speed = 20;
         float rotation_speed = .5f;
+        float rot_max_x = (((float)80/180) * glm::pi<float>());
  
         Player(){ 
             entity = new (God::entities.create()) Entity();
@@ -49,6 +51,7 @@ class Player{
             vec2 delta_mouse = Input::get_mouse_delta();
 
             entity->rotation.x += delta_mouse.y * rotation_speed * dt;
+            entity->rotation.x = clamp<float>(entity->rotation.x, -rot_max_x, rot_max_x);
             entity->rotation.y += delta_mouse.x * rotation_speed * dt;
 
             camera->view_transform = (eulerAngleX(entity->rotation.x) * eulerAngleY(entity->rotation.y)) * glm::translate(mat4(), -entity->position);
