@@ -2,7 +2,7 @@
 
 
 DynamicPool<Shader> AssetManager::shader_pool = DynamicPool<Shader>(8);
-DynamicPool<Mesh*> AssetManager::mesh_pool = DynamicPool<Mesh*>(4);
+vector<Mesh*> AssetManager::mesh_pool;
 
 Shader* AssetManager::get_shader(string vertex_path, string fragment_path){
     string vert = FileLoader::load_file_as_string(vertex_path);
@@ -50,8 +50,9 @@ Shader* AssetManager::get_shader(string shader_path){
 
 Mesh* AssetManager::get_mesh(string name){
     Mesh* mesh = ObjParser::load("landscape.obj");
+    mesh_pool.push_back(mesh);
 
-
+    return mesh;
 }
 
 

@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <iostream>
+#include <vector>
 
 #include "../renderer/Shader.hpp"
 #include "../renderer/Mesh.hpp"
@@ -18,7 +19,7 @@ public:
 
 
     static DynamicPool<Shader> shader_pool;
-    static DynamicPool<Mesh*> mesh_pool;
+    static vector<Mesh*> mesh_pool;
 
     static Shader* get_shader(string vertex_shader, string fragment_shader);
     static Shader* get_shader(string shader);
