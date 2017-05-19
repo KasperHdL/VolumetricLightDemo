@@ -211,7 +211,6 @@ void Renderer::render(float delta_time){
     //Create Shadow map
     ////////////////////////////////
 
-        glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
@@ -475,7 +474,6 @@ void Renderer::render(float delta_time){
 
     glEnable(GL_DEPTH_TEST);
 
-    glDisable(GL_FRAMEBUFFER_SRGB);
     glDisable(GL_BLEND);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
