@@ -168,11 +168,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
 
         // The depth buffer
-        GLuint depthrenderbuffer;
-        glGenRenderbuffers(1, &depthrenderbuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+        glGenRenderbuffers(1, &depth_renderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depth_renderbuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_renderbuffer);
 
 
         //configure framebuffer
@@ -188,11 +187,17 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         glDrawBuffers(3, draw_buffers);
 
+
     }
 
 }
 
 Renderer::~Renderer(){
+
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteFramebuffers(1, &depth_framebuffer);
+    glDeleteRenderbuffers(1, &depth_renderbuffer);
+
     SDL_GL_DeleteContext(glcontext);
     instance = nullptr;
 }
@@ -206,13 +211,14 @@ void Renderer::render(float delta_time){
     //Create Shadow map
     ////////////////////////////////
 
+        glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
     glViewport(0,0,shadow_width, shadow_height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
 
-    glClearColor(0,0,-999,1);
+    glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shadow_map_shader->use();
@@ -226,6 +232,7 @@ void Renderer::render(float delta_time){
         Light* l = sun;
 
         mat4 proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
+
         mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
 
         mat4 shadow_vp = proj * view;
@@ -274,7 +281,6 @@ void Renderer::render(float delta_time){
     ////////////////////////////////
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -284,7 +290,7 @@ void Renderer::render(float delta_time){
     camera->set_perspective_projection(); 
 
     //calc view transform
-    camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
+    //camera->view_transform = glm::lookAt(camera->entity->position, vec3(0,1,0), glm::vec3(0,1,0));
 
     //setup deferred shader
     geom_shader->use();
@@ -364,7 +370,7 @@ void Renderer::render(float delta_time){
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //set uniforms
     light_shader->use();
@@ -469,6 +475,7 @@ void Renderer::render(float delta_time){
 
     glEnable(GL_DEPTH_TEST);
 
+    glDisable(GL_FRAMEBUFFER_SRGB);
     glDisable(GL_BLEND);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);

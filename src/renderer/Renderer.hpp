@@ -42,6 +42,7 @@ public:
 
     GLuint framebuffer = 0;
     GLuint depth_framebuffer = 0;
+    GLuint depth_renderbuffer = 0;
 
     GLuint position_texture;
     GLuint normal_texture;

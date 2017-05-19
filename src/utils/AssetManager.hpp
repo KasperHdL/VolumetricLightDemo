@@ -28,6 +28,8 @@ public:
 
     static void update();
 
+    static void cleanup();
+
 
 private:
     static void _check_shader(Shader* shader);

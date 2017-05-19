@@ -62,6 +62,22 @@ void AssetManager::update(){
         _check_shader(AssetManager::shader_pool[i]);
 }
 
+void AssetManager::cleanup(){
+    for(int i = 0; i < AssetManager::shader_pool.capacity;i++){
+        Shader* s = AssetManager::shader_pool[i];
+        if(s != nullptr){
+            AssetManager::shader_pool.remove(s);
+            delete s;
+        }
+    }
+
+    for(int i = 0; i < mesh_pool.size();i++){
+        delete mesh_pool[i];
+
+    }
+
+}
+
 
 
 void AssetManager::_check_shader(Shader* shader){

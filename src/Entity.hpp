@@ -19,7 +19,7 @@ public:
     bool debug_control = false;
     std::string name;
 
-    Mesh* mesh;
+    Mesh* mesh = nullptr;
 
     //Transform
     vec3 position;

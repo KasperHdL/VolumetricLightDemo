@@ -5,11 +5,13 @@
 #include "utils/SceneLoader.hpp"
 #include "God.hpp"
 #include <vector>
+#include "Player.hpp"
 
 
 class Game{
     public:
         Engine* engine;
+        Player* player;
 
         Game(){}
         ~Game(){}
@@ -18,6 +20,7 @@ class Game{
 
         void initialize(Engine* engine){
             this->engine = engine;
+            player = new Player();
 
             SceneLoader::load_scene("standard.scene");
 
@@ -27,20 +30,6 @@ class Game{
             e->rotation = vec3(0,0,0);
             e->mesh     = AssetManager::get_mesh("landscape.obj");
             e->name     = "Landscape";
-
-            e   = new (God::entities.create()) Entity();
-            e->position = vec3(0,0,0);
-            e->scale    = vec3(10,10,1);
-            e->rotation = vec3(0,-3.14f / 2, 0);
-            e->mesh     = Mesh::get_quad();
-            e->name     = "Floor";
-
-            e           = new (God::entities.create()) Entity();
-            e->position = vec3(0,5,7);
-            e->scale    = vec3(10,10,1);
-            e->rotation = vec3(0, -3.14, 0);
-            e->mesh     = Mesh::get_quad();
-            e->name     = "Wall";
 
             /*
             for(int x = -10; x < 10; x ++){
@@ -62,7 +51,7 @@ class Game{
 
             God::lights[0]->create_shadow_map = true;
             God::lights[0]->falloff = 15;
-            God::lights[0]->intensity = 2;
+            God::lights[0]->intensity = 4;
             //God::lights[0]->far_plane = 10;
 
             //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
@@ -102,6 +91,12 @@ class Game{
             God::lights[2]->position = pos;
 
             */
+
+            //camera 
+
+            player->update(delta_time);
+
+
 
         }
 

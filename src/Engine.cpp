@@ -10,6 +10,8 @@ Engine::Engine(int screen_width, int screen_height){
 }
 
 Engine::~Engine(){
+
+    
 }
 
 int Engine::initialize(Game* game){
@@ -66,13 +68,16 @@ int Engine::initialize(Game* game){
     }
 
 
+    AssetManager::cleanup();
+    delete game;
+    delete debug;
+    delete Renderer::instance;
+
     // Close and destroy the window
     SDL_DestroyWindow(window);
 
     // Clean up
     SDL_Quit();
-
-    delete debug;
 
     return 0;
 }
