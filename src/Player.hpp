@@ -52,6 +52,7 @@ class Player{
             entity->rotation.y += delta_mouse.x * rotation_speed * dt;
 
             camera->view_transform = (eulerAngleX(entity->rotation.x) * eulerAngleY(entity->rotation.y)) * glm::translate(mat4(), -entity->position);
+            camera->entity->position = entity->position;;
 
 
 
