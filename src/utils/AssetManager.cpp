@@ -67,7 +67,7 @@ void AssetManager::cleanup(){
         Shader* s = AssetManager::shader_pool[i];
         if(s != nullptr){
             AssetManager::shader_pool.remove(s);
-            delete s;
+            s->~Shader();
         }
     }
 

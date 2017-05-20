@@ -29,7 +29,7 @@ void main(){
     float i = l * fog.w;
     if(i > 1)i = 1;
 
-    color = fog.xyz * i;
+    color = fog.xyz * i * (rand(uv * time));
 
 }
 

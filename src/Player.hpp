@@ -20,6 +20,8 @@ class Player{
         float speed = 20;
         float rotation_speed = .5f;
         float rot_max_x = (((float)80/180) * glm::pi<float>());
+
+        bool freeze = false;
  
         Player(){ 
             entity = new (God::entities.create()) Entity();
@@ -32,6 +34,11 @@ class Player{
         } 
 
         void update(float dt){
+            if(Input::get_key_on_down(SDL_SCANCODE_F))
+                freeze = !freeze;
+            if(freeze){
+                return;
+            }
 
 
             vec3 move_direction = vec3(0,0,0);

@@ -107,7 +107,7 @@ vec4 light_function(vec3 position){
 
 
         float l = length(dir);
-        int n = int(2 * l);
+        int n = int(1.5f * l);
         float f = l / n;
 
 
@@ -135,13 +135,10 @@ vec4 light_function(vec3 position){
         while(p < l){
             vec3 pos = start + p * (dir * rand(p * time));
 
-            //add light
-
+            //calculate light for pos
             from_light = pos - light_position.xyz;
-
             spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
             dist = length(from_light);
-
             att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
 
             shadow = 0;
@@ -149,13 +146,14 @@ vec4 light_function(vec3 position){
             if(light_shadow_index >= 0)
                 shadow = calc_shadows(light_shadow_index, pos);
 
+            //add light
             color.r += spot * att * (1-shadow);
 
             //increment
             p += f;
         } 
 
-        //add light
+        //divide by num samples
         color.r /= n;
 
 
@@ -206,6 +204,7 @@ void main(){
 
     color = diffuse * albedo;
 
+    //adjust for exposure
     float exposure = camera_position.w;
     const float gamma = 2.2;
 
