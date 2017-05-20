@@ -27,10 +27,8 @@ class DebugInterface{
         float delta_time_plot[array_length] = {};
         float delta_time_sum = 0;
 
-        float exposure = 1;
-
         //fog
-        float fog_intensity = 0.005;
+        float fog_intensity = 0.004;
         vec3 fog_color = vec3(.3f, .4f, .5f);
 
         //menu
@@ -39,9 +37,6 @@ class DebugInterface{
         bool scene_manager = false;
         bool create = false;
         bool hotload_shader = true;
-
-        bool game_debug = false;
-        bool entity_debug = false;
 
         //windows
 
@@ -55,7 +50,6 @@ class DebugInterface{
 
             //hierarchy
             float control_speed = 15;
-            bool hierarchy_lights = true;
             bool draw_light_pos = true;
 
 
@@ -76,8 +70,6 @@ class DebugInterface{
             if(Input::get_key_on_down(SDL_SCANCODE_F4))     scene_manager = !scene_manager;
             if(Input::get_key_on_down(SDL_SCANCODE_F5))     create        = !create;
             if(Input::get_key_on_down(SDL_SCANCODE_F6))     hotload_shader= !hotload_shader;
-            if(Input::get_key_on_down(SDL_SCANCODE_F8))     game_debug    = !game_debug;
-            if(Input::get_key_on_down(SDL_SCANCODE_F9))     entity_debug  = !entity_debug;
 
         }
 
@@ -91,6 +83,7 @@ class DebugInterface{
                 //menu
                 if(menu){
                     ImGui::Begin("Menu");
+                        ImGui::Text("Press [F] to freeze camera");
                         ImGui::Checkbox("Debug         [Esc]", &enabled);
                         ImGui::Checkbox("Menu          [F2] ", &menu);
                         ImGui::Checkbox("Hierarchy     [F3] ", &hierarchy);
@@ -98,13 +91,12 @@ class DebugInterface{
                         ImGui::Checkbox("Create Menu   [F5] ", &create);
 
                         ImGui::Checkbox("Hotload Shader[F6] ", &hotload_shader);
-
-                        ImGui::Checkbox("Game Debug    [F8] ", &game_debug);
-                        ImGui::Checkbox("Entity Debug  [F9] ", &entity_debug);
+                        ImGui::Separator();
 
                         ImGui::ColorEdit3("Fog Color", &fog_color.r);
                         ImGui::DragFloat("Fog Intensity", &fog_intensity);
-                        ImGui::DragFloat("Exposure", &exposure, 0.1f);
+                        ImGui::Separator();
+
                         //DT Plot
                         
                         delta_time_sum -= delta_time_plot[array_index];
@@ -127,19 +119,17 @@ class DebugInterface{
                 if(hierarchy){
                     ImGui::Begin("Hierarchy");
                     ImGui::DragFloat("Control Speed", &control_speed);
-                    ImGui::Checkbox("Show Lights", &hierarchy_lights);
                     ImGui::Checkbox("Show Light Pos", &draw_light_pos);
+                    ImGui::Separator();
 
                     //light
 
-                    if(hierarchy_lights){
-                        for(int i = 0; i < God::lights.capacity;i++){
-                            Light* l = God::lights[i];
-                            if(l != nullptr){
-                                ImGui::PushID(id++);
-                                l->draw_debug_inspector(dt, control_speed);
-                                ImGui::PopID();
-                            }
+                    for(int i = 0; i < God::lights.capacity;i++){
+                        Light* l = God::lights[i];
+                        if(l != nullptr){
+                            ImGui::PushID(id++);
+                            l->draw_debug_inspector(dt, control_speed);
+                            ImGui::PopID();
                         }
                     }
 
@@ -180,16 +170,6 @@ class DebugInterface{
 
 
                     ImGui::End();
-                }
-
-
-                if(entity_debug){
-                    for(int i = 0; i < God::entities.capacity;i++){
-                        Entity* e = God::entities[i];
-                        if(e != nullptr){
-                            e->draw_debug();
-                        }
-                    }
                 }
 
                 ImGui::Render();

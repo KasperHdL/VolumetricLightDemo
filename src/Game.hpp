@@ -24,18 +24,10 @@ class Game{
 
             SceneLoader::load_scene("standard.scene");
 
-            Entity* e   = new (God::entities.create()) Entity();
-            e->position = vec3(0,0,0);
-            e->scale    = vec3(1,1,1);
-            e->rotation = vec3(0,0,0);
-            e->mesh     = AssetManager::get_mesh("landscape.obj");
-            e->name     = "Landscape";
-
-            /*
             for(int x = -10; x < 10; x ++){
                 for(int y = -10; y < 10; y ++){
                     Entity* e   = new (God::entities.create()) Entity();
-                    e->position = vec3(x,0,y);
+                    e->position = vec3(x,-0.2f,y);
                     e->scale    = vec3(.5f);
                     e->rotation = vec3();
                     e->mesh     = Mesh::get_sphere();
@@ -43,7 +35,7 @@ class Game{
 
                     ents.push_back(e);
                 }
-            }*/
+            }
 
 
 //            new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(0,1,0), 1);

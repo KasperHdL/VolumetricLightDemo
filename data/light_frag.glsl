@@ -21,7 +21,9 @@ uniform float time;
 
 out vec3 color;
 
-float rand(float n){return fract(sin(n) * 43758.5453123);}
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 /////////////////
 //Shadow Calc
@@ -56,9 +58,6 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
 }
 
 
-float rand(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
 
 float calc_shadows(int index, vec3 position){
     vec4 frag_from_light = light_shadow_vp * vec4(position,1);
@@ -108,8 +107,8 @@ vec4 light_function(vec3 position, vec3 normal){
 
 
         float l = length(dir);
-        int n = int(3 * l);
-        float f = l / n;
+        int n = 30 + int(1 * l);
+        float f = l / (n-30);
 
 
         dir = dir / l;
@@ -138,8 +137,9 @@ vec4 light_function(vec3 position, vec3 normal){
 
 
         while(p < l){
+
             
-            vec3 pos = start + (p + rand(uv * p * time) - 0.5f) * dir;
+            vec3 pos = start + (p + (rand(uv * p * time) - 0.5f)) * dir;
 
             //calculate light for pos
             from_light = pos - light_position.xyz;
@@ -154,10 +154,14 @@ vec4 light_function(vec3 position, vec3 normal){
                 shadow = calc_shadows(light_shadow_index, pos);
 
             //add light
-            color.r += spot * att * (1-shadow)* rand(p * time);
+            float c = spot * att * (1-shadow);
+            color.r += c;
 
             //increment
-            p += f;
+            if(p < 5)
+                p += f/6;
+            else
+                p += f;
         } 
 
         //divide by num samples
@@ -206,11 +210,8 @@ void main(){
     normal.y += (rand(uv * time * 2)-.5f)*a;
     normal.z += (rand(uv * time * 3)-.5f)*a;
 
-    a = .5f;
-    albedo += (rand(uv * time * 1)-.5f)*a;
-
-    //albedo.y += (rand(uv * time * 2)-.5f)*a;
-    //albedo.z += (rand(uv * time * 3)-.5f)*a;
+    a = .4f;
+    albedo += vec3((rand(uv * time * 1)-.5f)*a);
 
     //Calculate Light Contribution
         //xyz = light_direction
@@ -230,14 +231,4 @@ void main(){
 
     color = diffuse * albedo;
 
-    //adjust for exposure
-    float exposure = camera_position.w;
-    const float gamma = 2.2;
-
-    // Exposure tone mapping
-    vec3 mapped = vec3(1.0) - exp(-color * exposure);
-    // Gamma correction
-    mapped = pow(mapped, vec3(1.0 / gamma));
-
-    color = mapped;
 }

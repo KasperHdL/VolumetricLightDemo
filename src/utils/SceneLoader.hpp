@@ -42,19 +42,19 @@ class SceneLoader{
                         
                         if(l == 0){
                             name = line;
-                            mesh = _read_type(line);
                         }else if(l == 1){
-                            pos   = _read_vec3(line);
+                            mesh = _read_mesh(line);
                         }else if(l == 2){
-                            scale = _read_vec3(line);
+                            pos   = _read_vec3(line);
                         }else if(l == 3){
+                            scale = _read_vec3(line);
+                        }else if(l == 4){
                             rot   = _read_vec3(line);
 
                             _create_entity(name, mesh, pos, scale, rot);
                         }
 
-                        l++;
-                        l = l % 4;
+                        l = ++l % 5;
                     }
                 }
 
@@ -70,7 +70,8 @@ class SceneLoader{
             /* File Spec
              *
              * # Comment
-             * Type(as String) ? @Speed
+             * Name
+             * Mesh filename
              * Position
              * Scale
              * Rotation
@@ -83,7 +84,14 @@ class SceneLoader{
                 for(int i = 0; i < God::entities.capacity; i++){
                     Entity* e = God::entities[i];
                     if(e != nullptr){
+                        if(e->name == "Player")continue;
                         file << e->name << "\n";
+
+                        if(e->mesh == nullptr || e->mesh->name == "")
+                            file << "NULL" << "\n";
+                        else
+                            file << e->mesh->name << "\n";
+
                         file << e->position.x << " " << e->position.y << " " << e->position.z << " \n";
                         file << e->scale.x << " " << e->scale.y << " " << e->scale.z << " \n";
                         file << e->rotation.x << " " << e->rotation.y << " " << e->rotation.z << " \n";
@@ -98,17 +106,18 @@ class SceneLoader{
 
     private:
 
-        static Mesh* _read_type(string line){
-            //@TODO(Kasper) be able to load builtin types and obj files
+        static Mesh* _read_mesh(string line){
             if(line == "Cube"){
                 return Mesh::get_cube();
             }else if(line == "Quad"){
                 return Mesh::get_quad();
             }else if(line == "Sphere"){
                 return Mesh::get_sphere();
+            }else if(line == "NULL"){
+                return nullptr;
+            }else{
+                return AssetManager::get_mesh(line);
             }
-
-            return nullptr;
         }
 
         static vec3 _read_vec3(string line){

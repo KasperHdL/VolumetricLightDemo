@@ -49,7 +49,9 @@ Shader* AssetManager::get_shader(string shader_path){
 
 
 Mesh* AssetManager::get_mesh(string name){
-    Mesh* mesh = ObjParser::load("landscape.obj");
+    Mesh* mesh = ObjParser::load(name);
+    if(mesh == nullptr) return nullptr;
+    mesh->name = name;
     mesh_pool.push_back(mesh);
 
     return mesh;

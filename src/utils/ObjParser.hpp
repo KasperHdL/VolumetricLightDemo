@@ -92,6 +92,7 @@ public:
 
         }else{
             cout << "Cannot open file " << filename << "\n";
+            return nullptr;
         }
 
         //add verts and normals

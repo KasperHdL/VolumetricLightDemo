@@ -375,7 +375,7 @@ void Renderer::render(float delta_time){
 
     //set uniforms
     light_shader->use();
-    light_shader->set_uniform("camera_position", vec4(camera->entity->position,debug->exposure));
+    light_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
 
     light_shader->set_uniform("position_texture" , position_texture , 0);
     light_shader->set_uniform("normal_texture"   , normal_texture   , 1);
@@ -443,7 +443,7 @@ void Renderer::render(float delta_time){
     //setup screen shader
     screen_shader->use();
 
-    screen_shader->set_uniform("camera_position", vec4(camera->entity->position,debug->exposure));
+    screen_shader->set_uniform("camera_position", vec4(camera->entity->position,1));
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
@@ -452,10 +452,6 @@ void Renderer::render(float delta_time){
 
 
     //setup sun
-
-
-
-
 
 
     //draw screen
@@ -479,18 +475,19 @@ void Renderer::render(float delta_time){
 
     glDisable(GL_BLEND);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(  0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-
-    debug_shader->use();
-
-    debug_shader->set_uniform("vp"       , camera_vp);
 
     //debug draw light
-
     if(debug->draw_light_pos){
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(  0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+        debug_shader->use();
+
+        debug_shader->set_uniform("vp"       , camera_vp);
+
+
         for(int i = 0; i < God::lights.capacity;i++){
             Light* l = God::lights[i];
             if(l != nullptr){

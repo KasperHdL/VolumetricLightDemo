@@ -1,16 +1,25 @@
 Camera
--10.4 7.1 -16.2 
+NULL
+4.74974 10 -14.7108 
 1 1 1 
-0.1 0.3 0 1 
+0.1 0.3 0 
+Sphere
 Sphere
 0 3 0 
 1 1 1 
-0 0 0 1 
+0 0 0 
+Sphere
 Sphere
 0 5 0 
 1 1 1 
-0 0 0 1 
+0 0 0 
+Sphere
 Sphere
 0 7 0 
 1 1 1 
-0 0 0 1  
+0 0 0 
+Landscape
+landscape.obj
+0 0 0 
+1 1 1 
+0 0 0 

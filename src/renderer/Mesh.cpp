@@ -94,6 +94,7 @@ Mesh* Mesh::get_cube(){
 
     Mesh::cube_mesh = new Mesh(positions, normals, uvs, colors, indices);
 
+    Mesh::cube_mesh->name = "Cube";
     return Mesh::cube_mesh;
 }
 
@@ -126,6 +127,7 @@ Mesh* Mesh::get_quad(){
     };
     Mesh::quad_mesh = new Mesh(vertices, normals, uvs , colors, indices);
 
+    Mesh::quad_mesh->name = "Quad";
     return Mesh::quad_mesh;
 
 }
@@ -196,6 +198,7 @@ Mesh* Mesh::get_sphere(){
     vector<uint16_t> indices;
 
     Mesh::sphere_mesh = new Mesh(finalPosition, finalNormals, finalUVs, colors, indices);
+    Mesh::sphere_mesh->name = "Sphere";
 
     return Mesh::sphere_mesh;
 

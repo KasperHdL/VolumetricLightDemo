@@ -30,7 +30,7 @@ public:
         entity->position = vec3();
         entity->scale = vec3();
         entity->rotation = vec3();
-        entity->debug_control = true;
+        entity->debug_control = false;
 
     }
 

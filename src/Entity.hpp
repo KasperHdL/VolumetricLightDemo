@@ -35,10 +35,6 @@ public:
 
     }
 
-    void draw_debug(){
-
-    }
-
     void draw_debug_inspector(float dt, float control_speed){
         if(ImGui::TreeNode(name.c_str())){
             ImGui::Checkbox("Control", &debug_control);

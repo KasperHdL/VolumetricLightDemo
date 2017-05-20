@@ -3,6 +3,7 @@
 #include "impl/GL.hpp"
 #include "glm/glm.hpp"
 #include <vector>
+#include <string>
 
 using namespace std;
 using namespace glm;
@@ -11,6 +12,9 @@ using namespace glm;
 
 class Mesh{
 public:
+    string name = "";
+
+
     enum class Topology{
         points          = 0x0000,
         lines           = 0x0001,

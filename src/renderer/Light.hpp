@@ -109,6 +109,7 @@ public:
 
             mesh = Mesh::get_sphere();
 
+            //super rough approx
             const float min_darkness= (256.0 / 5.0);
             float lightMax  = glm::max(glm::max(color.r, color.g), color.b) * intensity;
             float radius    = (-attenuation.x +  glm::sqrt(attenuation.x * attenuation.x - 4 * attenuation.z * (attenuation.y - min_darkness * lightMax))) / (2 * attenuation.z);  

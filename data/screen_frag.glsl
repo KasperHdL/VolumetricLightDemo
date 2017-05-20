@@ -23,9 +23,10 @@ void main(){
     vec3 normal         = vec3(texture(normal_texture         , uv));
     vec3 albedo         = vec3(texture(color_texture          , uv));
 
-    position.x += (rand(uv * time * 1)-2.5f) * 5;
-    position.y += (rand(uv * time * 2)-2.5f) * 5;
-    position.z += (rand(uv * time * 3)-2.5f) * 5;
+    float a = 2;
+    position.x += (rand(uv * time * 1)-.5f) * a;
+    position.y += (rand(uv * time * 2)-.5f) * a;
+    position.z += (rand(uv * time * 3)-.5f) * a;
 
     float l = length(position - vec3(camera_position));
 
