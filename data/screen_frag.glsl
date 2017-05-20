@@ -2,9 +2,9 @@
 
 in vec2 uv;
 
-uniform sampler2DMS position_texture;
-uniform sampler2DMS normal_texture;
-uniform sampler2DMS color_texture;
+uniform sampler2D position_texture;
+uniform sampler2D normal_texture;
+uniform sampler2D color_texture;
 
 uniform vec4 camera_position;
 
@@ -19,9 +19,9 @@ float rand(vec2 co){
 }
 
 void main(){
-    vec3 position       = vec3(texelFetch(position_texture       , uv, 0));
-    vec3 normal         = vec3(texelFetch(normal_texture         , uv, 0));
-    vec3 albedo         = vec3(texelFetch(color_texture          , uv, 0));
+    vec3 position = vec3(texture(position_texture , uv));
+    vec3 normal   = vec3(texture(normal_texture   , uv));
+    vec3 albedo   = vec3(texture(color_texture    , uv)); 
 
     float l = length(position - vec3(camera_position));
 
