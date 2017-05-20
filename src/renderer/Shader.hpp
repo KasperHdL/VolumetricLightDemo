@@ -100,7 +100,7 @@ public:
         if(_check_uniform(u, Uniform_Type::Texture) == false) return;
 
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture_id);
         glUniform1i(u.location_id, slot);
     }
 

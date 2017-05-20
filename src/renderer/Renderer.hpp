@@ -54,6 +54,7 @@ public:
 
     float time = 0;
 
+    int num_samples = 4;
     int max_shadow_maps = 3;
     int shadow_width = 4048;
     int shadow_height = 4048;

@@ -2,9 +2,9 @@
 
 uniform vec4 screen_size;
 
-uniform sampler2D position_texture;
-uniform sampler2D normal_texture;
-uniform sampler2D color_texture;
+uniform sampler2DMS position_texture;
+uniform sampler2DMS normal_texture;
+uniform sampler2DMS color_texture;
 
 uniform vec4 camera_position;
 
@@ -13,7 +13,7 @@ uniform vec4 light_color;
 uniform vec4 light_attenuation;
 uniform vec4 light_cone;
 
-uniform sampler2D shadow_map;
+uniform sampler2DMS shadow_map;
 uniform int  light_shadow_index;
 uniform mat4 light_shadow_vp;
 
@@ -43,7 +43,7 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
 
     for(int x = -1; x <= 1; x++){
         for(int y = -1; y <= 1; y++){
-            float adj_depth = texture(shadow_map, coord.xy + vec2(x,y) * texel_size).r;
+            float adj_depth = texelFetch(shadow_map, coord.xy + vec2(x,y) * texel_size, gl_SampleID).r;
             shadow +=  coord.z > adj_depth + bias ? 1.0 : 0.0;
 
         }
@@ -67,7 +67,7 @@ float calc_shadows(int index, vec3 position){
     if(coord.z > 1.0) return 1.0;
     
 
-    float adj_depth = texture(shadow_map, coord.xy).r;
+    float adj_depth = texelFetch(shadow_map, coord.xy, gl_SampleID).r;
     float shadow =  coord.z > adj_depth ? 1.0 : 0.0;
 
     return shadow;
@@ -182,9 +182,9 @@ vec4 light_function(vec3 position){
 
 void main(){
     vec2 uv = gl_FragCoord.xy / screen_size.xy;
-    vec3 position = vec3(texture(position_texture , uv));
-    vec3 normal   = vec3(texture(normal_texture   , uv));
-    vec3 albedo   = vec3(texture(color_texture    , uv));
+    vec3 position = vec3(texelFetch(position_texture , uv, gl_SampleID));
+    vec3 normal   = vec3(texelFetch(normal_texture   , uv, gl_SampleID));
+    vec3 albedo   = vec3(texelFetch(color_texture    , uv, gl_SampleID));
 
     //Calculate Light Contribution
         //xyz = light_direction
