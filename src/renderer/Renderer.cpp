@@ -31,6 +31,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
+    glEnable( GL_MULTISAMPLE );
 
     //Shader setup
     {
@@ -137,8 +138,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
     //deferred framebuffer
     {
-        glGenFramebuffers(1, &framebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         
         //create textures
 
@@ -161,14 +160,14 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         //color
         glGenTextures(1, &color_texture);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, color_texture);
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, num_samples, GL_RGBA, screen_width, screen_height, GL_TRUE);
+        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, num_samples, GL_RGB16F, screen_width, screen_height, GL_TRUE);
 
         glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
         // The depth buffer
         glGenRenderbuffers(1, &depth_renderbuffer);
@@ -191,7 +190,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glDrawBuffers(3, draw_buffers);
 
     }
-    glEnable( GL_MULTISAMPLE );
 
 }
 
