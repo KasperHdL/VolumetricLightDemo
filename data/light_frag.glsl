@@ -107,8 +107,7 @@ vec4 light_function(vec3 position, vec3 normal){
 
 
         float l = length(dir);
-        int n = 30 + int(1 * l);
-        float f = l / (n-30);
+        int n = 0; 
 
 
         dir = dir / l;
@@ -133,9 +132,7 @@ vec4 light_function(vec3 position, vec3 normal){
 
         float i =  spot * att;
 
-
-
-
+        float f = 0;
         while(p < l){
 
             
@@ -158,10 +155,9 @@ vec4 light_function(vec3 position, vec3 normal){
             color.r += c;
 
             //increment
-            if(p < 5)
-                p += f/6;
-            else
-                p += f;
+            f = 1.0 / (0.1f + 0.001f * p + 0.001f * p * p);
+            p += 1/f;
+            n++;
         } 
 
         //divide by num samples
