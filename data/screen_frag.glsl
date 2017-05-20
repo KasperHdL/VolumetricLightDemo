@@ -23,13 +23,16 @@ void main(){
     vec3 normal         = vec3(texture(normal_texture         , uv));
     vec3 albedo         = vec3(texture(color_texture          , uv));
 
-    float l = length(position - vec3(camera_position));
+    position.x += (rand(uv * time * 1)-2.5f) * 5;
+    position.y += (rand(uv * time * 2)-2.5f) * 5;
+    position.z += (rand(uv * time * 3)-2.5f) * 5;
 
+    float l = length(position - vec3(camera_position));
 
     float i = l * fog.w;
     if(i > 1)i = 1;
 
-    color = fog.xyz * i * (rand(uv * time));
+    color = fog.xyz * i;
 
 }
 

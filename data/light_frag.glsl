@@ -35,7 +35,7 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
     if(coord.z > 1.0) return 1.0;
     
 
-    float bias = max(0.025 * (1.0 - dot(normal, normalize(light_dir))), 0.005);
+    float bias = max(0.005 * (1.0 - dot(normal, normalize(light_dir))), 0.0005);
 
     float shadow = 0.0;
 
@@ -49,6 +49,7 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
         }
     }
     shadow /= 9;
+
 
     return shadow;
 
@@ -79,7 +80,7 @@ float calc_shadows(int index, vec3 position){
 //Light Calc
 /////////////////
 
-vec4 light_function(vec3 position){
+vec4 light_function(vec3 position, vec3 normal){
     vec4 light = vec4(1,1,1,0);
 
     if(light_position.w == 0){
@@ -107,7 +108,7 @@ vec4 light_function(vec3 position){
 
 
         float l = length(dir);
-        int n = int(1.5f * l);
+        int n = int(3 * l);
         float f = l / n;
 
 
@@ -117,6 +118,7 @@ vec4 light_function(vec3 position){
 
         color.r = 0;
 
+        vec2 uv = gl_FragCoord.xy / screen_size.xy;
 
         vec3 from_light = position - light_position.xyz;
 
@@ -127,18 +129,23 @@ vec4 light_function(vec3 position){
 
         float shadow = 0;
 
+        if(light_shadow_index >= 0)
+            shadow = calc_shadows(light_shadow_index, position, from_light / dist, normal);
+
         float i =  spot * att;
 
 
 
 
         while(p < l){
-            vec3 pos = start + p * (dir * rand(p * time));
+            
+            vec3 pos = start + (p + rand(uv * p * time) - 0.5f) * dir;
 
             //calculate light for pos
             from_light = pos - light_position.xyz;
-            spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
             dist = length(from_light);
+
+            spot = pow(max(dot(normalize(from_light), normalize(light_cone.xyz)),0), light_cone.w);
             att = 1.0 / (light_attenuation.x + light_attenuation.y * dist + light_attenuation.z * dist * dist);
 
             shadow = 0;
@@ -147,7 +154,7 @@ vec4 light_function(vec3 position){
                 shadow = calc_shadows(light_shadow_index, pos);
 
             //add light
-            color.r += spot * att * (1-shadow);
+            color.r += spot * att * (1-shadow)* rand(p * time);
 
             //increment
             p += f;
@@ -186,10 +193,29 @@ void main(){
     vec3 normal   = vec3(texture(normal_texture   , uv));
     vec3 albedo   = vec3(texture(color_texture    , uv));
 
+    //dithering
+
+
+    float a = 0;
+    position.x += (rand(uv * time * 1)-.5f)*a;
+    position.y += (rand(uv * time * 2)-.5f)*a;
+    position.z += (rand(uv * time * 3)-.5f)*a;
+
+    a = 0;
+    normal.x += (rand(uv * time * 1)-.5f)*a;
+    normal.y += (rand(uv * time * 2)-.5f)*a;
+    normal.z += (rand(uv * time * 3)-.5f)*a;
+
+    a = .5f;
+    albedo += (rand(uv * time * 1)-.5f)*a;
+
+    //albedo.y += (rand(uv * time * 2)-.5f)*a;
+    //albedo.z += (rand(uv * time * 3)-.5f)*a;
+
     //Calculate Light Contribution
         //xyz = light_direction
         //w   = contribution
-    vec4 light = light_function(position);
+    vec4 light = light_function(position, normal);
 
     //Calculate Shadow
     float shadow = 0.0;
