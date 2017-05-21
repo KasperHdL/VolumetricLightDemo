@@ -230,7 +230,10 @@ void Renderer::render(float delta_time){
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
-    glViewport(0,0,shadow_width, shadow_height);
+    int one_shadow_width = shadow_width / max_shadow_maps;
+    int shadow_count = 0;
+
+    glViewport(one_shadow_width * (shadow_count), 0, one_shadow_width * (shadow_count + 1), shadow_height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer);
 
     glClearColor(0,0,0,0);
@@ -239,7 +242,6 @@ void Renderer::render(float delta_time){
     shadow_map_shader->use();
 
 
-    int shadow_count = 0;
 
     //shadow map for sun
 
@@ -276,6 +278,8 @@ void Renderer::render(float delta_time){
                 continue;
 
             }
+
+            glViewport(one_shadow_width * (shadow_count), 0, one_shadow_width * (shadow_count + 1), shadow_height);
 
             mat4 shadow_vp = proj * view;
             shadow_map_shader->set_uniform("vp", shadow_vp);
