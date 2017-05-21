@@ -89,6 +89,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         light_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
         light_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
+        light_shader->init_uniform("albedo_rand"        , Shader::Uniform_Type::Float);
 
 
         //screen
@@ -394,6 +395,7 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("shadow_map"       , depth_texture    , 3);
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
     light_shader->set_uniform("time", time);
+    light_shader->set_uniform("albedo_rand", debug->light_albedo_rand);
 
     light_shader->set_uniform("ray_att", vec4(debug->ray_att, debug->ray_rand));
 
@@ -564,7 +566,7 @@ void Renderer::_render_scene(Shader* shader){
             glm::mat4 model_transform = t * a * s;
 
             shader->set_uniform("model", model_transform);
-            shader->set_uniform("color", vec4(1,1,1,1));
+            shader->set_uniform("color", e->color);
 
             //draw mesh
             e->mesh->bind();

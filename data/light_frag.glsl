@@ -20,6 +20,7 @@ uniform mat4 light_shadow_vp;
 uniform float time;
 
 uniform vec4 ray_att;
+uniform float albedo_rand;
 
 out vec3 color;
 
@@ -187,7 +188,7 @@ void main(){
     vec3 albedo   = vec3(texture(color_texture    , uv));
 
     //dithering
-    float a = .5;
+    float a = albedo_rand;
     albedo += vec3((rand(uv * time * 1)-.5f)*a);
 
     //Calculate Light Contribution

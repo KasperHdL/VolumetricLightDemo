@@ -25,11 +25,21 @@ void main(){
     vec3 position       = vec3(texture(position_texture       , uv));
     vec3 normal         = vec3(texture(normal_texture         , uv));
     vec3 albedo         = vec3(texture(color_texture          , uv));
+    
+    float a = 0f;
+    normal.x += (rand(uv * time * 1)-.5f) * a;
+    normal.y += (rand(uv * time * 2)-.5f) * a;
+    normal.z += (rand(uv * time * 3)-.5f) * a;
+
+    a = 1f;
+    albedo.x += (rand(uv * time * 1)-.5f) * a;
+    albedo.y += (rand(uv * time * 2)-.5f) * a;
+    albedo.z += (rand(uv * time * 3)-.5f) * a;
 
     float d = max(dot(normal, normalize(light_direction.xyz)), 0.0);
     vec3 diffuse = d * (light_color.rgb * light_color.a);
 
-    float a = position_rand;
+    a = position_rand;
     position.x += (rand(uv * time * 1)-.5f) * a;
     position.y += (rand(uv * time * 2)-.5f) * a;
     position.z += (rand(uv * time * 3)-.5f) * a;

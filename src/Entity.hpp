@@ -26,6 +26,8 @@ public:
     vec3 scale;
     vec3 rotation;
 
+    vec4 color = vec4(1,1,1,1);
+
     //Render Properties
 
     Entity(){
@@ -56,6 +58,8 @@ public:
             ImGui::DragFloat3("Position", &position.x, 0.1f);
             ImGui::DragFloat3("Scale",    &scale.x,    0.1f);
             ImGui::DragFloat3("Rotation", &rotation.x, 0.01f);
+            ImGui::ColorEdit3("Color", &color.x);
+            ImGui::DragFloat("Intensity", &color.a);
 
             ImGui::TreePop();
         }

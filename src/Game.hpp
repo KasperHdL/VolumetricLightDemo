@@ -30,6 +30,7 @@ class Game{
                     e->position = vec3(x,-0.2f,y);
                     e->scale    = vec3(.5f);
                     e->rotation = vec3();
+                    //e->color = vec4((float)(x+10)/20,(float)(y+10)/20,0,1);
                     e->mesh     = Mesh::get_sphere();
                     e->name     = "E (" + to_string(x) + ", " + to_string(y) + ")";
 
@@ -62,6 +63,7 @@ class Game{
                 Entity* e = ents[i];
                 float y = sin(p_scalar * (e->position.z + e->position.x) + t_scalar * time);
                 e->position = vec3(e->position.x,y,e->position.z);
+                e->color = vec4(y*.6f,y*.8f,y*.2f+ .8f,1);
 
             }
 
