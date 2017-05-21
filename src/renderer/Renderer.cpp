@@ -100,6 +100,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("screen"             , Shader::Uniform_Type::Texture);
 
         screen_shader->init_uniform("fog"                , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
@@ -202,6 +203,31 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glDrawBuffers(3, draw_buffers);
 
     }
+
+    {
+        //Post Processing
+
+        glGenTextures(1, &post_texture);
+        glBindTexture(GL_TEXTURE_2D, post_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+
+        glGenFramebuffers(1, &post_framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
+
+        const GLenum draw_buffers[] = {
+            GL_COLOR_ATTACHMENT3
+        };
+        glDrawBuffers(1, draw_buffers);
+
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, post_texture, 0);
+
+
+    }
+
 
 }
 
@@ -377,6 +403,7 @@ void Renderer::render(float delta_time){
     ////////////////////////////////
 
 
+//    glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 
@@ -396,7 +423,7 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     light_shader->set_uniform("color_texture"    , color_texture    , 2);
 
-    light_shader->set_uniform("shadow_map"       , depth_texture    , 3);
+    light_shader->set_uniform("shadow_map"       , depth_texture    , 4);
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
     light_shader->set_uniform("time", time);
     light_shader->set_uniform("albedo_rand", debug->light_albedo_rand);
@@ -446,12 +473,49 @@ void Renderer::render(float delta_time){
         }
     }
 
+
     glDepthMask(GL_FALSE);
     glCullFace(GL_BACK);
+
+
+    //Render Directional Light
+
+    Mesh* mesh = Mesh::get_quad();
+    mesh->bind();
+    for(int i = 0; i < God::lights.capacity;i++){
+        Light* l = God::lights[i];
+        if(l != nullptr){
+            if(l->type != Light::Type::Directional) continue;
+
+            light_shader->set_uniform("light_position" , vec4(l->position, l->type));
+            light_shader->set_uniform("light_color"    , vec4(l->color, l->intensity));
+
+            if(l->create_shadow_map){
+                light_shader->set_uniform("light_shadow_vp"    , l->shadow_vp);
+                light_shader->set_uniform("light_shadow_index" , l->shadow_map_index);
+
+            }else{
+                light_shader->set_uniform("light_shadow_index" , -1);
+            }
+
+            light_shader->set_uniform("mvp", mat4(1));
+
+            int indexCount = (int) mesh->indices.size();
+            if (indexCount == 0){
+                glDrawArrays((GLenum)mesh->topology, 0, mesh->vertex_count);
+            } else {
+                glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
+            }
+
+        }
+    }
+    //glDisable(GL_BLEND);
 
     ////////////////////////////////
     //Write to Screen
     ////////////////////////////////
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //set uniforms
     time += delta_time;
@@ -467,21 +531,8 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("time", time);
     screen_shader->set_uniform("position_rand", debug->position_rand);
 
-    //setup sun
-    screen_shader->set_uniform("light_direction", vec4(sun->position,sun->type));
-    screen_shader->set_uniform("light_color", vec4(sun->color, sun->intensity));
-
-    screen_shader->set_uniform("shadow_map"         , depth_texture           , 3);
-    screen_shader->set_uniform("light_shadow_vp"    , sun->shadow_vp);
-    if(sun->create_shadow_map)
-        screen_shader->set_uniform("light_shadow_index" , sun->shadow_map_index);
-    else
-        screen_shader->set_uniform("light_shadow_index" , -1);
-
 
     //draw screen
-    Mesh* mesh = Mesh::get_quad();
-    mesh->bind();
 
     int indexCount = (int) mesh->indices.size();
     if (indexCount == 0){

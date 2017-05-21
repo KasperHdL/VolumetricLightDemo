@@ -43,11 +43,15 @@ public:
     GLuint framebuffer = 0;
     GLuint depth_framebuffer = 0;
     GLuint depth_renderbuffer = 0;
+    GLuint post_framebuffer = 0;
 
     GLuint position_texture;
     GLuint normal_texture;
     GLuint color_texture;
+
     GLuint depth_texture;
+
+    GLuint post_texture;
 
     SDL_Window* window;
     SDL_GLContext glcontext;
