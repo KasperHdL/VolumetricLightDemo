@@ -11,22 +11,19 @@ class Light{
 private:
     bool _debug_control = false;
     int type_selected_index;
-    static const int type_name_length = 4;
-    const char* type_names[type_name_length] = {"Directional Light", "Point Light", "Spot Light", "Volumetric Light"};
+    static const int type_name_length = 3;
+    const char* type_names[type_name_length] = {"Directional Light", "Point Light", "Spot Light"};
 
 public:
     enum class Type{
         Directional,
         Point,
-        Spot,
-        Volumetric
+        Spot
     };
 
     Type type;
     glm::vec3 position;
     glm::vec3 color;
-
-    bool volumetric = true;
 
     //[point / spot]
     glm::vec3 attenuation;
@@ -116,12 +113,6 @@ public:
               
             scale = vec3(radius, radius, radius) * 2.0f;
 
-        }else{
-            //volumetric light
-
-            mesh = Mesh::get_cube();
-            scale = vec3(3,2,3);
-
         }
     }
 
@@ -169,7 +160,6 @@ public:
             if(type == Type::Spot){
                 ImGui::DragFloat("Fall Off"      , &falloff        , 0.01f);
             }
-            ImGui::Checkbox("Volumetric", &volumetric);
 
             if(type == Type::Directional || type == Type::Spot)
                 ImGui::Checkbox("Shadow Map", &create_shadow_map);

@@ -54,9 +54,9 @@ public:
 
     float time = 0;
 
-    int max_shadow_maps = 3;
-    int shadow_width = 4048;
-    int shadow_height = 4048;
+    int max_shadow_maps = 1;
+    int shadow_width = 3000;
+    int shadow_height = 3000;
 
     int screen_width;
     int screen_height;

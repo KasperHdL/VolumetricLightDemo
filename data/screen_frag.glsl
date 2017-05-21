@@ -9,8 +9,11 @@ uniform sampler2D color_texture;
 uniform vec4 camera_position;
 
 uniform vec4 fog;
+uniform float position_rand;
 uniform float time;
 
+uniform vec4 light_direction;
+uniform vec4 light_color;
 
 out vec3 color;
 
@@ -22,8 +25,11 @@ void main(){
     vec3 position       = vec3(texture(position_texture       , uv));
     vec3 normal         = vec3(texture(normal_texture         , uv));
     vec3 albedo         = vec3(texture(color_texture          , uv));
+    
+    float d = max(dot(normal, normalize(light_direction.xyz)), 0.0);
+    vec3 diffuse = d * (light_color.rgb * light_color.a);
 
-    float a = 2;
+    float a = position_rand;
     position.x += (rand(uv * time * 1)-.5f) * a;
     position.y += (rand(uv * time * 2)-.5f) * a;
     position.z += (rand(uv * time * 3)-.5f) * a;
@@ -33,7 +39,8 @@ void main(){
     float i = l * fog.w;
     if(i > 1)i = 1;
 
-    color = fog.xyz * i;
+    color = fog.xyz * i + diffuse * albedo;
+
 
 }
 

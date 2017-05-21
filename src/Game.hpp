@@ -39,12 +39,12 @@ class Game{
 
 
 //            new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(0,1,0), 1);
-            new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,.015),0, vec3(1,1,1), 1);
+            Light* l = new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,.015),0, vec3(1,1,1), 1);
 
-            God::lights[0]->create_shadow_map = true;
-            God::lights[0]->falloff = 15;
-            God::lights[0]->intensity = 4;
-            God::lights[0]->calc_influence_mesh();
+            l->create_shadow_map = true;
+            l->falloff = 15;
+            l->intensity = 4;
+            l->calc_influence_mesh();
             //God::lights[0]->far_plane = 10;
 
             //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
@@ -72,7 +72,7 @@ class Game{
             float z  = -5;
 
             vec3 pos = vec3(m * sin(time * 2 + o), h + ho * sin(time + o), z);
-            God::lights[0]->position = pos;
+        //    God::lights[0]->position = pos;
 
             /*
             o = 2;

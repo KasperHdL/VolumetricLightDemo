@@ -31,6 +31,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
+    //sun
+    sun = new (God::lights.create()) Light(Light::Type::Directional, vec3(0,1,.25f), vec3(0,.1f,.5f), .15f);
+
 
     //Shader setup
     {
@@ -77,6 +80,8 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("shadow_map"         , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("camera_position"    , Shader::Uniform_Type::Vec4);
 
+        light_shader->init_uniform("ray_att"            , Shader::Uniform_Type::Vec4);
+
         light_shader->init_uniform("light_position"     , Shader::Uniform_Type::Vec4);
         light_shader->init_uniform("light_color"        , Shader::Uniform_Type::Vec4);
         light_shader->init_uniform("light_attenuation"  , Shader::Uniform_Type::Vec4);
@@ -96,6 +101,10 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
 
         screen_shader->init_uniform("fog"              , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("time"             , Shader::Uniform_Type::Float);
+        screen_shader->init_uniform("position_rand"    , Shader::Uniform_Type::Float);
+
+        screen_shader->init_uniform("light_direction"  , Shader::Uniform_Type::Vec4);
+        screen_shader->init_uniform("light_color"      , Shader::Uniform_Type::Vec4);
 
 
         //debug
@@ -231,21 +240,22 @@ void Renderer::render(float delta_time){
 
     if(sun != nullptr){
         Light* l = sun;
+        if(l->create_shadow_map){
 
-        mat4 proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
+            mat4 proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
 
-        mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
+            mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
 
-        mat4 shadow_vp = proj * view;
-        shadow_map_shader->set_uniform("vp", shadow_vp);
-        shadow_map_shader->set_uniform("shadow_index", shadow_count);
+            mat4 shadow_vp = proj * view;
+            shadow_map_shader->set_uniform("vp", shadow_vp);
+            shadow_map_shader->set_uniform("shadow_index", shadow_count);
 
-        l->shadow_vp = shadow_vp;
-        l->shadow_map_index = shadow_count++;
+            l->shadow_vp = shadow_vp;
+            l->shadow_map_index = shadow_count++;
 
-        //render scene
-        _render_scene(shadow_map_shader);
-
+            //render scene
+            _render_scene(shadow_map_shader);
+        }
     }
 
     //shadow map for other lights
@@ -385,6 +395,7 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
     light_shader->set_uniform("time", time);
 
+    light_shader->set_uniform("ray_att", vec4(debug->ray_att, debug->ray_rand));
 
 
     for(int i = 0; i < God::lights.capacity;i++){
@@ -436,7 +447,6 @@ void Renderer::render(float delta_time){
     //Write to Screen
     ////////////////////////////////
 
-
     //set uniforms
     time += delta_time;
 
@@ -449,9 +459,11 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
     screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
     screen_shader->set_uniform("time", time);
-
+    screen_shader->set_uniform("position_rand", debug->position_rand);
 
     //setup sun
+    screen_shader->set_uniform("light_direction", vec4(sun->position,sun->type));
+    screen_shader->set_uniform("light_color", vec4(sun->color, sun->intensity));
 
 
     //draw screen

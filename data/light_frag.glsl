@@ -19,6 +19,8 @@ uniform mat4 light_shadow_vp;
 
 uniform float time;
 
+uniform vec4 ray_att;
+
 out vec3 color;
 
 float rand(vec2 co){
@@ -29,7 +31,7 @@ float rand(vec2 co){
 //Shadow Calc
 /////////////////
 
-float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
+float calc_shadows_smooth(int index, vec3 position){
     vec4 frag_from_light = light_shadow_vp * vec4(position,1);
 
     vec3 coord = frag_from_light.xyz / frag_from_light.w;
@@ -37,7 +39,7 @@ float calc_shadows(int index, vec3 position, vec3 light_dir, vec3 normal){
     if(coord.z > 1.0) return 1.0;
     
 
-    float bias = max(0.005 * (1.0 - dot(normal, normalize(light_dir))), 0.0005);
+    float bias = 0.0005;
 
     float shadow = 0.0;
 
@@ -66,9 +68,10 @@ float calc_shadows(int index, vec3 position){
     coord = coord * 0.5 + 0.5;
     if(coord.z > 1.0) return 1.0;
     
+    float bias = 0.0005;
 
     float adj_depth = texture(shadow_map, coord.xy).r;
-    float shadow =  coord.z > adj_depth ? 1.0 : 0.0;
+    float shadow =  coord.z > adj_depth + bias? 1.0 : 0.0;
 
     return shadow;
 
@@ -79,7 +82,7 @@ float calc_shadows(int index, vec3 position){
 //Light Calc
 /////////////////
 
-vec4 light_function(vec3 position, vec3 normal){
+vec4 light_function(vec3 position, vec3 normal, vec2 uv){
     vec4 light = vec4(1,1,1,0);
 
     if(light_position.w == 0){
@@ -116,7 +119,6 @@ vec4 light_function(vec3 position, vec3 normal){
 
         color.r = 0;
 
-        vec2 uv = gl_FragCoord.xy / screen_size.xy;
 
         vec3 from_light = position - light_position.xyz;
 
@@ -127,16 +129,13 @@ vec4 light_function(vec3 position, vec3 normal){
 
         float shadow = 0;
 
-        if(light_shadow_index >= 0)
-            shadow = calc_shadows(light_shadow_index, position, from_light / dist, normal);
-
         float i =  spot * att;
 
         float f = 0;
-        while(p < l){
+        while(p < l && n < 1000){
 
             
-            vec3 pos = start + (p + (rand(uv * p * time) - 0.5f)*f) * dir;
+            vec3 pos = start + (p + (rand(uv * p * time) - 0.5f)* f * ray_att.w) * dir;
 
             //calculate light for pos
             from_light = pos - light_position.xyz;
@@ -155,7 +154,7 @@ vec4 light_function(vec3 position, vec3 normal){
             color.r += c;
 
             //increment
-            f = 1.0 / (1.0 / (0.2f + 0.01f * p + 0.001f * p * p));
+            f = ray_att.x + ray_att.y * p + ray_att.z * p * p;
             p += f;
             n++;
         } 
@@ -170,12 +169,6 @@ vec4 light_function(vec3 position, vec3 normal){
 
         light = vec4(-from_light.xyz, i);
 
-    }else{
-
-        vec3 dir = position - camera_position.xyz;
-
-
-        light = vec4(0,0,0, 1);
     }
 
     return light;
@@ -194,31 +187,19 @@ void main(){
     vec3 albedo   = vec3(texture(color_texture    , uv));
 
     //dithering
-
-
-    float a = 0;
-    position.x += (rand(uv * time * 1)-.5f)*a;
-    position.y += (rand(uv * time * 2)-.5f)*a;
-    position.z += (rand(uv * time * 3)-.5f)*a;
-
-    a = 0;
-    normal.x += (rand(uv * time * 1)-.5f)*a;
-    normal.y += (rand(uv * time * 2)-.5f)*a;
-    normal.z += (rand(uv * time * 3)-.5f)*a;
-
-    a = .4f;
+    float a = .5;
     albedo += vec3((rand(uv * time * 1)-.5f)*a);
 
     //Calculate Light Contribution
         //xyz = light_direction
         //w   = contribution
-    vec4 light = light_function(position, normal);
+    vec4 light = light_function(position, normal, uv);
 
     //Calculate Shadow
     float shadow = 0.0;
 
     if(light_shadow_index >= 0)
-        shadow = calc_shadows(light_shadow_index, position, light.xyz, normal);
+        shadow = calc_shadows_smooth(light_shadow_index, position);
 
 
     //Calculate Frag

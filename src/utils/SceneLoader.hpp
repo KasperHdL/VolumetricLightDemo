@@ -6,6 +6,7 @@
 #include "../renderer/Mesh.hpp"
 #include "../renderer/Camera.hpp"
 #include "../renderer/Renderer.hpp"
+#include "../renderer/Light.hpp"
 
 #include "DataPath.hpp"
 
@@ -20,7 +21,8 @@ class SceneLoader{
             /* File Spec
              *
              * # Comment
-             * Type(as String) @Speed
+             * Type(as String) @Speed(Kasper)
+             * Mesh(filename or predefined[Cube,Quad,Sphere])
              * Position
              * Scale
              * Rotation
@@ -39,7 +41,7 @@ class SceneLoader{
             if(file.is_open()){
                 while(getline(file, line)){
                     if(line.size() != 0  && line.at(0) != '#'){
-                        
+
                         if(l == 0){
                             name = line;
                         }else if(l == 1){

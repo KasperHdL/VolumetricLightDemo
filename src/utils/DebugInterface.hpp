@@ -29,7 +29,11 @@ class DebugInterface{
 
         //fog
         float fog_intensity = 0.004;
-        vec3 fog_color = vec3(.3f, .4f, .5f);
+        vec3 fog_color = vec3(.3f, .4f, .3f);
+        float position_rand = 2;
+
+        vec3 ray_att = vec3(0.2f, 0.01f, 0.001f);
+        float ray_rand = 1;
 
         //menu
         bool menu = true;
@@ -50,7 +54,7 @@ class DebugInterface{
 
             //hierarchy
             float control_speed = 15;
-            bool draw_light_pos = true;
+            bool draw_light_pos = false;
 
 
         void initialize(SDL_Window* window, Game* game){
@@ -91,10 +95,26 @@ class DebugInterface{
                         ImGui::Checkbox("Create Menu   [F5] ", &create);
 
                         ImGui::Checkbox("Hotload Shader[F6] ", &hotload_shader);
+
                         ImGui::Separator();
 
-                        ImGui::ColorEdit3("Fog Color", &fog_color.r);
-                        ImGui::DragFloat("Fog Intensity", &fog_intensity);
+                        ImGui::Text("Fog");
+                        ImGui::ColorEdit3("Color", &fog_color.r);
+                        ImGui::DragFloat("Intensity", &fog_intensity,0.001f);
+                        ImGui::DragFloat("Position Rand Scalar", &position_rand);
+
+                        ImGui::Separator();
+
+                        ImGui::Text("Raymarching");
+                        ImGui::DragFloat3("Attenuation", &ray_att.x, 0.01f);
+                        ImGui::DragFloat("Rand scalar", &ray_rand, 0.1f);
+
+                        if(ray_att.x <= 0) ray_att.x = 0.2f;
+                        if(ray_att.y <= 0) ray_att.y = 0.01f;
+                        if(ray_att.z <= 0) ray_att.z = 0.001f;
+
+                        if(glm::length(ray_att) == 0) ray_att.x = 0.1f;
+
                         ImGui::Separator();
 
                         //DT Plot
