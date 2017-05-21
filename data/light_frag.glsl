@@ -136,7 +136,7 @@ vec4 light_function(vec3 position, vec3 normal){
         while(p < l){
 
             
-            vec3 pos = start + (p + (rand(uv * p * time) - 0.5f)) * dir;
+            vec3 pos = start + (p + (rand(uv * p * time) - 0.5f)*f) * dir;
 
             //calculate light for pos
             from_light = pos - light_position.xyz;
@@ -155,8 +155,8 @@ vec4 light_function(vec3 position, vec3 normal){
             color.r += c;
 
             //increment
-            f = 1.0 / (0.1f + 0.001f * p + 0.001f * p * p);
-            p += 1/f;
+            f = 1.0 / (1.0 / (0.2f + 0.01f * p + 0.001f * p * p));
+            p += f;
             n++;
         } 
 
