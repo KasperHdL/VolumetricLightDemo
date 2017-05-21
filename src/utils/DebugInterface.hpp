@@ -49,8 +49,8 @@ class DebugInterface{
 
             //create menu
             int type_selected_index = 0;
-            static const int type_num_items = 5;
-            const char* type_entities[type_num_items] = {"Cube", "Quad", "Sphere", "Player", "Light"};
+            static const int type_num_items = 4;
+            const char* type_entities[type_num_items] = {"Cube", "Quad", "Sphere", "Light"};
 
             //hierarchy
             float control_speed = 15;
@@ -144,6 +144,7 @@ class DebugInterface{
 
                     //light
 
+                    ImGui::Text("Lights:");
                     for(int i = 0; i < God::lights.capacity;i++){
                         Light* l = God::lights[i];
                         if(l != nullptr){
@@ -153,6 +154,8 @@ class DebugInterface{
                         }
                     }
 
+                    ImGui::Separator();
+                    ImGui::Text("Entities:");
                     //entities
                     for(int i = 0; i < God::entities.capacity;i++){
                         Entity* e = God::entities[i];
@@ -198,11 +201,9 @@ class DebugInterface{
 
 
         void _create_entity(int index){
-            if(index == 4){
+            if(index == 3){
                 //Light
-
                 Light* l = new (God::lights.create()) Light();
-                
 
             }else{
                 Entity* e = new (God::entities.create()) Entity();
