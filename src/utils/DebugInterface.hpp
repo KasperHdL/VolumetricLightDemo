@@ -88,7 +88,9 @@ class DebugInterface{
                 //menu
                 if(menu){
                     ImGui::Begin("Menu");
-                        ImGui::Text("Press [F] to freeze camera");
+                        ImGui::Checkbox("Freeze Camera [F]", &game->player->freeze);
+                        ImGui::Separator();
+
                         ImGui::Checkbox("Debug         [Esc]", &enabled);
                         ImGui::Checkbox("Menu          [F2] ", &menu);
                         ImGui::Checkbox("Hierarchy     [F3] ", &hierarchy);
@@ -149,18 +151,22 @@ class DebugInterface{
 
                     //light
 
+                    ImGui::Text("");
                     ImGui::Text("Lights:");
+                    ImGui::Separator();
                     for(int i = 0; i < God::lights.capacity;i++){
                         Light* l = God::lights[i];
                         if(l != nullptr){
                             ImGui::PushID(id++);
                             l->draw_debug_inspector(dt, control_speed);
                             ImGui::PopID();
+                            ImGui::Separator();
                         }
                     }
 
-                    ImGui::Separator();
+                    ImGui::Text("");
                     ImGui::Text("Entities:");
+                    ImGui::Separator();
                     //entities
                     for(int i = 0; i < God::entities.capacity;i++){
                         Entity* e = God::entities[i];
@@ -168,6 +174,7 @@ class DebugInterface{
                             ImGui::PushID(id++);
                             e->draw_debug_inspector(dt, control_speed);
                             ImGui::PopID();
+                            ImGui::Separator();
                         }
                     }
                     ImGui::End();

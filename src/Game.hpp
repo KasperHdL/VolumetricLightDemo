@@ -44,7 +44,7 @@ class Game{
 
             l->create_shadow_map = true;
             l->falloff = 15;
-            l->intensity = 4;
+            l->intensity = 3;
             l->calc_influence_mesh();
             //God::lights[0]->far_plane = 10;
 
@@ -56,6 +56,7 @@ class Game{
         float time     = 0;
         float p_scalar = 0.5f;
         float t_scalar = 0.5f;
+
         void update(float delta_time){
             time += delta_time;
 
