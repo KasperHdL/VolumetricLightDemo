@@ -191,5 +191,14 @@ public:
         }
     }
 
+    void set_ortho_scale(float scale){
+        near_plane       = -scale;
+        left_plane       = -scale;
+        bottom_plane     = -scale;
+        far_plane        = scale;
+        right_plane      = scale;
+        top_plane        = scale;
+    }
+
 
 };
