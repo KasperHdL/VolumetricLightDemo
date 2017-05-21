@@ -17,9 +17,9 @@ class Player{
         Camera* camera;
         DebugInterface* debug;
 
-        float speed = 20;
-        float rotation_speed = .5f;
-        float rot_max_x = (((float)80/180) * glm::pi<float>());
+        float speed = 15;
+        float rotation_speed = .3f;
+        float rot_max_x = (((float)60/180) * glm::pi<float>());
 
         bool freeze = false;
  
@@ -69,7 +69,8 @@ class Player{
 
             //update camera
             camera->view_transform = (eulerAngleX(entity->rotation.x) * eulerAngleY(entity->rotation.y)) * glm::translate(mat4(), -entity->position);
-            camera->entity->position = entity->position;;
+            camera->entity->position = entity->position;
+            camera->entity->rotation = entity->rotation;
 
 
 

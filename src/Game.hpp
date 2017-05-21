@@ -21,6 +21,8 @@ class Game{
         void initialize(Engine* engine){
             this->engine = engine;
             player = new Player();
+            player->entity->position = vec3(-3.3,-1.3,11.3);
+            player->entity->rotation = vec3(0.15,6.5,0);
 
             SceneLoader::load_scene("standard.scene");
 
@@ -30,7 +32,6 @@ class Game{
                     e->position = vec3(x,-0.2f,y);
                     e->scale    = vec3(.5f);
                     e->rotation = vec3();
-                    //e->color = vec4((float)(x+10)/20,(float)(y+10)/20,0,1);
                     e->mesh     = Mesh::get_sphere();
                     e->name     = "E (" + to_string(x) + ", " + to_string(y) + ")";
 
@@ -38,18 +39,15 @@ class Game{
                 }
             }
 
+            Light* sun =  new (God::lights.create()) Light(Light::Type::Directional, vec3(0,-1,.25f), vec3(0,.1f,.5f), .15f);
+            sun->set_ortho_scale(15);
 
-//            new (God::lights.create()) Light(Light::Type::Directional, vec3(-1,-1,1), vec3(0,1,0), 1);
             Light* l = new (God::lights.create()) Light(Light::Type::Spot, vec3(0,5,-10.2f),vec3(0,-0.01,.015),0, vec3(1,1,1), 1);
 
             l->create_shadow_map = true;
             l->falloff = 15;
             l->intensity = 3;
             l->calc_influence_mesh();
-            //God::lights[0]->far_plane = 10;
-
-            //new (God::lights.create()) Light(Light::Type::Spot, vec3(0,0,-1), vec3(0,0,1), 1);
-
 
         }
 

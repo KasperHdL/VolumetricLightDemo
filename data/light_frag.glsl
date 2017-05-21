@@ -20,9 +20,9 @@ uniform mat4 light_shadow_vp;
 uniform float time;
 
 uniform vec4 ray_att;
-uniform float albedo_rand;
+uniform float color_rand;
 
-out vec3 color;
+out vec3 output;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -118,7 +118,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
 
         float p = 0;
 
-        color.r = 0;
+        output.r = 0;
 
 
         vec3 from_light = position - light_position.xyz;
@@ -152,7 +152,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
 
             //add light
             float c = spot * att * (1-shadow);
-            color.r += c;
+            output.r += c;
 
             //increment
             f = ray_att.x + ray_att.y * p + ray_att.z * p * p;
@@ -161,7 +161,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
         } 
 
         //divide by num samples
-        color.r /= n;
+        output.r /= n;
 
 
 
@@ -185,11 +185,11 @@ void main(){
     vec2 uv = gl_FragCoord.xy / screen_size.xy;
     vec3 position = vec3(texture(position_texture , uv));
     vec3 normal   = vec3(texture(normal_texture   , uv));
-    vec3 albedo   = vec3(texture(color_texture    , uv));
+    vec3 color   = vec3(texture(color_texture    , uv));
 
     //dithering
-    float a = albedo_rand;
-    albedo += vec3((rand(uv * time * 1)-.5f)*a);
+    float a = color_rand;
+    color += vec3((rand(uv * time * 1)-.5f)*a);
 
     //Calculate Light Contribution
         //xyz = light_direction
@@ -205,9 +205,10 @@ void main(){
 
     //Calculate Frag
     float d = max(dot(normal, normalize(light.xyz)), 0.0);
-    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow) + light_color.rgb * light_color.a * color.r);
-        //color.r is the volumetric light
+    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow) + light_color.rgb * light_color.a * output.r);
+        //output.r is the volumetric light
 
-    color = diffuse * albedo;
+    output = diffuse * color;
+
 
 }

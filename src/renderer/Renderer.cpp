@@ -31,10 +31,6 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
     camera->set_viewport(0,0,screen_width, screen_height);
     camera->set_perspective_projection();
 
-    //sun
-    sun = new (God::lights.create()) Light(Light::Type::Directional, vec3(0,-1,.25f), vec3(0,.1f,.5f), .15f);
-    sun->set_ortho_scale(15);
-
 
     //Shader setup
     {
@@ -90,7 +86,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         light_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
         light_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
-        light_shader->init_uniform("albedo_rand"        , Shader::Uniform_Type::Float);
+        light_shader->init_uniform("color_rand"        , Shader::Uniform_Type::Float);
 
 
         //screen
@@ -269,27 +265,7 @@ void Renderer::render(float delta_time){
 
 
 
-    //shadow map for sun
-
-    if(sun != nullptr && sun->create_shadow_map){
-        Light* l = sun;
-
-        mat4 proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
-
-        mat4 view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
-
-        mat4 shadow_vp = proj * view;
-        shadow_map_shader->set_uniform("vp", shadow_vp);
-        shadow_map_shader->set_uniform("shadow_index", shadow_count);
-
-        l->shadow_vp = shadow_vp;
-        l->shadow_map_index = shadow_count++;
-
-        //render scene
-        _render_scene(shadow_map_shader);
-    }
-
-    //shadow map for other lights
+    //shadow map 
     for(int i = 0; i < God::lights.capacity;i++){
         if(shadow_count >= max_shadow_maps)break;
         Light* l = God::lights[i];
@@ -300,9 +276,12 @@ void Renderer::render(float delta_time){
             if(l->type == Light::Type::Spot){
                 proj = glm::perspectiveFov<float>(radians<float>(l->field_of_view), shadow_width, shadow_height, l->near_plane, l->far_plane);
                 view = glm::lookAt(l->position, l->position + l->direction, glm::vec3(0,1,0));
+            }else if(l->type == Light::Type::Directional){
+                proj = glm::ortho<float>(l->left_plane, l->right_plane, l->bottom_plane, l->top_plane, l->near_plane, l->far_plane);
+                view = glm::lookAt(vec3(0,0,0), l->position, glm::vec3(0,1,0));
             }else{
+                //ignore point lights
                 continue;
-
             }
 
             glViewport(one_shadow_width * (shadow_count), 0, one_shadow_width * (shadow_count + 1), shadow_height);
@@ -426,7 +405,7 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("shadow_map"       , depth_texture    , 4);
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
     light_shader->set_uniform("time", time);
-    light_shader->set_uniform("albedo_rand", debug->light_albedo_rand);
+    light_shader->set_uniform("color_rand", debug->light_color_rand);
 
     light_shader->set_uniform("ray_att", vec4(debug->ray_att, debug->ray_rand));
 

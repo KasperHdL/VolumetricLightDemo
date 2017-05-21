@@ -34,7 +34,7 @@ class DebugInterface{
 
         vec3 ray_att = vec3(0.2f, 0.01f, 0.001f);
         float ray_rand = 1;
-        float light_albedo_rand = .1f;
+        float light_color_rand = .1f;
 
         //menu
         bool menu = true;
@@ -88,6 +88,7 @@ class DebugInterface{
                 //menu
                 if(menu){
                     ImGui::Begin("Menu");
+                        ImGui::Text("Move on [WASD], [Space] and [Shift]");
                         ImGui::Checkbox("Freeze Camera [F]", &game->player->freeze);
                         ImGui::Separator();
 
@@ -120,8 +121,8 @@ class DebugInterface{
 
                         ImGui::Separator();
 
-                        ImGui::Text("Light Albedo Random Offset");
-                        ImGui::DragFloat("Light Albedo Rand", &light_albedo_rand, 0.01f);
+                        ImGui::Text("Light Color Random Offset");
+                        ImGui::DragFloat("Light Color Rand", &light_color_rand, 0.01f);
                         ImGui::Separator();
 
                         //DT Plot

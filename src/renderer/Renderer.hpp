@@ -30,8 +30,6 @@ public:
     DebugInterface* debug;
 
     Camera* camera;
-    Light* sun = nullptr;
-
 
     Shader* geom_shader;
     Shader* stencil_shader;
