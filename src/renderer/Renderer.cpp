@@ -100,7 +100,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("screen"             , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("screen_texture"             , Shader::Uniform_Type::Texture);
 
         screen_shader->init_uniform("fog"                , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
@@ -403,7 +403,7 @@ void Renderer::render(float delta_time){
     ////////////////////////////////
 
 
-//    glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 
@@ -509,7 +509,7 @@ void Renderer::render(float delta_time){
 
         }
     }
-    //glDisable(GL_BLEND);
+    glDisable(GL_BLEND);
 
     ////////////////////////////////
     //Write to Screen
@@ -527,6 +527,7 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
+    screen_shader->set_uniform("screen_texture"    , post_texture    , 3);
     screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
     screen_shader->set_uniform("time", time);
     screen_shader->set_uniform("position_rand", debug->position_rand);
