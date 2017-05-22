@@ -109,6 +109,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("light_shadow_vp"    , Shader::Uniform_Type::Mat4);
         screen_shader->init_uniform("light_shadow_index" , Shader::Uniform_Type::Int);
 
+        for(int i = 0; i < 9; i++)
+            screen_shader->init_uniform("kernel[" + to_string(i) + "]", Shader::Uniform_Type::Float);
+
         //debug
         debug_shader = AssetManager::get_shader("pass_vert.glsl","debug_frag.glsl");
 
@@ -510,6 +513,9 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
     screen_shader->set_uniform("time", time);
     screen_shader->set_uniform("position_rand", debug->position_rand);
+
+    for(int i = 0; i < 9; i++)
+        screen_shader->set_uniform("kernel[" + to_string(i) + "]", debug->kernel[i]);
 
 
     //draw screen

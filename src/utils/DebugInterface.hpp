@@ -34,7 +34,9 @@ class DebugInterface{
 
         vec3 ray_att = vec3(0.2f, 0.01f, 0.001f);
         float ray_rand = 1;
-        float light_color_rand = .1f;
+        float light_color_rand = 0;
+
+        float kernel[9] = {0,0,0,0,1,0,0,0,0};
 
         //menu
         bool menu = true;
@@ -123,6 +125,12 @@ class DebugInterface{
 
                         ImGui::Text("Light Color Random Offset");
                         ImGui::DragFloat("Light Color Rand", &light_color_rand, 0.01f);
+
+                        ImGui::Separator();
+                        ImGui::Text("Kernel");
+                        ImGui::DragFloat3("[1]", &kernel[0]);
+                        ImGui::DragFloat3("[2]", &kernel[3]);
+                        ImGui::DragFloat3("[3]", &kernel[6]);
                         ImGui::Separator();
 
                         //DT Plot

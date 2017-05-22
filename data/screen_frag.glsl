@@ -12,6 +12,7 @@ uniform vec4 camera_position;
 uniform vec4 fog;
 uniform float position_rand;
 uniform float time;
+uniform float kernel[9];
 
 out vec3 output;
 
@@ -41,11 +42,6 @@ void main(){
     //blur
     vec3 blur = vec3(0);
     float div = 0;
-    const float kernel[9] = float[](
-        1, 1, 1,
-        1, 5, 1,
-        1, 1, 1
-    );
 
     vec2 texel_size = 1.0  / textureSize(screen_texture, 0);
     for(int x = -1; x <= 1; x++){

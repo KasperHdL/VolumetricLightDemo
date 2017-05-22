@@ -205,7 +205,7 @@ void main(){
 
     //Calculate Frag
     float d = max(dot(normal, normalize(light.xyz)), 0.0);
-    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow) + light_color.rgb * light_color.a * output.r);
+    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow)) + (light_color.rgb * light_color.a * output.r);
         //output.r is the volumetric light
 
     output = diffuse * color;
