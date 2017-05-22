@@ -6,6 +6,8 @@ uniform sampler2D position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D color_texture;
 uniform sampler2D screen_texture;
+uniform sampler2D specular_texture;
+uniform sampler2D shadow_map;
 
 uniform vec4 camera_position;
 
@@ -21,10 +23,12 @@ float rand(vec2 co){
 }
 
 void main(){
-    vec3 position       = vec3(texture(position_texture       , uv));
-    vec3 normal         = vec3(texture(normal_texture         , uv));
-    vec3 color          = vec3(texture(color_texture          , uv));
-    vec3 screen         = vec3(texture(screen_texture         , uv));
+    vec3 position  = vec3(texture(position_texture , uv));
+    vec3 normal    = vec3(texture(normal_texture   , uv));
+    vec3 color     = vec3(texture(color_texture    , uv));
+    vec3 screen    = vec3(texture(screen_texture   , uv));
+    float specular = texture(specular_texture      , uv).r;
+    float shadow   = texture(shadow_map      , uv).r;
 
 
     //dithering
@@ -48,7 +52,7 @@ void main(){
         for(int y = -1; y <= 1; y++){
             float k = kernel[(x+1) + (y+1) * 3];
             blur += texture(screen_texture, uv + vec2(x,y) * texel_size).xyz * k;
-            div += k;
+            div += abs(k);
 
         }
     }

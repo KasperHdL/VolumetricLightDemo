@@ -27,6 +27,7 @@ public:
     vec3 rotation;
 
     vec4 color = vec4(1,1,1,1);
+    float specularity = 50;
 
     //Render Properties
 
@@ -59,7 +60,7 @@ public:
             ImGui::DragFloat3("Scale",    &scale.x,    0.1f);
             ImGui::DragFloat3("Rotation", &rotation.x, 0.01f);
             ImGui::ColorEdit3("Color", &color.x);
-            ImGui::DragFloat("Intensity", &color.a);
+            ImGui::DragFloat("Specularity", &specularity);
 
             ImGui::TreePop();
         }

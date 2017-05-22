@@ -73,6 +73,7 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         light_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
+        light_shader->init_uniform("specular_texture"   , Shader::Uniform_Type::Texture);
 
         light_shader->init_uniform("shadow_map"         , Shader::Uniform_Type::Texture);
         light_shader->init_uniform("camera_position"    , Shader::Uniform_Type::Vec4);
@@ -96,7 +97,9 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         screen_shader->init_uniform("position_texture"   , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("normal_texture"     , Shader::Uniform_Type::Texture);
         screen_shader->init_uniform("color_texture"      , Shader::Uniform_Type::Texture);
-        screen_shader->init_uniform("screen_texture"             , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("specular_texture"   , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("shadow_map"      , Shader::Uniform_Type::Texture);
+        screen_shader->init_uniform("screen_texture"     , Shader::Uniform_Type::Texture);
 
         screen_shader->init_uniform("fog"                , Shader::Uniform_Type::Vec4);
         screen_shader->init_uniform("time"               , Shader::Uniform_Type::Float);
@@ -180,6 +183,14 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+        //specular
+        glGenTextures(1, &specular_texture);
+        glBindTexture(GL_TEXTURE_2D, specular_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen_width, screen_height, 0, GL_RGB, GL_FLOAT, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
 
         // The depth buffer
         glGenRenderbuffers(1, &depth_renderbuffer);
@@ -192,14 +203,16 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, position_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, normal_texture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, color_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, specular_texture, 0);
 
         const GLenum draw_buffers[] = {
             GL_COLOR_ATTACHMENT0,
             GL_COLOR_ATTACHMENT1,
-            GL_COLOR_ATTACHMENT2
+            GL_COLOR_ATTACHMENT2,
+            GL_COLOR_ATTACHMENT3
         };
 
-        glDrawBuffers(3, draw_buffers);
+        glDrawBuffers(4, draw_buffers);
 
     }
 
@@ -218,15 +231,14 @@ void Renderer::initialize(SDL_Window* window, int screen_width, int screen_heigh
         glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
 
         const GLenum draw_buffers[] = {
-            GL_COLOR_ATTACHMENT3
+            GL_COLOR_ATTACHMENT4
         };
         glDrawBuffers(1, draw_buffers);
 
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, post_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, post_texture, 0);
 
 
     }
-
 
 }
 
@@ -404,8 +416,9 @@ void Renderer::render(float delta_time){
     light_shader->set_uniform("position_texture" , position_texture , 0);
     light_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     light_shader->set_uniform("color_texture"    , color_texture    , 2);
+    light_shader->set_uniform("specular_texture" , specular_texture , 3);
 
-    light_shader->set_uniform("shadow_map"       , depth_texture    , 4);
+    light_shader->set_uniform("shadow_map"       , depth_texture    , 5);
     light_shader->set_uniform("screen_size", vec4(screen_width, screen_height, 0, 0));
     light_shader->set_uniform("time", time);
     light_shader->set_uniform("color_rand", debug->light_color_rand);
@@ -509,7 +522,9 @@ void Renderer::render(float delta_time){
     screen_shader->set_uniform("position_texture" , position_texture , 0);
     screen_shader->set_uniform("normal_texture"   , normal_texture   , 1);
     screen_shader->set_uniform("color_texture"    , color_texture    , 2);
-    screen_shader->set_uniform("screen_texture"    , post_texture    , 3);
+    screen_shader->set_uniform("specular_texture" , specular_texture , 4);
+    screen_shader->set_uniform("screen_texture"   , post_texture     , 4);
+    screen_shader->set_uniform("shadow_map"       , depth_texture    , 5);
     screen_shader->set_uniform("fog", vec4(debug->fog_color, debug->fog_intensity));
     screen_shader->set_uniform("time", time);
     screen_shader->set_uniform("position_rand", debug->position_rand);
@@ -614,7 +629,7 @@ void Renderer::_render_scene(Shader* shader){
             glm::mat4 model_transform = t * a * s;
 
             shader->set_uniform("model", model_transform);
-            shader->set_uniform("color", e->color);
+            shader->set_uniform("color", vec4(vec3(e->color), e->specularity));
 
             //draw mesh
             e->mesh->bind();

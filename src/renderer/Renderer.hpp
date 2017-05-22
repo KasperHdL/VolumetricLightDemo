@@ -46,6 +46,7 @@ public:
     GLuint position_texture;
     GLuint normal_texture;
     GLuint color_texture;
+    GLuint specular_texture;
 
     GLuint depth_texture;
 

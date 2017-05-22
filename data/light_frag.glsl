@@ -5,6 +5,7 @@ uniform vec4 screen_size;
 uniform sampler2D position_texture;
 uniform sampler2D normal_texture;
 uniform sampler2D color_texture;
+uniform sampler2D specular_texture;
 
 uniform vec4 camera_position;
 
@@ -182,10 +183,11 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
 
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / screen_size.xy;
+    vec2 uv       = gl_FragCoord.xy / screen_size.xy;
     vec3 position = vec3(texture(position_texture , uv));
     vec3 normal   = vec3(texture(normal_texture   , uv));
-    vec3 color   = vec3(texture(color_texture    , uv));
+    vec3 color    = vec3(texture(color_texture    , uv));
+    float specular = texture(specular_texture    , uv).r;
 
     //dithering
     float a = color_rand;
@@ -208,7 +210,16 @@ void main(){
     vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow)) + (light_color.rgb * light_color.a * output.r);
         //output.r is the volumetric light
 
-    output = diffuse * color;
+    
+
+    vec3 spec = vec3(0);
+    if(specular > 0){
+        vec3 halfway_dir = normalize(light.xyz + normalize(camera_position.xyz - position));
+        spec = pow(max(dot(normal, halfway_dir), 0.0), specular) * light_color.rgb * light_color.a * light.w;
+    }
+
+
+    output = diffuse * color + spec * color;
 
 
 }
