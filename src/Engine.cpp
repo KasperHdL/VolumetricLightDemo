@@ -27,7 +27,7 @@ int Engine::initialize(Game* game){
 
     // Create an application window with the following settings:
     window = SDL_CreateWindow(
-            "A Very Special SDL2 window",                     // window title
+            "Volumetric Light Demo",                     // window title
             SDL_WINDOWPOS_UNDEFINED,              // initial x position
             SDL_WINDOWPOS_UNDEFINED,              // initial y position
             screen_width,                                  // width, in pixels
