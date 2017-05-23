@@ -16,7 +16,7 @@ uniform float position_rand;
 uniform float time;
 uniform float kernel[9];
 
-out vec3 output;
+out vec3 result;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -60,6 +60,6 @@ void main(){
     
 
     //Combine
-    output = blur + fog.xyz * i;
+    result = blur + fog.xyz * i;
 }
 

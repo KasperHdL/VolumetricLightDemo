@@ -23,7 +23,7 @@ uniform float time;
 uniform vec4 ray_att;
 uniform float color_rand;
 
-out vec3 output;
+out vec3 result;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -119,7 +119,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
 
         float p = 0;
 
-        output.r = 0;
+        result.r = 0;
 
 
         vec3 from_light = position - light_position.xyz;
@@ -153,7 +153,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
 
             //add light
             float c = spot * att * (1-shadow);
-            output.r += c;
+            result.r += c;
 
             //increment
             f = ray_att.x + ray_att.y * p + ray_att.z * p * p;
@@ -162,7 +162,7 @@ vec4 light_function(vec3 position, vec3 normal, vec2 uv){
         } 
 
         //divide by num samples
-        output.r /= n;
+        result.r /= n;
 
 
 
@@ -207,8 +207,8 @@ void main(){
 
     //Calculate Frag
     float d = max(dot(normal, normalize(light.xyz)), 0.0);
-    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow)) + (light_color.rgb * light_color.a * output.r);
-        //output.r is the volumetric light
+    vec3 diffuse = d * (light_color.rgb * light_color.a * light.w * (1 - shadow)) + (light_color.rgb * light_color.a * result.r);
+        //result.r is the volumetric light
 
     
 
@@ -219,7 +219,7 @@ void main(){
     }
 
 
-    output = diffuse * color + spec * color;
+    result = diffuse * color + spec * color;
 
 
 }

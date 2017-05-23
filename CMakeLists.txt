@@ -1,25 +1,10 @@
 cmake_minimum_required(VERSION 3.6)
-project(WalkingSim CXX)
+project(VolumetricLightDemo CXX)
 
-IF(UNIX)
-    set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(DEBUG_MODE TRUE)
 
-    IF(CMAKE_BUILD_TYPE MATCHES Debug)
-        set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-        set(DEBUG_MODE TRUE)
-    ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
-        set(DEBUG_MODE FALSE)
-    ENDIF()
-ELSE(UNIX)
-    set(DEBUG_MODE TRUE CACHE BOOL "Build mode")
-ENDIF(UNIX) 
-
-IF(DEBUG_MODE)
-    message("----- Debug Build -----")
-    add_definitions(-DDEBUG)
-ELSE()
-    message("----- Release Build -----")
-ENDIF()
+add_definitions(-DDEBUG)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -67,13 +52,13 @@ ELSE(WIN32)
     SET(EXTRA_LIBS ${EXTRA_LIBS})
 ENDIF(WIN32)
 
-file(GLOB_RECURSE GAME_FILES
+file(GLOB_RECURSE FILES
     "src/*.cpp"
     "src/*.hpp"
 )
 
-add_executable(Game ${GAME_FILES})
-target_link_libraries(Game ${EXTRA_LIBS})
+add_executable(Demo ${FILES})
+target_link_libraries(Demo ${EXTRA_LIBS})
 
 file(COPY data DESTINATION .)
 
