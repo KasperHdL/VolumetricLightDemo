@@ -10,7 +10,6 @@ Engine::Engine(int screen_width, int screen_height){
 }
 
 Engine::~Engine(){
-
     
 }
 
@@ -45,8 +44,6 @@ int Engine::initialize(Game* game){
     Renderer renderer;
     renderer.initialize(window, screen_width, screen_height);
 
-    //update_shaders();
-
     game->initialize(this);
 
     debug = new DebugInterface();
@@ -64,7 +61,10 @@ int Engine::initialize(Game* game){
         delta_time = clamp(((NOW - LAST) / (float)SDL_GetPerformanceFrequency() ),0.0f,1.0f);
         time += delta_time;
 
+        debug->update_timer.start();
         update(delta_time);
+        debug->update_timer.stop();
+
         renderer.render(delta_time);
     }
 

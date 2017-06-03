@@ -264,6 +264,7 @@ void Renderer::render(float delta_time){
     //Create Shadow map
     ////////////////////////////////
 
+    debug->shadow_map_timer.start();
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
@@ -314,11 +315,13 @@ void Renderer::render(float delta_time){
         }
     }
 
+    debug->shadow_map_timer.stop();
 
     ////////////////////////////////
     //Write to Opaque Objects to G-Buffer
     ////////////////////////////////
 
+    debug->opaque_timer.start();
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -337,11 +340,13 @@ void Renderer::render(float delta_time){
     _render_scene(geom_shader);
 
     glDepthMask(GL_FALSE);
+    debug->opaque_timer.stop();
 
     ////////////////////////////////
     //Stencil Light Calculation
     ////////////////////////////////
 
+    debug->stencil_light_timer.start();
     glEnable(GL_STENCIL_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -390,6 +395,7 @@ void Renderer::render(float delta_time){
     glDisable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
+    debug->stencil_light_timer.stop();
 
 
     ////////////////////////////////
@@ -397,6 +403,7 @@ void Renderer::render(float delta_time){
     ////////////////////////////////
 
 
+    debug->light_calc_timer.start();
     glBindFramebuffer(GL_FRAMEBUFFER, post_framebuffer);
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
@@ -505,11 +512,13 @@ void Renderer::render(float delta_time){
         }
     }
     glDisable(GL_BLEND);
+    debug->light_calc_timer.stop();
 
     ////////////////////////////////
     //Write to Screen
     ////////////////////////////////
 
+    debug->post_processing_timer.start();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //set uniforms
@@ -542,12 +551,14 @@ void Renderer::render(float delta_time){
         glDrawElements((GLenum) mesh->topology, indexCount, GL_UNSIGNED_SHORT, 0);
     }
 
+    debug->post_processing_timer.stop();
 
 
     ///////////////////////////////
     //Debug Draw for light sources
     ///////////////////////////////
 
+    debug->debug_draw_timer.start();
     glEnable(GL_DEPTH_TEST);
 
     glDisable(GL_BLEND);
@@ -599,17 +610,23 @@ void Renderer::render(float delta_time){
             }
         }
     }
+    debug->debug_draw_timer.stop();
 
 
     ///////////////////////////////
     //Debug UI
     ///////////////////////////////
+
+    debug->debug_ui_timer.start();
     debug->render(delta_time);
+    debug->debug_ui_timer.stop();
 
     ///////////////////////////////
     //Swap Window
     ///////////////////////////////
+    debug->swap_buffer_timer.start();
     SDL_GL_SwapWindow(window);
+    debug->swap_buffer_timer.stop();
 
     return;
 }
